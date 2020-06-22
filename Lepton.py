@@ -79,6 +79,7 @@ class Lepton(object):
     ioctl(self.__handle, SPI_IOC_WR_BITS_PER_WORD, struct.pack("=B", Lepton.BITS))
     ioctl(self.__handle, SPI_IOC_RD_MAX_SPEED_HZ, struct.pack("=I", Lepton.SPEED))
     ioctl(self.__handle, SPI_IOC_WR_MAX_SPEED_HZ, struct.pack("=I", Lepton.SPEED))
+    print(self.__handle)
     return self
 
 
@@ -89,6 +90,7 @@ class Lepton(object):
   @staticmethod
   def capture_segment(handle, xs_buf, xs_size, capture_buf):
     messages = Lepton.ROWS
+    #print(messages)
     iow = _IOW(SPI_IOC_MAGIC, 0, xs_size)
     ioctl(handle, iow, xs_buf, True)
     while (capture_buf[0] & 0x000f) == 0x000f: # byteswapped 0x0f00
@@ -127,12 +129,21 @@ class Lepton(object):
       tuple consisting of (data_buffer, frame_id)
     """
     start = time.time()
-    
+    print(start)
     if data_buffer is None:
       data_buffer = np.ndarray((Lepton.ROWS, Lepton.COLS, 1), dtype=np.uint16)
     elif data_buffer.ndim < 2 or data_buffer.shape[0] < Lepton.ROWS or data_buffer.shape[1] < Lepton.COLS or data_buffer.itemsize < 2:
       raise Exception("Provided input array not large enough")
-      
+    
+    self.__handle = open(self.__spi_dev, "wb+", buffering=0)
+    print(self.__handle)
+    ioctl(self.__handle, SPI_IOC_RD_MODE, struct.pack("=B", Lepton.MODE))
+    ioctl(self.__handle, SPI_IOC_WR_MODE, struct.pack("=B", Lepton.MODE))
+    ioctl(self.__handle, SPI_IOC_RD_BITS_PER_WORD, struct.pack("=B", Lepton.BITS))
+    ioctl(self.__handle, SPI_IOC_WR_BITS_PER_WORD, struct.pack("=B", Lepton.BITS))
+    ioctl(self.__handle, SPI_IOC_RD_MAX_SPEED_HZ, struct.pack("=I", Lepton.SPEED))
+    ioctl(self.__handle, SPI_IOC_WR_MAX_SPEED_HZ, struct.pack("=I", Lepton.SPEED))
+    
     while True:
       Lepton.capture_segment(self.__handle, self.__xmit_buf, self.__msg_size, self.__capture_buf[0])
       if retry_reset and (self.__capture_buf[20, 0] & 0xFF0F) != 0x1400: # make sure that this is a well-formed frame, should find line 20 here
