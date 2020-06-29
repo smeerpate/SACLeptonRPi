@@ -79,7 +79,7 @@ class Lepton(object):
     ioctl(self.__handle, SPI_IOC_WR_BITS_PER_WORD, struct.pack("=B", Lepton.BITS))
     ioctl(self.__handle, SPI_IOC_RD_MAX_SPEED_HZ, struct.pack("=I", Lepton.SPEED))
     ioctl(self.__handle, SPI_IOC_WR_MAX_SPEED_HZ, struct.pack("=I", Lepton.SPEED))
-    print(self.__handle)
+    #print(self.__handle)
     return self
 
 
@@ -129,14 +129,14 @@ class Lepton(object):
       tuple consisting of (data_buffer, frame_id)
     """
     start = time.time()
-    print(start)
+    #print(start)
     if data_buffer is None:
       data_buffer = np.ndarray((Lepton.ROWS, Lepton.COLS, 1), dtype=np.uint16)
     elif data_buffer.ndim < 2 or data_buffer.shape[0] < Lepton.ROWS or data_buffer.shape[1] < Lepton.COLS or data_buffer.itemsize < 2:
       raise Exception("Provided input array not large enough")
     
     self.__handle = open(self.__spi_dev, "wb+", buffering=0)
-    print(self.__handle)
+    #print(self.__handle)
     ioctl(self.__handle, SPI_IOC_RD_MODE, struct.pack("=B", Lepton.MODE))
     ioctl(self.__handle, SPI_IOC_WR_MODE, struct.pack("=B", Lepton.MODE))
     ioctl(self.__handle, SPI_IOC_RD_BITS_PER_WORD, struct.pack("=B", Lepton.BITS))

@@ -14,10 +14,11 @@ sensorHeight = 60
 l = Lepton()
 
 # create full screen output window
-cv2.namedWindow("output", cv2.WINDOW_NORMAL)
-cv2.setWindowProperty("output",cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+#cv2.namedWindow("output", cv2.WINDOW_NORMAL)
+#cv2.setWindowProperty("output",cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
-
+# make an alpha channel for the frame buffer image.
+alpha = np.ones((screenHeight,screenWidth), dtype=np.uint8)*255
 
 
 
@@ -26,12 +27,12 @@ while(1):
     # find maximum value in raw array
     maxVal = np.amax(raw)
     maxCoord = np.where(raw == maxVal)
-    print(maxCoord)
-    print(maxCoord[0][0])
-    print(maxCoord[1][0])
+#    print(maxCoord)
+#    print(maxCoord[0][0])
+#    print(maxCoord[1][0])
     # text position
     txtPosition = (maxCoord[1][0]*screenWidth/sensorWidth, maxCoord[0][0]*screenHeight/sensorHeight)
-    print(txtPosition)
+#    print(txtPosition)
 
     cv2.normalize(raw, raw, 0, 65535, cv2.NORM_MINMAX) # extend contrast
     np.right_shift(raw, 8, raw) # fit data into 8 bits
@@ -42,8 +43,11 @@ while(1):
     
     # Put interesting data on top of the image.
     cv2.putText(color, "{}".format(maxVal), txtPosition, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,150,0,255), 2)
-    cv2.imshow("output", color) # show it.
-    
+    #cv2.imshow("output", color) # show it.
+    b,g,r = cv2.split(color)
+    fbImage = cv2.merge((b,g,r,alpha))
+    with open('/dev/fb0', 'rb+') as fBuf:
+        fBuf.write(fbImage)
     
     # break als de esc knop ingedrukt wordt
     if cv2.waitKey(20) & 0xFF == 27:
