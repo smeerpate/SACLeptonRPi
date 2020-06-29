@@ -2,6 +2,11 @@ import numpy as np
 import cv2
 import time
 from Lepton import Lepton
+import sys
+
+# Stop the cursor from blinking
+sys.stdout.write("\033[?25l")
+sys.stdout.flush()
 
 # Target screen is 12", 1024x768
 screenWidth = 1024
@@ -9,6 +14,8 @@ screenHeight = 768
 # Sensor size is 80x60
 sensorWidth = 80
 sensorHeight = 60
+# Lepton offset in degC
+corrVal = 1.45
 
 # Initialize Lepton sensor instance.
 l = Lepton()
@@ -42,7 +49,7 @@ while(1):
     color = cv2.cvtColor(resized, cv2.COLOR_GRAY2BGR)
     
     # Put interesting data on top of the image.
-    cv2.putText(color, "{}".format(maxVal), txtPosition, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,150,0,255), 2)
+    cv2.putText(color, "{}".format((maxVal/100)-273.15 + corrVal), txtPosition, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,150,0,255), 2)
     #cv2.imshow("output", color) # show it.
     b,g,r = cv2.split(color)
     fbImage = cv2.merge((b,g,r,alpha))
