@@ -72,7 +72,7 @@ try:
             tcCircles.append((x,y))
 
         # thermal:
-        thresh = cv2.threshold(thImage, 200, 255, cv2.THRESH_BINARY)[1]
+        thresh = cv2.threshold(thImage, 100, 255, cv2.THRESH_BINARY)[1]
         cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         if len(cnts)==2:
             cnts = cnts[0]

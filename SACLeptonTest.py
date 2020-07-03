@@ -28,8 +28,8 @@ def showInFrameBufferTopBottom(imageTop, imageBottom, fbSize):
         _fBuf.write(fbCont)
 
 # Stop the cursor from blinking
-sys.stdout.write("\033[?25l")
-sys.stdout.flush()
+#sys.stdout.write("\033[?25l")
+#sys.stdout.flush()
 
 # Target screen is 12", 1024x768 or 768x1024 in portrait mode
 screenWidth = 768
@@ -37,8 +37,6 @@ screenHeight = 1024
 # Sensor size is 80x60
 sensorWidth = 80
 sensorHeight = 60
-sensorFovH = 50 # degrees
-sensorFovV = 50 # degrees
 # Lepton offset in degC
 corrVal = 0
 maxVal = 0
@@ -47,8 +45,6 @@ feverThresh = 37.0
 # Initialize PiCamera
 cameraWidth = 640
 cameraHeight = 480
-cameraFovH = 62 # degrees
-cameraFovV = 54 # degrees
 camera = PiCamera()
 camera.resolution = (cameraWidth,cameraHeight)
 camera.framerate = 32
@@ -56,11 +52,6 @@ rawCapture = PiRGBArray(camera, size=(640,480))
 # allow warmup
 time.sleep(0.1)
 
-# Calculate scaling factors and offsets for thermal overlay
-S_x = cameraWidth / sensorWidth
-S_y = cameraHeight / sensorHeight
-O_u = 0
-O_v = 0
 
 ################################# Initialization #########################################
 # load frontal face  classifier
@@ -68,10 +59,6 @@ faceDet = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 
 # Initialize Lepton sensor instance.
 l = Lepton()
-
-# make an alpha channel for the frame buffer image.
-alpha = np.ones((screenHeight/2,screenWidth), dtype=np.uint8)*255
-fbCanvas = np.zeros((screenHeight,screenWidth,4), dtype=np.uint8)
 
 ##########################################################################################
 
@@ -82,13 +69,22 @@ try:
         image = frame.array
 	# find face(s)
 	gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-	rects = faceDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(150,150))
+	rects = faceDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(100,100))
 	faceBoxes = [(y,x+w, y+h, x) for (x,y,w,h) in rects]
 	if len(faceBoxes) > 0:
-	    tcFace1 = rects[0] # true color ROI
-            thFace1 = (int(round(rects[0][0]/S_x)+O_u), int(round(rects[0][1]/S_y)+O_v), int(round(rects[0][2]/S_x)), int(round(rects[0][3]/S_y)))
-#	    print(tcFace1)
-#            print(thFace1)
+	    tcFace1 = faceBoxes[0] # true color ROI
+            # transform the coordinates from true color image space to thermal image space using the affine transform matrix M
+            # See https://docs.opencv.org/2.4/modules/imgproc/doc/geometric_transformations.html
+            M = np.array([[1.5689e-1, 8.6462e-3, -1.1660e+1],[1.0613e-4, 1.6609e-1, -1.4066e+1]])
+            P_slt = np.array([[tcFace1[3]],[tcFace1[0]],[1]]) # 'slt' source left top
+            P_srt = np.array([[tcFace1[1]],[tcFace1[0]],[1]]) # 'srt' source right top
+            P_slb = np.array([[tcFace1[3]],[tcFace1[2]],[1]]) # 'slb' source left bottom
+            P_srb = np.array([[tcFace1[1]],[tcFace1[2]],[1]]) # 'srb' source right bottom
+            P_dlt = np.dot(M, P_slt)
+            P_drt = np.dot(M, P_srt)
+            P_dlb = np.dot(M, P_slb)
+            P_drb = np.dot(M, P_srb)
+            thFace1Cnts = np.array([P_dlt, P_drt, P_dlb, P_drb], dtype=np.float32)
 	    for (top,right,bottom,left) in faceBoxes:
 	        cv2.rectangle(image,(left,top),(right,bottom), (100,255,100), 1)
 
@@ -96,50 +92,40 @@ try:
         raw,_ = l.capture()
         # find maximum value in raw lepton data array in thRoi (face1) slice of raw data.
         if len(faceBoxes) > 0:
-            thRoi = raw[thFace1[1]:thFace1[1]+thFace1[3], thFace1[0]:thFace1[0]+thFace1[2]]
-            maxVal = np.amax(thRoi)
-            maxCoord = np.where(thRoi == maxVal)
-#       print(maxCoord)
-#       print(maxCoord[0][0])
-#       print(maxCoord[1][0])
+            thRoi = cv2.boundingRect(thFace1Cnts)
+            x,y,w,h = thRoi
+            # x any shold not be negative. Clip the values.
+            x = max(0, min(x, sensorWidth))
+            y = max(0, min(y, sensorHeight))
+            thRoiData = raw[y:y+h, x:x+w]
+            maxVal = np.amax(thRoiData)
+            maxCoord = np.where(thRoiData == maxVal)
+
         # text position
-#        txtPosition = (maxCoord[1][0]*screenWidth/sensorWidth, maxCoord[0][0]*screenHeight/sensorHeight)
-        txtPosition = (500,100)
+        txtPosition = (500,50)
 
         cv2.normalize(raw, raw, 0, 65535, cv2.NORM_MINMAX) # extend contrast
         np.right_shift(raw, 8, raw) # fit data into 8 bits
         # draw roi if any
         if len(faceBoxes) > 0:
-            left = thFace1[0]
-            top = thFace1[1]
-            right = thFace1[0]+thFace1[2]
-            bottom = thFace1[1]+thFace1[3]
-            cv2.rectangle(raw, (left,top), (right,bottom), 255, 1)
-        # scale the image to full screen resolution.
-        resized = cv2.resize(np.uint8(raw), (screenWidth ,screenHeight/2), interpolation = cv2.INTER_AREA)
+             x,y,w,h = thRoi
+             cv2.rectangle(raw, (x,y), (x+w,y+h), 255, 1)
+        # make uint8 image
+        thermal = np.uint8(raw)
         # convert grayscale to BGR
-        thermal = cv2.cvtColor(resized, cv2.COLOR_GRAY2BGR)
-        color = cv2.resize(image, (screenWidth, screenHeight/2), interpolation = cv2.INTER_AREA)
+        thermal = cv2.cvtColor(thermal, cv2.COLOR_GRAY2BGR)
+        color = image
 
-        # Put data on top of the image.
-        measTemp = (float(maxVal/100.0)-273.15) + corrVal
-	if measTemp > feverThresh:
-            cv2.putText(color, "{}degC".format(measTemp), txtPosition, cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0,50,255,255), 2)
-        else:
-            cv2.putText(color, "{}degC".format(measTemp), txtPosition, cv2.FONT_HERSHEY_SIMPLEX, 1.2, (50,255,0,255),2)
+        # Put data on top of the image if a face was detected.
+        if len(faceBoxes) == 1:
+            measTemp = (float(maxVal/100.0)-273.15) + corrVal
+	    if measTemp > feverThresh:
+                cv2.putText(color, "{}degC".format(measTemp), txtPosition, cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,0,255,255), 2)
+            else:
+                cv2.putText(color, "{}degC".format(measTemp), txtPosition, cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,255,0,255),2)
+
         # show it. Prepare data for the frame buffer.
         showInFrameBufferTopBottom(color, thermal, (screenWidth,screenHeight))
-#        M =np.array([[1.306e0, -8.407e-3, -1.609e+2],[-9.533e-2, 1.287e0, -8.262e+1]])
-#        color = cv2.warpAffine(color, M, (screenWidth, screenHeight/2), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
-#        b,g,r = cv2.split(color)
-#        fbImageTop = cv2.merge((b,g,r,alpha))
-#	fbCanvas[0:screenHeight/2, 0:screenWidth] = fbImageTop
-#	b,g,r = cv2.split(thermal)
-#	fbImageBottom = cv2.merge((b,g,r,alpha))
-#	fbCanvas[screenHeight/2:screenHeight,  0:screenWidth] = fbImageBottom
-	# write image to the frame buffer.
-#        with open('/dev/fb0', 'rb+') as fBuf:
-#            fBuf.write(fbCanvas)
 
         rawCapture.truncate()
         rawCapture.seek(0)
