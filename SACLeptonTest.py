@@ -8,6 +8,25 @@ import sys
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 
+# fbSize is (width,height)
+def showInFrameBufferTopBottom(imageTop, imageBottom, fbSize):
+    imSize = (fbSize[0], fbSize[1]/2)
+    _a = np.ones((imSize[1],imSize[0]), dtype=np.uint8)*255
+    _imageTop = cv2.resize(imageTop, imSize, interpolation = cv2.INTER_AREA)
+    _imageBottom = cv2.resize(imageBottom, imSize, interpolation = cv2.INTER_AREA)
+    # Empty framebuffer content array BGRA
+    fbCont = np.zeros((screenHeight, screenWidth, 4), dtype=np.uint8)
+    # Place content in fb array
+    _b,_g,_r = cv2.split(_imageTop)
+    _imageTop = cv2.merge((_b,_g,_r,_a))
+    fbCont[0:imSize[1], 0:imSize[0]] = _imageTop
+    _b,_g,_r = cv2.split(_imageBottom)
+    _imageBottom = cv2.merge((_b,_g,_r,_a))
+    fbCont[(fbSize[1]/2):((fbSize[1]/2)+imSize[1]), 0:imSize[0]] = _imageBottom
+    # Write to frame buffer
+    with open('/dev/fb0', 'rb+') as _fBuf:
+        _fBuf.write(fbCont)
+
 # Stop the cursor from blinking
 sys.stdout.write("\033[?25l")
 sys.stdout.flush()
@@ -109,17 +128,18 @@ try:
         else:
             cv2.putText(color, "{}degC".format(measTemp), txtPosition, cv2.FONT_HERSHEY_SIMPLEX, 1.2, (50,255,0,255),2)
         # show it. Prepare data for the frame buffer.
+        showInFrameBufferTopBottom(color, thermal, (screenWidth,screenHeight))
 #        M =np.array([[1.306e0, -8.407e-3, -1.609e+2],[-9.533e-2, 1.287e0, -8.262e+1]])
 #        color = cv2.warpAffine(color, M, (screenWidth, screenHeight/2), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
-        b,g,r = cv2.split(color)
-        fbImageTop = cv2.merge((b,g,r,alpha))
-	fbCanvas[0:screenHeight/2, 0:screenWidth] = fbImageTop
-	b,g,r = cv2.split(thermal)
-	fbImageBottom = cv2.merge((b,g,r,alpha))
-	fbCanvas[screenHeight/2:screenHeight,  0:screenWidth] = fbImageBottom
+#        b,g,r = cv2.split(color)
+#        fbImageTop = cv2.merge((b,g,r,alpha))
+#	fbCanvas[0:screenHeight/2, 0:screenWidth] = fbImageTop
+#	b,g,r = cv2.split(thermal)
+#	fbImageBottom = cv2.merge((b,g,r,alpha))
+#	fbCanvas[screenHeight/2:screenHeight,  0:screenWidth] = fbImageBottom
 	# write image to the frame buffer.
-        with open('/dev/fb0', 'rb+') as fBuf:
-            fBuf.write(fbCanvas)
+#        with open('/dev/fb0', 'rb+') as fBuf:
+#            fBuf.write(fbCanvas)
 
         rawCapture.truncate()
         rawCapture.seek(0)
