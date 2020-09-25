@@ -7,6 +7,7 @@ from Lepton import Lepton
 import sys
 from picamera.array import PiRGBArray
 from picamera import PiCamera
+import logging
 
 # fbSize is (width,height)
 def showInFrameBufferTopBottom(imageTop, imageBottom, fbSize):
@@ -30,6 +31,7 @@ def showInFrameBufferTopBottom(imageTop, imageBottom, fbSize):
 # Stop the cursor from blinking
 #sys.stdout.write("\033[?25l")
 #sys.stdout.flush()
+logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
 
 # Target screen is 12", 1024x768 or 768x1024 in portrait mode
 screenWidth = 768
@@ -40,7 +42,7 @@ sensorHeight = 60
 # Lepton offset in degC
 corrVal = 0
 maxVal = 0
-feverThresh = 37.0
+feverThresh = 35.4
 
 # Initialize PiCamera
 cameraWidth = 640
@@ -55,11 +57,19 @@ time.sleep(0.1)
 
 ################################# Initialization #########################################
 # load frontal face  classifier
-faceDet = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+faceDet = cv2.CascadeClassifier("/home/pi//SACLeptonRPi/haarcascade_frontalface_default.xml")
 
 # Initialize Lepton sensor instance.
 l = Lepton()
 
+##########################################################################################
+
+################################ Globals #################################################
+runningAvg = 0
+thSampleCount = 0
+thSampleAcc = []
+thDataValid = False
+nThSamplesToAverage = 6
 ##########################################################################################
 
 ############################### main loop ################################################
@@ -69,7 +79,7 @@ try:
         image = frame.array
 	# find face(s)
 	gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-	rects = faceDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(100,100))
+	rects = faceDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(180,180))
 	faceBoxes = [(y,x+w, y+h, x) for (x,y,w,h) in rects]
 	if len(faceBoxes) > 0:
 	    tcFace1 = faceBoxes[0] # true color ROI
@@ -99,7 +109,22 @@ try:
             y = max(0, min(y, sensorHeight))
             thRoiData = raw[y:y+h, x:x+w]
             maxVal = np.amax(thRoiData)
+	    # get running average over N thermal samples
+	    if (thSampleCount < nThSamplesToAverage):
+	        thSampleCount += 1
+	        thSampleAcc.append(maxVal)
+	    else:
+	       	thDataValid = True
+		thSampleAcc.append(maxVal)
+	        thSampleAcc.pop(0)
+	    	runningAvg = sum(thSampleAcc)/len(thSampleAcc)
             maxCoord = np.where(thRoiData == maxVal)
+	else:
+	    # No faces found.
+	    runningAvg = 0
+	    thSampleCount = 0
+	    del thSampleAcc[:]
+	    thDataValid = False
 
         # text position
         txtPosition = (500,50)
@@ -117,8 +142,9 @@ try:
         color = image
 
         # Put data on top of the image if a face was detected.
-        if len(faceBoxes) == 1:
-            measTemp = (float(maxVal/100.0)-273.15) + corrVal
+        if len(faceBoxes) == 1 and thDataValid:
+#            measTemp = (float(maxVal/100.0)-273.15) + corrVal
+	    measTemp = (float(runningAvg/100.0)-273.15)
 	    if measTemp > feverThresh:
                 cv2.putText(color, "{}degC".format(measTemp), txtPosition, cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,0,255,255), 2)
             else:
@@ -129,8 +155,12 @@ try:
 
         rawCapture.truncate()
         rawCapture.seek(0)
-#        time.sleep(0.1)
+        time.sleep(0.5)
 
 # stop on ctrl+C.
 except KeyboardInterrupt:
 	camera.close()
+# There is another problem. Print out the exception.
+except Exception as e:
+        print(e)
+        camera.close()
