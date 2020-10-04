@@ -155,7 +155,7 @@ try:
 
         rawCapture.truncate()
         rawCapture.seek(0)
-        time.sleep(0.5)
+        time.sleep(1)
 
 # stop on ctrl+C.
 except KeyboardInterrupt:
@@ -163,4 +163,5 @@ except KeyboardInterrupt:
 # There is another problem. Print out the exception.
 except Exception as e:
         print(e)
+	# maybe use "traceback.print_exc()"?
         camera.close()
