@@ -1,17 +1,22 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <assert.h>
 #include <unistd.h>
 #include <sys/time.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <sys/shm.h>
 
 #include "bcm_host.h"
 
-#define WIDTH	360
-#define HEIGHT  270
+#define WIDTH	400//360
+#define HEIGHT  400//270
 
 #define PRINTINFO 1
 //#define PRINTMOREINFO 1
+#define WAITTIME 40
 
 #ifndef ALIGN_UP
 // Macro to facilitate word allignment.
@@ -49,7 +54,11 @@ static void FillRect(void *image, int bytesPerLine, int w, int h, int val )
     {
         for (col = 0; col < w; col++)
         {
-            line[col] = val;
+            if (col & 0x2)
+                line[col] = val;
+            else
+                line[col] = 0;
+            //line[col] = val;
         }
         #ifdef PRINTMOREINFO
         printf("[info]: Written line nr %i at address 0x%08x.\n", row, line );
@@ -57,6 +66,34 @@ static void FillRect(void *image, int bytesPerLine, int w, int h, int val )
         line += (bytesPerLine >> 2); // Need to increment with number of DWORDs per line instead of bytes. Getting segmentation fau otherwise.
     }
 }
+
+int openSemaphoreSet(key_t key, int numberSems)
+{
+    int iSemId;
+    if (!numberSems)
+        return (-1);
+
+    if ((iSemId = semget(key, numberSems, IPC_CREAT | IPC_EXCL | 0660)) == -1)
+        return (-1);
+
+    return iSemId;
+}
+
+int ipcOpenSegment(key_t key, int iSegSize)
+{
+    int iSegId;
+
+    // Try to get a segment of shared memory and store its ID.
+    iSegId = shmget(key, iSegSize, IPC_CREAT | 0660);
+
+    if (iSegId == -1)
+    {
+        // A problem occured...
+        return -1;
+    }
+    return iSegSize;
+}
+
 
 
 int main(void)
@@ -72,11 +109,22 @@ int main(void)
     int bytesPerLine;
     uint32_t bytesToAllocate;
     VC_DISPMANX_ALPHA_T alpha = {DISPMANX_FLAGS_ALPHA_FROM_SOURCE | DISPMANX_FLAGS_ALPHA_FIXED_ALL_PIXELS,
-                                    127, // Alpha value.
-                                    0};
+                                 200, // Alpha value.
+                                 0};
 
     rectVars = &gRectVars; // Pointer to global struct variable.
     bytesPerLine = ALIGN_UP(width * 4, 32); // Length of a line in bytes, DWORD allignement.
+    bytesPerLine = width*4;
+
+    ///// IPC stuff /////
+    key_t key;
+    key = ftok(".", 's');
+    int iSemId = openSemaphoreSet(key, 1);
+    printf("[info]: Created a semaphore set with id %d and key %d.\n", iSemId, key);
+    int iShmNumBytes = 640 * 480 * 4; // 640x480 RGBA 8888
+    int iSegId = ipcOpenSegment(key, iShmNumBytes);
+    printf("[info]: Created a segment of shared memory with id %d and key %d.\n", iSegId, key);
+    ////////////////////
 
     bcm_host_init();
 
@@ -105,7 +153,7 @@ int main(void)
     #endif
 
     // Fill the imagebuffer with data.
-    FillRect(rectVars->image, bytesPerLine, width, height, 0xF800);
+    FillRect(rectVars->image, bytesPerLine, width, height, 0x0010A0FF); // 0xAARRGGBB
 
     // Create resources in the video core.
     rectVars->resource = vc_dispmanx_resource_create(imgType, width, height, &rectVars->vc_image_ptr);
@@ -124,7 +172,7 @@ int main(void)
 
     // Create source and destinationn rectangles
     vc_dispmanx_rect_set(&srcRect, 0, 0, width << 16, height << 16); // fixed point 16.16??
-    vc_dispmanx_rect_set(&dstRect, 100, 100, width, height);
+    vc_dispmanx_rect_set(&dstRect, 300, 300, width, height);
 
     // Add elements (?)
     rectVars->element = vc_dispmanx_element_add(rectVars->update,
@@ -141,8 +189,8 @@ int main(void)
     result = vc_dispmanx_update_submit_sync(rectVars->update);
     assert(result == 0);
 
-    printf("[info]: Sleeping for 10 secs...\n");
-    sleep(10);
+    printf("[info]: Sleeping for %d secs...\n", WAITTIME);
+    sleep(WAITTIME);
 
     rectVars->update = vc_dispmanx_update_start(10); // priority 10??
     assert(rectVars->update);
