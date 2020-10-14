@@ -10,4 +10,4 @@ DMX_LIBS = -L/opt/vc/lib/ -lbcm_host -lvcos -lvchiq_arm -lpthread
 EGL_LIBS = -L/opt/vc/lib -lbrcmEGL -lbrcmGLESv2
 LDFLAGS = $(DMX_LIBS) $(EGL_LIBS)
 
-all: SACDisplayArray
+all: SACDisplayArray SACPrintEGLInfo SACCreateEGLWindow
