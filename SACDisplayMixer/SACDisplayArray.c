@@ -84,6 +84,7 @@ int ipcOpenSegment(key_t key, int iSegSize)
     int iSegId;
 
     // Try to get a segment of shared memory and store its ID.
+    // Permission 0660: User can read and write, Group can read and write. Both can not exec.
     iSegId = shmget(key, iSegSize, IPC_CREAT | 0660);
 
     if (iSegId == -1)
@@ -91,7 +92,18 @@ int ipcOpenSegment(key_t key, int iSegSize)
         // A problem occured...
         return -1;
     }
-    return iSegSize;
+    return iSegId;
+}
+
+char* ipcAttachToSegment(int iSegId)
+{
+    return(shmat(iSegId, 0, 0)); // Let the kernel find some memory block + no flags.
+}
+
+int ipcDetachFromSegmentWithPointer(char* pSegPointer)
+{
+    // Signal the kernel that we don't longer need the shared memory segment.
+    return(shmdt(pSegPointer));
 }
 
 
@@ -124,6 +136,11 @@ int main(void)
     int iShmNumBytes = 640 * 480 * 4; // 640x480 RGBA 8888
     int iSegId = ipcOpenSegment(key, iShmNumBytes);
     printf("[info]: Created a segment of shared memory with id %d and key %d.\n", iSegId, key);
+    char* pSegStart;
+    pSegStart = ipcAttachToSegment(iSegId);
+    printf("[info]: Segment of shared memory with id %d is now mapped to this program's memory space and pointing at 0x%08x.\n", iSegId, (uint32_t)pSegStart);
+    int iResult = ipcDetachFromSegmentWithPointer(pSegStart);
+    printf("[info]: Detatched from shared memory with return value %d.\n", iResult);
     ////////////////////
 
     bcm_host_init();
