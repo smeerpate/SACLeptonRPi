@@ -16,7 +16,7 @@
 
 #define PRINTINFO 1
 //#define PRINTMOREINFO 1
-#define WAITTIME 40
+#define WAITTIME 1
 
 #ifndef ALIGN_UP
 // Macro to facilitate word allignment.
@@ -139,8 +139,8 @@ int main(void)
     uint32_t* pSegStart;
     pSegStart = (uint32_t*)ipcAttachToSegment(iSegId);
     printf("[info]: Segment of shared memory with id %d is now mapped to this program's memory space and pointing at 0x%08x.\n", iSegId, (uint32_t)pSegStart);
-    int iResult = ipcDetachFromSegmentWithPointer((char*)pSegStart);
-    printf("[info]: Detatched from shared memory with return value %d.\n", iResult);
+    //int iResult = ipcDetachFromSegmentWithPointer((char*)pSegStart);
+    //printf("[info]: Detatched from shared memory with return value %d.\n", iResult);
     ////////////////////
 
     bcm_host_init();
@@ -206,8 +206,15 @@ int main(void)
     result = vc_dispmanx_update_submit_sync(rectVars->update);
     assert(result == 0);
 
-    printf("[info]: Sleeping for %d secs...\n", WAITTIME);
-    sleep(WAITTIME);
+    for(int x=0; x < 40; x++)
+    {
+        int shmValue = *pSegStart & 0xff;
+        printf("[info]: Value in shared mamory: %d\n", shmValue);
+        FillRect(rectVars->image, bytesPerLine, width, height, 0x0010A000 + shmValue); // 0xAARRGGBB
+        rectVars->update = vc_dispmanx_update_start(10);
+        printf("[info]: Sleeping for %d secs...\n", WAITTIME);
+        sleep(WAITTIME);
+    }
 
     rectVars->update = vc_dispmanx_update_start(10); // priority 10??
     assert(rectVars->update);
@@ -238,6 +245,8 @@ int main(void)
     #endif
     result = vc_dispmanx_display_close(rectVars->display);
     assert(result == 0);
+
+    ipcDetachFromSegmentWithPointer((char*)pSegStart);
 
     return 0;
 }

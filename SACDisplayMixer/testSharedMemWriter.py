@@ -1,6 +1,16 @@
 import numpy as np
 import sysv_ipc as ipc
 import time
+from subprocess import call
+from threading import Thread
+
+def startDisplay():
+	call(["./SACCreateEGLWindowWithIPC"])
+
+
+th1 = Thread(target=startDisplay)
+th1.start()
+time.sleep(1)
 
 key = ipc.ftok(".", ord('s'))
 shm = ipc.SharedMemory(key, 0, 0)
