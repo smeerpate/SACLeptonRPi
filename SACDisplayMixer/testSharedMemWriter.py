@@ -3,6 +3,9 @@ import sysv_ipc as ipc
 import time
 from subprocess import call
 from threading import Thread
+import cv2
+from picamera.array import PiRGBArray
+from picamera import PiCamera
 
 def startDisplay():
 	call(["./OGLESSimpleImageWithIPC"])
@@ -15,17 +18,28 @@ time.sleep(1)
 key = ipc.ftok(".", ord('i'))
 shm = ipc.SharedMemory(key, 0, 0)
 
-imContent = np.ones((640,480,3),dtype=np.uint8)
+#imContent = np.ones((640,480,3),dtype=np.uint8)
+camera = PiCamera()
+camera.resolution = (640, 480)
+rawCapture = PiRGBArray(camera, size=(640, 480))
+# give time to startup the camera...
+time.sleep(0.1)
 
 shm.attach()
 
-for rCnt in range(10):
-	for cnt in range(255):
-		imRamp = imContent * cnt
-		shm.write(imRamp)
-		print("matrix values are all set to " + str(cnt))
-		time.sleep(0.01)
+# capture frames from the camera
+for frame in camera.capture_continuous(rawCapture, format="rgb", use_video_port=True):
+	# grab the raw NumPy array representing the image, then initialize the timestamp
+	# and occupied/unoccupied text
+	image = frame.array
+	# write the frame to shared memory
+	shm.write(image)
 
-th1._stop()
-th1.join()
+	key = cv2.waitKey(1) & 0xFF
+	# clear the stream in preparation for the next frame
+	rawCapture.truncate(0)
+
+	time.sleep(0.1)
+
+
 shm.detach()
