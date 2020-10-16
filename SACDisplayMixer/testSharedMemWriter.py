@@ -5,17 +5,17 @@ from subprocess import call
 from threading import Thread
 
 def startDisplay():
-	call(["./SACCreateEGLWindowWithIPC"])
+	call(["./OGLESSimpleImageWithIPC"])
 
 
 th1 = Thread(target=startDisplay)
 th1.start()
 time.sleep(1)
 
-key = ipc.ftok(".", ord('s'))
+key = ipc.ftok(".", ord('i'))
 shm = ipc.SharedMemory(key, 0, 0)
 
-imContent = np.ones((640,480,4),dtype=np.uint8)
+imContent = np.ones((640,480,3),dtype=np.uint8)
 
 shm.attach()
 
