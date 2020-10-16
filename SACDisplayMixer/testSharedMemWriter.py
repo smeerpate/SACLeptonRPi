@@ -19,10 +19,13 @@ imContent = np.ones((640,480,3),dtype=np.uint8)
 
 shm.attach()
 
-for cnt in range(255):
-	imRamp = imContent * cnt
-	shm.write(imRamp)
-	print("matrix values are all set to " + str(cnt))
-	time.sleep(0.5)
+for rCnt in range(10):
+	for cnt in range(255):
+		imRamp = imContent * cnt
+		shm.write(imRamp)
+		print("matrix values are all set to " + str(cnt))
+		time.sleep(0.01)
 
+th1._stop()
+th1.join()
 shm.detach()
