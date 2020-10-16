@@ -174,8 +174,14 @@ void Draw ( ESContext *esContext ) {
 void Update(ESContext *esContext, float deltatime)
 {
    UserData *userData = esContext->userData;
-   userData->image = pSharedMemory;
-   esContext->userData = userData;
+   //userData->image = pSharedMemory;
+   //userData->textureId = CreateSimpleTexture2D (esContext);
+   //esContext->userData = userData;
+   // Load the texture
+   glTexImage2D ( GL_TEXTURE_2D, 0, GL_RGB,
+                  userData->width, userData->height,
+                  0, GL_RGB, GL_UNSIGNED_BYTE, pSharedMemory );
+
    //printf("shmValue = %d\n", *pSharedMemory);
    return;
 }
