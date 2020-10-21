@@ -1,0 +1,72 @@
+import numpy as np
+import cv2
+import time
+from Lepton import Lepton
+import sys
+from picamera.array import PiRGBArray
+from picamera import PiCamera
+
+# Stop the cursor from blinking
+sys.stdout.write("\033[?25l")
+sys.stdout.flush()
+
+# Target screen is 12", 1024x768 or 768x1024 in portrait mode
+screenWidth = 768
+screenHeight = 1024
+# Sensor size is 80x60
+sensorWidth = 80
+sensorHeight = 60
+# Lepton offset in degC
+corrVal = 1.45
+
+# Initialize PiCamera
+camera = PiCamera()
+camera.resolution = (640,480)
+camera.framerate = 32
+rawCapture = PiRGBArray(camera, size=(640,480))
+# allow warmup
+time.sleep(0.1)
+
+# Initialize Lepton sensor instance.
+l = Lepton()
+
+# make an alpha channel for the frame buffer image.
+alpha = np.ones((screenHeight,screenWidth), dtype=np.uint8)*255
+
+
+#while(1):
+try:
+    for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+        image = frame.array
+        raw,_ = l.capture()
+        # find maximum value in raw array
+        maxVal = np.amax(raw)
+        maxCoord = np.where(raw == maxVal)
+#       print(maxCoord)
+#       print(maxCoord[0][0])
+#       print(maxCoord[1][0])
+        # text position
+#        txtPosition = (maxCoord[1][0]*screenWidth/sensorWidth, maxCoord[0][0]*screenHeight/sensorHeight)
+        txtPosition = (600,100)
+
+        cv2.normalize(raw, raw, 0, 65535, cv2.NORM_MINMAX) # extend contrast
+        np.right_shift(raw, 8, raw) # fit data into 8 bits
+        # scale the image to full screen resolution.
+        resized = cv2.resize(np.uint8(raw), (screenWidth ,screenHeight), interpolation = cv2.INTER_AREA)
+        # convert grayscale to BGR
+        #color = cv2.cvtColor(resized, cv2.COLOR_GRAY2BGR)
+        color = cv2.resize(image, (screenWidth, screenHeight), interpolation = cv2.INTER_AREA) 
+        
+        # Put interesting data on top of the image        cv2.putText(color, "{}\u00a3C".format((maxVal/100)-273.15 + corrVal), txtPosition, cv2.FONT_HERSHEY_SIMPLEX, 2, (0,255,150,255), 2)
+        #cv2.imshow("output", color) # show it.
+        b,g,r = cv2.split(color)
+        fbImage = cv2.merge((b,g,r,alpha))
+        with open('/dev/fb0', 'rb+') as fBuf:
+            fBuf.write(fbImage)
+        
+        rawCapture.truncate()
+        rawCapture.seek(0)
+#        time.sleep(0.1)
+# stop on ctrl+C.
+except KeyboardInterrupt:
+	camera.close()

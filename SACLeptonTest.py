@@ -163,5 +163,5 @@ except KeyboardInterrupt:
 # There is another problem. Print out the exception.
 except Exception as e:
         print(e)
-	# maybe use "traceback.print_exc()"?
+	traceback.print_exc()
         camera.close()
