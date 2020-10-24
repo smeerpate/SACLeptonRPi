@@ -23,7 +23,7 @@ int main()
     printf("sResult Ping: %d\n", sResult);
 
     sResult = LEP_GetSysFlirSerialNumber(&i2cPort, &sSN);
-    printf("SerialNr: %d\n", sSN);
+    printf("SerialNr: %d\n", (u_int64_t)sSN);
 
     sResult = LEP_GetSysCameraUpTime(&i2cPort, &sUpTime);
     printf("Uptime: %fs\n", (float)sUpTime/1000.0);
@@ -33,6 +33,9 @@ int main()
 
     sResult = LEP_GetSysAuxTemperatureCelcius(&i2cPort, &sFPATempDegC);
     printf("Aux Temperature: %fdegC\n", (float)sFPATempDegC);
+
+    sResult = LEP_RunSysFFCNormalization(&i2cPort);
+    printf("sResult Run FFC: %d\n", sResult);
 
     sResult = LEP_ClosePort(&i2cPort);
     printf("sResult ClosePort: %d\n", sResult);
