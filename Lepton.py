@@ -9,6 +9,9 @@ import time
 from ioctl_numbers import _IOR, _IOW
 from fcntl import ioctl
 
+########################################################
+# SPI constants
+########################################################
 SPI_IOC_MAGIC   = ord("k")
 SPI_IOC_RD_MODE          = _IOR(SPI_IOC_MAGIC, 1, "=B")
 SPI_IOC_WR_MODE          = _IOW(SPI_IOC_MAGIC, 1, "=B")
@@ -26,6 +29,96 @@ SPI_MODE_2 = (SPI_CPOL|0)
 SPI_MODE_3 = (SPI_CPOL|SPI_CPHA)
 
 
+########################################################
+# Main I2C communication class for Lepton
+# commissioning.
+# Default I2C channel is 1.
+########################################################
+class LeptonCommissioning(object):
+	# The Lepton camera's device address
+	LEP_I2C_DEVICE_ADDRESS          = 0x2A
+	# Block Data Buffers
+	LEP_DATA_BUFFER_0_BASE_ADDR     = 0xF800
+	LEP_DATA_BUFFER_1_BASE_ADDR     = 0xFC00
+	# The Lepton I2C Registers Sub-Addresses
+	LEP_I2C_REG_BASE_ADDR           = 0x0000
+	# Host On Switch when camera is in stand by of off
+	LEP_I2C_POWER_REG               = (LEP_I2C_REG_BASE_ADDR + 0x0000)
+	# Host Command Interface over I2C
+	LEP_I2C_STATUS_REG              = (LEP_I2C_REG_BASE_ADDR + 0x0002 )
+	LEP_I2C_COMMAND_REG             = (LEP_I2C_REG_BASE_ADDR + 0x0004 )
+	LEP_I2C_DATA_LENGTH_REG         = (LEP_I2C_REG_BASE_ADDR + 0x0006 )
+	LEP_I2C_DATA_0_REG              = (LEP_I2C_REG_BASE_ADDR + 0x0008 )
+	LEP_I2C_DATA_1_REG              = (LEP_I2C_REG_BASE_ADDR + 0x000A )
+	LEP_I2C_DATA_2_REG              = (LEP_I2C_REG_BASE_ADDR + 0x000C )
+	LEP_I2C_DATA_3_REG              = (LEP_I2C_REG_BASE_ADDR + 0x000E )
+	LEP_I2C_DATA_4_REG              = (LEP_I2C_REG_BASE_ADDR + 0x0010 )
+	LEP_I2C_DATA_5_REG              = (LEP_I2C_REG_BASE_ADDR + 0x0012 )
+	LEP_I2C_DATA_6_REG              = (LEP_I2C_REG_BASE_ADDR + 0x0014 )
+	LEP_I2C_DATA_7_REG              = (LEP_I2C_REG_BASE_ADDR + 0x0016 )
+	LEP_I2C_DATA_8_REG              = (LEP_I2C_REG_BASE_ADDR + 0x0018 )
+	LEP_I2C_DATA_9_REG              = (LEP_I2C_REG_BASE_ADDR + 0x001A )
+	LEP_I2C_DATA_10_REG             = (LEP_I2C_REG_BASE_ADDR + 0x001C )
+	LEP_I2C_DATA_11_REG             = (LEP_I2C_REG_BASE_ADDR + 0x001E )
+	LEP_I2C_DATA_12_REG             = (LEP_I2C_REG_BASE_ADDR + 0x0020 )
+	LEP_I2C_DATA_13_REG             = (LEP_I2C_REG_BASE_ADDR + 0x0022 )
+	LEP_I2C_DATA_14_REG             = (LEP_I2C_REG_BASE_ADDR + 0x0024 )
+	LEP_I2C_DATA_15_REG             = (LEP_I2C_REG_BASE_ADDR + 0x0026 )
+	LEP_I2C_DATA_CRC_REG            = (LEP_I2C_REG_BASE_ADDR + 0x0028 )
+	LEP_I2C_DATA_BUFFER_0           = (LEP_DATA_BUFFER_0_BASE_ADDR )
+	LEP_I2C_DATA_BUFFER_0_END       = (LEP_DATA_BUFFER_0_BASE_ADDR + 0x03FF )
+	LEP_I2C_DATA_BUFFER_0_LENGTH    =  0x400
+	LEP_I2C_DATA_BUFFER_1           = (LEP_DATA_BUFFER_1_BASE_ADDR )
+	LEP_I2C_DATA_BUFFER_1_END       = (LEP_DATA_BUFFER_1_BASE_ADDR + 0x03FF )
+	LEP_I2C_DATA_BUFFER_1_LENGTH    = 0x400
+	LEP_I2C_STATUS_BUSY_BIT_MASK    = 0x0001 # Bit 0 is the Busy Bit
+	# error codes
+	LEP_OK                           = 0       # Camera ok
+	LEP_COMM_OK                      = LEP_OK, # Camera comm ok (same as LEP_OK)
+	LEP_ERROR                        = -1,    # Camera general error
+	LEP_NOT_READY                    = -2,    # Camera not ready error
+	LEP_RANGE_ERROR                  = -3,    # Camera range error
+	LEP_CHECKSUM_ERROR               = -4,    # Camera checksum error
+	LEP_BAD_ARG_POINTER_ERROR        = -5,    # Camera Bad argument  error
+	LEP_DATA_SIZE_ERROR              = -6,    # Camera byte count error
+	LEP_UNDEFINED_FUNCTION_ERROR     = -7,    # Camera undefined function error
+	LEP_FUNCTION_NOT_SUPPORTED       = -8,    # Camera function not yet supported error
+	# OTP access errors
+	LEP_OTP_WRITE_ERROR              = -15,   #!< Camera OTP write error
+	LEP_OTP_READ_ERROR		 = -16,   # double bit error detected (uncorrectible)
+	LEP_OTP_NOT_PROGRAMMED_ERROR     = -18,   # Flag read as non-zero
+	# I2C Errors
+	LEP_ERROR_I2C_BUS_NOT_READY      = -20,   # I2C Bus Error - Bus Not Avaialble
+	LEP_ERROR_I2C_BUFFER_OVERFLOW    = -22,   # I2C Bus Error - Buffer Overflow
+	LEP_ERROR_I2C_ARBITRATION_LOST   = -23,   # I2C Bus Error - Bus Arbitration Lost
+	LEP_ERROR_I2C_BUS_ERROR          = -24,   # I2C Bus Error - General Bus Error
+	LEP_ERROR_I2C_NACK_RECEIVED      = -25,   # I2C Bus Error - NACK Received
+	LEP_ERROR_I2C_FAIL               = -26,   # I2C Bus Error - General Failure
+	# Processing Errors
+	LEP_DIV_ZERO_ERROR               = -80,   # Attempted div by zero
+	# Comm Errors
+	LEP_COMM_PORT_NOT_OPEN           = -101,  # Comm port not open
+	LEP_COMM_INVALID_PORT_ERROR      = -102,  # Comm port no such port error
+	LEP_COMM_RANGE_ERROR             = -103,  # Comm port range error
+	LEP_ERROR_CREATING_COMM          = -104,  # Error creating comm
+	LEP_ERROR_STARTING_COMM          = -105,  # Error starting comm
+	LEP_ERROR_CLOSING_COMM           = -106,  # Error closing comm
+	LEP_COMM_CHECKSUM_ERROR          = -107,  # Comm checksum error
+	LEP_COMM_NO_DEV                  = -108,  # No comm device
+	LEP_TIMEOUT_ERROR                = -109,  # Comm timeout error
+	LEP_COMM_ERROR_WRITING_COMM      = -110,  # Error writing comm
+	LEP_COMM_ERROR_READING_COMM      = -111,  # Error reading comm
+	LEP_COMM_COUNT_ERROR             = -112,  # Comm byte count error
+	# Other Errors
+	LEP_OPERATION_CANCELED           = -126,  # Camera operation canceled
+	LEP_UNDEFINED_ERROR_CODE         = -127   # Undefined error
+
+	def __init__(self, i2c_channel = 1):
+		self.__i2cBus = smbus.SMBus(i2c_channel)
+
+########################################################
+# Main SPI communication class.
+########################################################
 class Lepton(object):
   """Communication class for FLIR Lepton module on SPI
   Args:
