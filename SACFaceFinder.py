@@ -11,6 +11,8 @@ class FaceFider:
 	def __init__(self, imageSize = (640,480), minFaceSize = (180,180)):
 		self.imageSize = imageSize
 		self.minFaceSize = minFaceSize
+		# load frontal face  classifier
+		self.faceDet = cv2.CascadeClassifier("/home/pi/SACLeptonRPi/haarcascade_frontalface_default.xml")
 		
 	####################################################
 	# Sets the the transformation matrix (M) for mapping
@@ -30,7 +32,7 @@ class FaceFider:
 	####################################################
 	def getTcFaceContours(self, image):
 		gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-		rects = faceDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=self.minFaceSize)
+		rects = self.faceDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=self.minFaceSize)
 		if len(rects) > 0:
 			# only consider first face found.
 			# rect comes in a tuple (x,y,w,h).
