@@ -36,11 +36,11 @@ class FaceFider:
 			# rect comes in a tuple (x,y,w,h).
 			# todo: check for biggest bounding box.
 			self.tcROI = rects[0]
-	    	return TRUE
-	    else:
-	    	# no faces found
-	    	self.tcROI = (-1,-1,-1,-1)
-	    	return FALSE
+	    		return TRUE
+	    	else:
+	    		# no faces found
+	    		self.tcROI = (-1,-1,-1,-1)
+	    		return FALSE
 	    		
 	####################################################
 	# Uses the transformation matrix to transform
