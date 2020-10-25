@@ -45,6 +45,8 @@ class FaceFider:
 	####################################################
 	# Uses the transformation matrix to transform
 	# the true color ROI to a thermal image ROI.
+	# Returns the contour points of the thermal
+	# image ROI.
 	####################################################    		
 	def getThFaceContours(self):  		
     	# transform the coordinates from true color image space to thermal image space using the affine transform matrix M
@@ -70,3 +72,4 @@ class FaceFider:
         P_dlb = np.dot(self.M, P_slb)
         P_drb = np.dot(self.M, P_srb)
         thROIPoints = np.array([P_dlt, P_drt, P_dlb, P_drb], dtype=np.float32)
+        return(thROIPoints)
