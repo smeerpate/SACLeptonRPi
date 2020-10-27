@@ -41,10 +41,10 @@ try:
 
 		elif state == "WAIT_FOR_SIZE_OK":
 			if ff.getTcFaceContours(image) == True:
-				if ff.tcROI.w > faceSizeUpperLimit:
+				if ff.getTcFaceROIWidth() > faceSizeUpperLimit:
 					print("Too close")
 					state = "WAIT_FOR_SIZE_OK"
-				elif ss.tcROI.w < faceSizeLowerLimit:
+				elif ff.getTcFaceROIWidth() < faceSizeLowerLimit:
 					print("Too far")
 					state = "WAIT_FOR_SIZE_OK"
 				else:
@@ -63,6 +63,8 @@ try:
 		else:
 			break
 
+		# clear the stream in preparation for the next frame
+		rawCapture.truncate(0)
 
 except KeyboardInterrupt:
 	print("Interuptted by user.")
