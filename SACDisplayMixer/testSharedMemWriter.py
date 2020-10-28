@@ -15,7 +15,7 @@ th1 = Thread(target=startDisplay)
 th1.start()
 time.sleep(1)
 
-key = ipc.ftok(".", ord('i'))
+key = ipc.ftok("/home/pi/SACLeptonRPi", ord('i'))
 shm = ipc.SharedMemory(key, 0, 0)
 
 #imContent = np.ones((640,480,3),dtype=np.uint8)
@@ -35,7 +35,8 @@ for frame in camera.capture_continuous(rawCapture, format="rgb", use_video_port=
 	# write the frame to shared memory
 	shm.write(image)
 
-	key = cv2.waitKey(1) & 0xFF
+	if cv2.waitKey(0) & 0xFF == ord('q'):
+		break
 	# clear the stream in preparation for the next frame
 	rawCapture.truncate(0)
 

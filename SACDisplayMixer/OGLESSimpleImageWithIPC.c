@@ -37,7 +37,7 @@ int ipcOpenSegment(key_t key, int iSegSize)
     int iSegId;
     // Try to get a segment of shared memory and store its ID.
     // Permission 0660: User can read and write, Group can read and write. Both can not exec.
-    iSegId = shmget(key, iSegSize, IPC_CREAT | 0660);
+    iSegId = shmget(key, iSegSize, IPC_CREAT | 0666);
     printf("[info]: Created a segment of shared memory with id %d and key %d.\n", iSegId, key);
     if (iSegId == -1)
     {
@@ -62,7 +62,7 @@ char* initSharedMemory(int iNumBytes)
 {
     char* pSegStart;
     key_t key;
-    key = ftok(".", 'i');
+    key = ftok("/home/pi/SACLeptonRPi", 'i');
     int iSegId = ipcOpenSegment(key, iNumBytes);
     pSegStart = ipcAttachToSegment(iSegId);
     return pSegStart;
