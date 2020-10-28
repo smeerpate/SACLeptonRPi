@@ -38,7 +38,7 @@ int ipcOpenSegment(key_t key, int iSegSize)
     // Try to get a segment of shared memory and store its ID.
     // Permission 0660: User can read and write, Group can read and write. Both can not exec.
     iSegId = shmget(key, iSegSize, IPC_CREAT | 0666);
-    printf("[info]: Created a segment of shared memory with id %d and key %d.\n", iSegId, key);
+    printf("[INFO]: Created a segment of shared memory with id %d and key %d.\n", iSegId, key);
     if (iSegId == -1)
     {
         // A problem occured...

@@ -108,10 +108,10 @@ try:
 		elif state == "GET_TEMPERATURE":
 			thRect_x, thRect_y, thRect_w, thRect_h = cv2.boundingRect(ff.getThFaceContours())
 			# x and y should not be negativeor lager then the FPA. Clip the values.
-			thRect_x = max(0, min(thRect_x, thSensorWidth))
-			thRect_y = max(0, min(thRect_y, thSensorHeight))
-			thRect_xe = max(0, min(thRect_x + thRect_w, thSensorWidth))
-			thRect_ye = max(0, min(thRect_y + thRect_w, thSensorHeight))
+			thRect_x = max(0, min(thRect_x, thSensorWidth-2))
+			thRect_y = max(0, min(thRect_y, thSensorHeight-2))
+			thRect_xe = max(0, min(thRect_x + thRect_w, thSensorWidth-1))
+			thRect_ye = max(0, min(thRect_y + thRect_w, thSensorHeight-1))
 			thRoi = (thRect_x, thRect_y, thRect_xe, thRect_ye)
 			print(str(thRoi))
 			l.SetROI(thRoi)
