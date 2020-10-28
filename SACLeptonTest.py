@@ -108,22 +108,22 @@ try:
             y = max(0, min(y, sensorHeight))
             thRoiData = raw[y:y+h, x:x+w]
             maxVal = np.amax(thRoiData)
-	    # get running average over N thermal samples
-	    if (thSampleCount < nThSamplesToAverage):
-	        thSampleCount += 1
-	        thSampleAcc.append(maxVal)
-	    else:
-	       	thDataValid = True
-		thSampleAcc.append(maxVal)
-	        thSampleAcc.pop(0)
-	    	runningAvg = sum(thSampleAcc)/len(thSampleAcc)
-            maxCoord = np.where(thRoiData == maxVal)
-	else:
-	    # No faces found.
-	    runningAvg = 0
-	    thSampleCount = 0
-	    del thSampleAcc[:]
-	    thDataValid = False
+	        # get running average over N thermal samples
+            if (thSampleCount < nThSamplesToAverage):
+                thSampleCount += 1
+                thSampleAcc.append(maxVal)
+            else:
+                thDataValid = True
+                thSampleAcc.append(maxVal)
+                thSampleAcc.pop(0)
+                runningAvg = sum(thSampleAcc)/len(thSampleAcc)
+                maxCoord = np.where(thRoiData == maxVal)
+        else:
+	        # No faces found.
+            runningAvg = 0
+            thSampleCount = 0
+            del thSampleAcc[:]
+            thDataValid = False
 
         # text position
         txtPosition = (500,50)
@@ -143,8 +143,8 @@ try:
         # Put data on top of the image if a face was detected.
         if len(faceBoxes) == 1 and thDataValid:
 #            measTemp = (float(maxVal/100.0)-273.15) + corrVal
-	    measTemp = (float(runningAvg/100.0)-273.15)
-	    if measTemp > feverThresh:
+            measTemp = (float(runningAvg/100.0)-273.15)
+            if measTemp > feverThresh:
                 cv2.putText(color, "{}degC".format(measTemp), txtPosition, cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,0,255,255), 2)
             else:
                 cv2.putText(color, "{}degC".format(measTemp), txtPosition, cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,255,0,255),2)
@@ -161,6 +161,6 @@ except KeyboardInterrupt:
 	camera.close()
 # There is another problem. Print out the exception.
 except Exception as e:
-        print(e)
-	traceback.print_exc()
-        camera.close()
+    print(e)
+    traceback.print_exc()
+    camera.close()
