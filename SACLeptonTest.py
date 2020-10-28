@@ -77,12 +77,11 @@ try:
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
 	# get true color image from PiCamera
         image = frame.array
-	# find face(s)
-	gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-	rects = faceDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(180,180))
-	faceBoxes = [(y,x+w, y+h, x) for (x,y,w,h) in rects]
-	if len(faceBoxes) > 0:
-	    tcFace1 = faceBoxes[0] # true color ROI
+        gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        rects = faceDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(180,180))
+        faceBoxes = [(y,x+w, y+h, x) for (x,y,w,h) in rects]
+        if len(faceBoxes) > 0:
+            tcFace1 = faceBoxes[0] # true color ROI
             # transform the coordinates from true color image space to thermal image space using the affine transform matrix M
             # See https://docs.opencv.org/2.4/modules/imgproc/doc/geometric_transformations.html
             M = np.array([[1.5689e-1, 8.6462e-3, -1.1660e+1],[1.0613e-4, 1.6609e-1, -1.4066e+1]])
@@ -95,8 +94,8 @@ try:
             P_dlb = np.dot(M, P_slb)
             P_drb = np.dot(M, P_srb)
             thFace1Cnts = np.array([P_dlt, P_drt, P_dlb, P_drb], dtype=np.float32)
-	    for (top,right,bottom,left) in faceBoxes:
-	        cv2.rectangle(image,(left,top),(right,bottom), (100,255,100), 1)
+            for (top,right,bottom,left) in faceBoxes:
+                cv2.rectangle(image,(left,top),(right,bottom), (100,255,100), 1)
 
 	# get thermal image from Lepton
         raw,_ = l.capture()
