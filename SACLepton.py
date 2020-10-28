@@ -96,6 +96,13 @@ try:
 
 		elif state == "RUN_FFC":
 			l.RunRadFfc()
+			state = "GET_TEMPERATURE"
+
+
+		elif state == "GET_TEMPERATURE":
+			l.SetROI((19,10,59,49))
+			values = l.GetROIValues()
+			print(str(values))
 			state = "IDLE"
 
 
