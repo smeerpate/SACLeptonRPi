@@ -15,8 +15,8 @@ from SACFaceFinder import FaceFinder
 
 # Gobals
 state = "IDLE"
-faceSizeUpperLimit = 300
-faceSizeLowerLimit = 250
+faceSizeUpperLimit = 280
+faceSizeLowerLimit = 220
 
 def addText(image, sMessage):
 	font = cv2.FONT_HERSHEY_SIMPLEX
@@ -25,6 +25,18 @@ def addText(image, sMessage):
 	color = (255, 0, 0)
 	thickness = 2
 	image = cv2.putText(image, sMessage, org, font, fontScale, color, thickness, cv2.LINE_AA)
+
+def checkFaceSize(image, currWidth, minWidth, maxWidth):
+	if currWidth > maxWidth:
+		addText(image, 'Ga wat verder staan.')
+		return False
+	elif currWidth < minWidth:
+		addText(image, 'Ga wat dichter staan.')
+		return False
+	else:
+		addText(image, 'Afstand OK.')
+		return True
+
 
 # Start Displaying thread and init shared memory connection
 def startDisplay():
@@ -75,21 +87,17 @@ try:
 
 		elif state == "WAIT_FOR_SIZE_OK":
 			if ff.getTcFaceContours(image) == True:
-				if ff.getTcFaceROIWidth() > faceSizeUpperLimit:
-					#print("Too close")
-					addText(image, 'Ga wat verder staan.')
-					state = "WAIT_FOR_SIZE_OK"
-				elif ff.getTcFaceROIWidth() < faceSizeLowerLimit:
-					#print("Too far")
-					addText(image, 'Kom wat dichter staan.')
+				if checkFaceSize(image, ff.getTcFaceROIWidth(), faceSizeLowerLimit, faceSizeUpperLimit) == False:
 					state = "WAIT_FOR_SIZE_OK"
 				else:
-					#print("Face size ok")
-					addText(image, 'Afstand OK.')
-					state = "WAIT_FOR_SIZE_OK" #"TEMP_OK"
-
+					state = "RUN_FFC"
 			else:
 				state = "IDLE"
+
+		elif state == "RUN_FFC":
+			l.RunRadFfc()
+			state = "IDLE"
+
 
 		elif state == "TEMP_OK":
 			if ff.getTcFaceContours(image) == True:
@@ -103,6 +111,7 @@ try:
 		# display image
 		try:
 			im_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+			im_rgb = cv2.flip(im_rgb, 0)
 			shm.write(im_rgb)
 		except Exception as e:
 			print("[ERROR]: Can not write to shared memory: " + str(e))
