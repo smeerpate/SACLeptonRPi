@@ -69,10 +69,11 @@ class FaceFinder:
         #     x------------x
         #     lb          rb
         #
-        P_slt = np.array([[self.tcROI.x],[self.tcROI.y],[1]]) # 'slt' source left top vector
-        P_srt = np.array([[self.tcROI.x + self.tcROI.w],[self.tcROI.y],[1]]) # 'srt' source right top vector
-        P_slb = np.array([[self.tcROI.x],[self.tcROI.y + self.tcROI.h],[1]]) # 'slb' source left bottom vector
-        P_srb = np.array([[self.tcROI.x + self.tcROI.w],[self.tcROI.y + self.tcROI.h],[1]]) # 'srb' source right bottom vector
+        tcROI_x, tcROI_y, tcROI_w, tcROI_h = self.tcROI
+        P_slt = np.array([[tcROI_x],[tcROI_y],[1]]) # 'slt' source left top vector
+        P_srt = np.array([[tcROI_x + tcROI_w],[tcROI_y],[1]]) # 'srt' source right top vector
+        P_slb = np.array([[tcROI_x],[tcROI_y + tcROI_h],[1]]) # 'slb' source left bottom vector
+        P_srb = np.array([[tcROI_x + tcROI_w],[tcROI_y + tcROI_h],[1]]) # 'srb' source right bottom vector
         P_dlt = np.dot(self.M, P_slt)
         P_drt = np.dot(self.M, P_srt)
         P_dlb = np.dot(self.M, P_slb)

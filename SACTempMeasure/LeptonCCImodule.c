@@ -92,7 +92,7 @@ static PyObject* LeptonCCI_SetROI(PyObject* self, PyObject* args) {
     LEP_RAD_ROI_T sROI;
     int startRow, startCol, endRow, endCol;
 
-    if (!PyArg_ParseTuple(args, "(iiii)", &startRow, &startCol, &endRow, &endCol)){
+    if (!PyArg_ParseTuple(args, "(iiii)", &startCol, &startRow, &endCol, &endRow)){
         return NULL;
     }
     sROI.startRow = startRow;
@@ -164,6 +164,76 @@ static PyObject* LeptonCCI_GetROIValues(PyObject* self) {
 }
 
 
+///////////////////////////////////////////////////
+// LeptonCCI_GetAuxTemp is a Function without
+// arguments. Returns the camera's aux temperature
+// in deg C.
+///////////////////////////////////////////////////
+static PyObject* LeptonCCI_GetAuxTemp(PyObject* self) {
+    LEP_SYS_AUX_TEMPERATURE_CELCIUS_T sAuxTemp;
+    LEP_RESULT sResult;
+
+    sResult = LEP_OpenPort(1, LEP_CCI_TWI, 400, &i2cPort);
+    if(LEP_COMM_OK != sResult)
+    {
+        sprintf(sError, "LeptonCCI_GetAuxTemp: Unable to open i2c port. SDK error code %i.", (int)sResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return NULL; // Propagate the error to the Python interpretor.
+    }
+    sResult = LEP_GetSysAuxTemperatureCelcius(&i2cPort, &sAuxTemp);
+    if(LEP_OK != sResult)
+    {
+        sprintf(sError, "LeptonCCI_GetAuxTemp: Unable to get Aux temperature. SDK error code %i.", (int)sResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return NULL; // Propagate the error to the Python interpretor.
+    }
+    sResult = LEP_ClosePort(&i2cPort);
+    if(LEP_OK != sResult)
+    {
+        sprintf(sError, "LeptonCCI_GetAuxTemp: Unable to close i2c port. SDK error code %i.", (int)sResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return NULL; // Propagate the error to the Python interpretor.
+    }
+
+    return Py_BuildValue("f", (float)sAuxTemp);
+}
+
+
+///////////////////////////////////////////////////
+// LeptonCCI_GetFpaTemp is a Function without
+// arguments. Returns the camera's FPA temperature
+// in deg C.
+///////////////////////////////////////////////////
+static PyObject* LeptonCCI_GetFpaTemp(PyObject* self) {
+    LEP_SYS_FPA_TEMPERATURE_CELCIUS_T sFpaTemp;
+    LEP_RESULT sResult;
+
+    sResult = LEP_OpenPort(1, LEP_CCI_TWI, 400, &i2cPort);
+    if(LEP_COMM_OK != sResult)
+    {
+        sprintf(sError, "LeptonCCI_GetFpaTemp: Unable to open i2c port. SDK error code %i.", (int)sResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return NULL; // Propagate the error to the Python interpretor.
+    }
+    sResult = LEP_GetSysFpaTemperatureCelcius(&i2cPort, &sFpaTemp);
+    if(LEP_OK != sResult)
+    {
+        sprintf(sError, "LeptonCCI_GetFpaTemp: Unable to get FPA temperature. SDK error code %i.", (int)sResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return NULL; // Propagate the error to the Python interpretor.
+    }
+    sResult = LEP_ClosePort(&i2cPort);
+    if(LEP_OK != sResult)
+    {
+        sprintf(sError, "LeptonCCI_GetFpaTemp: Unable to close i2c port. SDK error code %i.", (int)sResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return NULL; // Propagate the error to the Python interpretor.
+    }
+
+    return Py_BuildValue("f", (float)sFpaTemp);
+}
+
+
 // Method mapping table
 // Method definition object for this extension, these argumens mean:
 // ml_name: The name of the method
@@ -177,6 +247,8 @@ static PyMethodDef LeptonCCI_methods[] = {
     {"GetROI", (PyCFunction)LeptonCCI_GetROI, METH_NOARGS, NULL},
     {"SetROI", (PyCFunction)LeptonCCI_SetROI, METH_VARARGS, NULL},
     {"GetROIValues", (PyCFunction)LeptonCCI_GetROIValues, METH_NOARGS, NULL},
+    {"GetAuxTemp", (PyCFunction)LeptonCCI_GetAuxTemp, METH_NOARGS, NULL},
+    {"GetFpaTemp", (PyCFunction)LeptonCCI_GetFpaTemp, METH_NOARGS, NULL},
     {NULL, NULL, 0, NULL}
 };
 

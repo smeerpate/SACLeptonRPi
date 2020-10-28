@@ -15,8 +15,13 @@ from SACFaceFinder import FaceFinder
 
 # Gobals
 state = "IDLE"
+values = (0,0,0,0)
+# Settings. We will need to get these from a JSON file.
+thSensorWidth = 80
+thSensorHeight = 60
 faceSizeUpperLimit = 280
 faceSizeLowerLimit = 220
+transformMatrix = np.array([[1.5689e-1, 8.6462e-3, -1.1660e+1],[1.0613e-4, 1.6609e-1, -1.4066e+1]])
 
 def addText(image, sMessage):
 	font = cv2.FONT_HERSHEY_SIMPLEX
@@ -70,6 +75,7 @@ time.sleep(0.1)
 
 # initialize the face finder
 ff = FaceFinder()
+ff.setTransformMatrix(transformMatrix)
 
 try:
 	for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
@@ -100,10 +106,28 @@ try:
 
 
 		elif state == "GET_TEMPERATURE":
-			l.SetROI((19,10,59,49))
+			thRect_x, thRect_y, thRect_w, thRect_h = cv2.boundingRect(ff.getThFaceContours())
+			# x and y should not be negativeor lager then the FPA. Clip the values.
+			thRect_x = max(0, min(thRect_x, thSensorWidth))
+			thRect_y = max(0, min(thRect_y, thSensorHeight))
+			thRect_xe = max(0, min(thRect_x + thRect_w, thSensorWidth))
+			thRect_ye = max(0, min(thRect_y + thRect_w, thSensorHeight))
+			thRoi = (thRect_x, thRect_y, thRect_xe, thRect_ye)
+			print(str(thRoi))
+			l.SetROI(thRoi)
+			#l.SetROI((34,11,59,49))
 			values = l.GetROIValues()
 			print(str(values))
-			state = "IDLE"
+			state = "WAIT_FOR_NO_FACE"
+
+
+		elif state == "WAIT_FOR_NO_FACE":
+			if ff.getTcFaceContours(image) == True:
+				state = "WAIT_FOR_NO_FACE"
+				addText(image, str(values[1]) + " degC")
+			else:
+				state = "IDLE"
+
 
 
 		elif state == "TEMP_OK":
