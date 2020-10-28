@@ -10,12 +10,21 @@ from threading import Thread
 import sysv_ipc as ipc
 from picamera.array import PiRGBArray
 from picamera import PiCamera
+from picamera.color import Color
 from SACFaceFinder import FaceFinder
 
 # Gobals
 state = "IDLE"
 faceSizeUpperLimit = 300
 faceSizeLowerLimit = 250
+
+def addText(image, sMessage):
+	font = cv2.FONT_HERSHEY_SIMPLEX
+	org = (50, 50)
+	fontScale = 1
+	color = (255, 0, 0)
+	thickness = 2
+	image = cv2.putText(image, sMessage, org, font, fontScale, color, thickness, cv2.LINE_AA)
 
 # Start Displaying thread and init shared memory connection
 def startDisplay():
@@ -38,6 +47,11 @@ cameraHeight = 480
 camera = PiCamera()
 camera.resolution = (cameraWidth,cameraHeight)
 camera.framerate = 10
+
+#camera.annotate_foreground = Color(y=0.4, u=-0.05, v=0.615)
+#camera.annotate_text = 'Hallo!'
+camera.meter_mode = 'spot'
+
 rawCapture = PiRGBArray(camera, size=(640,480))
 # allow warmup
 time.sleep(0.1)
@@ -56,19 +70,23 @@ try:
 				state = "WAIT_FOR_SIZE_OK"
 			else:
 				state = "IDLE"
-				print("face not present")
+				#print("face not present")
+				addText(image, 'Geen gezicht gevonden.')
 
 		elif state == "WAIT_FOR_SIZE_OK":
 			if ff.getTcFaceContours(image) == True:
 				if ff.getTcFaceROIWidth() > faceSizeUpperLimit:
-					print("Too close")
+					#print("Too close")
+					addText(image, 'Ga wat verder staan.')
 					state = "WAIT_FOR_SIZE_OK"
 				elif ff.getTcFaceROIWidth() < faceSizeLowerLimit:
-					print("Too far")
+					#print("Too far")
+					addText(image, 'Kom wat dichter staan.')
 					state = "WAIT_FOR_SIZE_OK"
 				else:
-					print("Face size ok")
-					state = "TEMP_OK"
+					#print("Face size ok")
+					addText(image, 'Afstand OK.')
+					state = "WAIT_FOR_SIZE_OK" #"TEMP_OK"
 
 			else:
 				state = "IDLE"
@@ -84,7 +102,8 @@ try:
 
 		# display image
 		try:
-			shm.write(image)
+			im_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+			shm.write(im_rgb)
 		except Exception as e:
 			print("[ERROR]: Can not write to shared memory: " + str(e))
 		# clear the stream in preparation for the next frame
