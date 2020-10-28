@@ -77,12 +77,11 @@ try:
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
 	# get true color image from PiCamera
         image = frame.array
-	# find face(s)
-	gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-	rects = faceDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(180,180))
-	faceBoxes = [(y,x+w, y+h, x) for (x,y,w,h) in rects]
-	if len(faceBoxes) > 0:
-	    tcFace1 = faceBoxes[0] # true color ROI
+        gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        rects = faceDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(180,180))
+        faceBoxes = [(y,x+w, y+h, x) for (x,y,w,h) in rects]
+        if len(faceBoxes) > 0:
+            tcFace1 = faceBoxes[0] # true color ROI
             # transform the coordinates from true color image space to thermal image space using the affine transform matrix M
             # See https://docs.opencv.org/2.4/modules/imgproc/doc/geometric_transformations.html
             M = np.array([[1.5689e-1, 8.6462e-3, -1.1660e+1],[1.0613e-4, 1.6609e-1, -1.4066e+1]])
@@ -95,8 +94,8 @@ try:
             P_dlb = np.dot(M, P_slb)
             P_drb = np.dot(M, P_srb)
             thFace1Cnts = np.array([P_dlt, P_drt, P_dlb, P_drb], dtype=np.float32)
-	    for (top,right,bottom,left) in faceBoxes:
-	        cv2.rectangle(image,(left,top),(right,bottom), (100,255,100), 1)
+            for (top,right,bottom,left) in faceBoxes:
+                cv2.rectangle(image,(left,top),(right,bottom), (100,255,100), 1)
 
 	# get thermal image from Lepton
         raw,_ = l.capture()
@@ -109,22 +108,22 @@ try:
             y = max(0, min(y, sensorHeight))
             thRoiData = raw[y:y+h, x:x+w]
             maxVal = np.amax(thRoiData)
-	    # get running average over N thermal samples
-	    if (thSampleCount < nThSamplesToAverage):
-	        thSampleCount += 1
-	        thSampleAcc.append(maxVal)
-	    else:
-	       	thDataValid = True
-		thSampleAcc.append(maxVal)
-	        thSampleAcc.pop(0)
-	    	runningAvg = sum(thSampleAcc)/len(thSampleAcc)
-            maxCoord = np.where(thRoiData == maxVal)
-	else:
-	    # No faces found.
-	    runningAvg = 0
-	    thSampleCount = 0
-	    del thSampleAcc[:]
-	    thDataValid = False
+	        # get running average over N thermal samples
+            if (thSampleCount < nThSamplesToAverage):
+                thSampleCount += 1
+                thSampleAcc.append(maxVal)
+            else:
+                thDataValid = True
+                thSampleAcc.append(maxVal)
+                thSampleAcc.pop(0)
+                runningAvg = sum(thSampleAcc)/len(thSampleAcc)
+                maxCoord = np.where(thRoiData == maxVal)
+        else:
+	        # No faces found.
+            runningAvg = 0
+            thSampleCount = 0
+            del thSampleAcc[:]
+            thDataValid = False
 
         # text position
         txtPosition = (500,50)
@@ -144,8 +143,8 @@ try:
         # Put data on top of the image if a face was detected.
         if len(faceBoxes) == 1 and thDataValid:
 #            measTemp = (float(maxVal/100.0)-273.15) + corrVal
-	    measTemp = (float(runningAvg/100.0)-273.15)
-	    if measTemp > feverThresh:
+            measTemp = (float(runningAvg/100.0)-273.15)
+            if measTemp > feverThresh:
                 cv2.putText(color, "{}degC".format(measTemp), txtPosition, cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,0,255,255), 2)
             else:
                 cv2.putText(color, "{}degC".format(measTemp), txtPosition, cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,255,0,255),2)
@@ -162,6 +161,6 @@ except KeyboardInterrupt:
 	camera.close()
 # There is another problem. Print out the exception.
 except Exception as e:
-        print(e)
-	traceback.print_exc()
-        camera.close()
+    print(e)
+    traceback.print_exc()
+    camera.close()
