@@ -163,6 +163,100 @@ static PyObject* LeptonCCI_GetROIValues(PyObject* self) {
                                  sROIValues.radSpotmeterPopulation);
 }
 
+///////////////////////////////////////////////////
+// LeptonCCI_SetFluxLinearParams is a Function with
+// arguments. Takes in a tuple:
+// (sceneEmissivity, TBkg, tauWindow, TWindow,
+// tauAtm, TAtm, reflWindow, TRefl)
+///////////////////////////////////////////////////
+static PyObject* LeptonCCI_SetFluxLinearParams(PyObject* self, PyObject* args) {
+    LEP_RESULT sResult;
+    LEP_RAD_FLUX_LINEAR_PARAMS_T sFLParams;
+    int sceneEmissivity, TBkg, tauWindow, TWindow, tauAtm, TAtm, reflWindow, TRefl;
+
+    if (!PyArg_ParseTuple(args, "(iiiiiiii)", &sceneEmissivity, &TBkg, &tauWindow, &TWindow, &tauAtm, &TAtm, &reflWindow, &TRefl)){
+        return NULL;
+    }
+
+    sFLParams.sceneEmissivity = sceneEmissivity;
+    sFLParams.TBkgK = TBkg;
+    sFLParams.tauWindow = tauWindow;
+    sFLParams.TWindowK = TWindow;
+    sFLParams.tauAtm = tauAtm;
+    sFLParams.TAtmK = TAtm;
+    sFLParams.reflWindow = reflWindow;
+    sFLParams.TReflK = TRefl;
+
+    sResult = LEP_OpenPort(1, LEP_CCI_TWI, 400, &i2cPort);
+    if(LEP_COMM_OK != sResult)
+    {
+        sprintf(sError, "LeptonCCI_SetFluxLinearParams: Unable to open i2c port. SDK error code %i.", (int)sResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return NULL; // Propagate the error to the Python interpretor.
+    }
+    sResult = LEP_SetRadFluxLinearParams(&i2cPort, sFLParams);
+    if(LEP_OK != sResult)
+    {
+        sprintf(sError, "LeptonCCI_SetFluxLinearParams: Unable to set spotmeter ROI. SDK error code %i.", (int)sResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return NULL; // Propagate the error to the Python interpretor.
+    }
+    sResult = LEP_ClosePort(&i2cPort);
+    if(LEP_OK != sResult)
+    {
+        sprintf(sError, "LeptonCCI_SetFluxLinearParams: Unable to close i2c port. SDK error code %i.", (int)sResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return NULL; // Propagate the error to the Python interpretor.
+    }
+
+    Py_RETURN_NONE;
+}
+
+
+
+///////////////////////////////////////////////////
+// LeptonCCI_GetFluxLinearParams is a Function without
+// arguments. Returns a tuple:
+// (sceneEmissivity, TBkg, tauWindow, TWindow,
+// tauAtm, TAtm, reflWindow, TRefl)
+///////////////////////////////////////////////////
+static PyObject* LeptonCCI_GetFluxLinearParams(PyObject* self) {
+    LEP_RAD_FLUX_LINEAR_PARAMS_T sFLParams;
+    LEP_RESULT sResult;
+
+    sResult = LEP_OpenPort(1, LEP_CCI_TWI, 400, &i2cPort);
+    if(LEP_COMM_OK != sResult)
+    {
+        sprintf(sError, "LeptonCCI_GetFluxLinearParams: Unable to open i2c port. SDK error code %i.", (int)sResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return NULL; // Propagate the error to the Python interpretor.
+    }
+    sResult = LEP_GetRadFluxLinearParams(&i2cPort, &sFLParams);
+    if(LEP_OK != sResult)
+    {
+        sprintf(sError, "LeptonCCI_GetFluxLinearParams: Unable to get spotmeter ROI values. SDK error code %i.", (int)sResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return NULL; // Propagate the error to the Python interpretor.
+    }
+    LEP_ClosePort(&i2cPort);
+    if(LEP_OK != sResult)
+    {
+        sprintf(sError, "LeptonCCI_GetFluxLinearParams: Unable to close i2c port. SDK error code %i.", (int)sResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return NULL; // Propagate the error to the Python interpretor.
+    }
+
+    return Py_BuildValue("iiiiiiii", sFLParams.sceneEmissivity,
+                                      sFLParams.TBkgK,
+                                      sFLParams.tauWindow,
+                                      sFLParams.TWindowK,
+                                      sFLParams.tauAtm,
+                                      sFLParams.TAtmK,
+                                      sFLParams.reflWindow,
+                                      sFLParams.TReflK);
+}
+
+
 
 ///////////////////////////////////////////////////
 // LeptonCCI_GetAuxTemp is a Function without
@@ -247,6 +341,8 @@ static PyMethodDef LeptonCCI_methods[] = {
     {"GetROI", (PyCFunction)LeptonCCI_GetROI, METH_NOARGS, NULL},
     {"SetROI", (PyCFunction)LeptonCCI_SetROI, METH_VARARGS, NULL},
     {"GetROIValues", (PyCFunction)LeptonCCI_GetROIValues, METH_NOARGS, NULL},
+    {"SetFluxLinearParams", (PyCFunction)LeptonCCI_SetFluxLinearParams, METH_VARARGS, NULL},
+    {"GetFluxLinearParams", (PyCFunction)LeptonCCI_GetFluxLinearParams, METH_NOARGS, NULL},
     {"GetAuxTemp", (PyCFunction)LeptonCCI_GetAuxTemp, METH_NOARGS, NULL},
     {"GetFpaTemp", (PyCFunction)LeptonCCI_GetFpaTemp, METH_NOARGS, NULL},
     {NULL, NULL, 0, NULL}
