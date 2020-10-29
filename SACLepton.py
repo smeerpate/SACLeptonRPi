@@ -3,6 +3,7 @@
 import numpy as np
 import cv2
 import time
+from datetime import datetime
 import LeptonCCI as l
 import sys
 from subprocess import call
@@ -44,7 +45,7 @@ def checkFaceSize(image, currWidth, minWidth, maxWidth):
 
 def writeLog():
 	f = open("SACTemplog.txt", "a")
-	f.write(str(l.GetAuxTemp()) + "," + str(l.GetFpaTemp()) + "," + str(l.GetROIValues()) + "," + str(l.GetROI()) + ",\n")
+	f.write(str(datetime.now()) + "," + str(l.GetAuxTemp()) + "," + str(l.GetFpaTemp()) + "," + str(l.GetROIValues()) + "," + str(l.GetROI()) + ",\n")
 	f.close()
 
 
@@ -115,6 +116,15 @@ try:
 
 
 		elif state == "SET_FLUX_LINEAR_PARAMS":
+			sceneEmissivity = 0.98
+			TBkg = l.GetAuxTemp()
+			tauWindow = 1
+			TWindow = l.GetAuxTemp()
+			tauAtm = 1
+			TAtm = l.GetAuxTemp()
+			reflWindow = 0
+			TRefl = l.GetAuxTemp()
+			l.SetFluxLinearParams((sceneEmissivity,TBkg,tauWindow,TWindow,tauAtm,TAtm,reflWindow,TRefl))
 			print(str(l.GetFluxLinearParams()))
 			state = "GET_TEMPERATURE"
 
