@@ -10,6 +10,17 @@
 #include <LEPTON_Types.h>
 #include <LEPTON_RAD.h>
 
+
+// Value clamping macro
+#define CLAMP(x, low, high) ({\
+  __typeof__(x) __x = (x); \
+  __typeof__(low) __low = (low);\
+  __typeof__(high) __high = (high);\
+  __x > __high ? __high : (__x < __low ? __low : __x);\
+  })
+
+
+
 PyObject* LeptonCCIError;
 LEP_CAMERA_PORT_DESC_T i2cPort;
 char sError[128];
@@ -172,20 +183,20 @@ static PyObject* LeptonCCI_GetROIValues(PyObject* self) {
 static PyObject* LeptonCCI_SetFluxLinearParams(PyObject* self, PyObject* args) {
     LEP_RESULT sResult;
     LEP_RAD_FLUX_LINEAR_PARAMS_T sFLParams;
-    int sceneEmissivity, TBkg, tauWindow, TWindow, tauAtm, TAtm, reflWindow, TRefl;
+    float sceneEmissivity, TBkg, tauWindow, TWindow, tauAtm, TAtm, reflWindow, TRefl;
 
-    if (!PyArg_ParseTuple(args, "(iiiiiiii)", &sceneEmissivity, &TBkg, &tauWindow, &TWindow, &tauAtm, &TAtm, &reflWindow, &TRefl)){
+    if (!PyArg_ParseTuple(args, "(ffffffff)", &sceneEmissivity, &TBkg, &tauWindow, &TWindow, &tauAtm, &TAtm, &reflWindow, &TRefl)){
         return NULL;
     }
 
-    sFLParams.sceneEmissivity = sceneEmissivity;
-    sFLParams.TBkgK = TBkg;
-    sFLParams.tauWindow = tauWindow;
-    sFLParams.TWindowK = TWindow;
-    sFLParams.tauAtm = tauAtm;
-    sFLParams.TAtmK = TAtm;
-    sFLParams.reflWindow = reflWindow;
-    sFLParams.TReflK = TRefl;
+    sFLParams.sceneEmissivity = CLAMP((int)(sceneEmissivity * 8192.0), 82, 8192);
+    sFLParams.TBkgK = CLAMP((int)((TBkg + 273.15) * 100.0), 0, 65535);
+    sFLParams.tauWindow = CLAMP((int)(tauWindow * 8192.0), 82, 8192);
+    sFLParams.TWindowK = CLAMP((int)((TWindow + 273.15) * 100.0), 0, 65535);
+    sFLParams.tauAtm = CLAMP((int)(tauAtm * 8192.0), 82, 8192);
+    sFLParams.TAtmK = CLAMP((int)((TAtm + 273.15) * 100.0), 0, 65535);
+    sFLParams.reflWindow = CLAMP((int)(reflWindow * 8192.0), 0, 8192-sFLParams.tauWindow);
+    sFLParams.TReflK = CLAMP((int)((TRefl + 273.15) * 100.0), 0, 65535);
 
     sResult = LEP_OpenPort(1, LEP_CCI_TWI, 400, &i2cPort);
     if(LEP_COMM_OK != sResult)
@@ -253,7 +264,7 @@ static PyObject* LeptonCCI_GetFluxLinearParams(PyObject* self) {
                                       sFLParams.tauAtm/8192.0,
                                       (sFLParams.TAtmK/100.0)-273.15,
                                       sFLParams.reflWindow/8192.0,
-                                      (sFLParams.TReflK/100.0)/-273.15);
+                                      (sFLParams.TReflK/100.0)-273.15);
 }
 
 
