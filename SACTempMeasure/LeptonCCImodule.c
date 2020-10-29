@@ -186,6 +186,7 @@ static PyObject* LeptonCCI_SetFluxLinearParams(PyObject* self, PyObject* args) {
     float sceneEmissivity, TBkg, tauWindow, TWindow, tauAtm, TAtm, reflWindow, TRefl;
 
     if (!PyArg_ParseTuple(args, "(ffffffff)", &sceneEmissivity, &TBkg, &tauWindow, &TWindow, &tauAtm, &TAtm, &reflWindow, &TRefl)){
+        PyErr_SetString(LeptonCCIError, "LeptonCCI_SetFluxLinearParams: Args parsing error.");
         return NULL;
     }
 

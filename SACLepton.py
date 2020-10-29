@@ -45,7 +45,7 @@ def checkFaceSize(image, currWidth, minWidth, maxWidth):
 
 def writeLog():
 	f = open("SACTemplog.txt", "a")
-	f.write(str(datetime.now()) + "," + str(l.GetAuxTemp()) + "," + str(l.GetFpaTemp()) + "," + str(l.GetROIValues()) + "," + str(l.GetROI()) + ",\n")
+	f.write(str(int(round(time.time() * 1000))) + ";" + str(l.GetAuxTemp()) + ";" + str(l.GetFpaTemp()) + ";" + str(l.GetROIValues()) + ";" + str(l.GetROI()) + ";\n")
 	f.close()
 
 
@@ -118,13 +118,15 @@ try:
 		elif state == "SET_FLUX_LINEAR_PARAMS":
 			sceneEmissivity = 0.98
 			TBkg = l.GetAuxTemp()
-			tauWindow = 1
+			tauWindow = 1.0
 			TWindow = l.GetAuxTemp()
-			tauAtm = 1
+			tauAtm = 1.0
 			TAtm = l.GetAuxTemp()
-			reflWindow = 0
+			reflWindow = 0.0
 			TRefl = l.GetAuxTemp()
-			l.SetFluxLinearParams((sceneEmissivity,TBkg,tauWindow,TWindow,tauAtm,TAtm,reflWindow,TRefl))
+			FLParams = (sceneEmissivity,TBkg,tauWindow,TWindow,tauAtm,TAtm,reflWindow,TRefl)
+			print(str(FLParams))
+			l.SetFluxLinearParams(FLParams)
 			print(str(l.GetFluxLinearParams()))
 			state = "GET_TEMPERATURE"
 
