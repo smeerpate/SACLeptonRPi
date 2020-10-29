@@ -42,6 +42,11 @@ def checkFaceSize(image, currWidth, minWidth, maxWidth):
 		addText(image, 'Afstand OK.')
 		return True
 
+def writeLog():
+	f = open("SACTemplog.txt", "a")
+	f.write(str(l.GetAuxTemp()) + "," + str(l.GetFpaTemp()) + "," + str(l.GetROIValues()) + "," + str(l.GetROI()) + ",\n")
+	f.close()
+
 
 # Start Displaying thread and init shared memory connection
 def startDisplay():
@@ -115,9 +120,9 @@ try:
 			thRoi = (thRect_x, thRect_y, thRect_xe, thRect_ye)
 			print(str(thRoi))
 			l.SetROI(thRoi)
-			#l.SetROI((34,11,59,49))
 			values = l.GetROIValues()
 			print(str(values))
+			writeLog()
 			state = "WAIT_FOR_NO_FACE"
 
 
