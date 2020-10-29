@@ -246,14 +246,14 @@ static PyObject* LeptonCCI_GetFluxLinearParams(PyObject* self) {
         return NULL; // Propagate the error to the Python interpretor.
     }
 
-    return Py_BuildValue("iiiiiiii", sFLParams.sceneEmissivity,
-                                      sFLParams.TBkgK,
-                                      sFLParams.tauWindow,
-                                      sFLParams.TWindowK,
-                                      sFLParams.tauAtm,
-                                      sFLParams.TAtmK,
-                                      sFLParams.reflWindow,
-                                      sFLParams.TReflK);
+    return Py_BuildValue("ffffffff", sFLParams.sceneEmissivity/8192.0,
+                                      (sFLParams.TBkgK/100.0)-273.15,
+                                      sFLParams.tauWindow/8192.0,
+                                      (sFLParams.TWindowK/100.0)-273.15,
+                                      sFLParams.tauAtm/8192.0,
+                                      (sFLParams.TAtmK/100.0)-273.15,
+                                      sFLParams.reflWindow/8192.0,
+                                      (sFLParams.TReflK/100.0)/-273.15);
 }
 
 
