@@ -61,7 +61,7 @@ time.sleep(1)
 key = ipc.ftok("/home/pi/SACLeptonRPi", ord('i'))
 shm = ipc.SharedMemory(key, 0, 0)
 shm.attach()
-print("[INFO] Shared memory key " + str(key) + " with pointer " +  str(shm))
+print("[INFO]: Shared memory key " + str(key) + " with pointer " +  str(shm))
 
 # Initialize PiCamera
 cameraWidth = 640
@@ -82,6 +82,8 @@ time.sleep(0.1)
 ff = FaceFinder()
 ff.setTransformMatrix(transformMatrix)
 
+
+print("[INFO]: Starting state machine...")
 try:
 	for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
 		# get an image from the camera
@@ -96,6 +98,7 @@ try:
 				#print("face not present")
 				addText(image, 'Geen gezicht gevonden.')
 
+
 		elif state == "WAIT_FOR_SIZE_OK":
 			if ff.getTcFaceContours(image) == True:
 				if checkFaceSize(image, ff.getTcFaceROIWidth(), faceSizeLowerLimit, faceSizeUpperLimit) == False:
@@ -105,8 +108,14 @@ try:
 			else:
 				state = "IDLE"
 
+
 		elif state == "RUN_FFC":
 			l.RunRadFfc()
+			state = "SET_FLUX_LINEAR_PARAMS"
+
+
+		elif state == "SET_FLUX_LINEAR_PARAMS":
+			print(str(l.GetFluxLinearParams()))
 			state = "GET_TEMPERATURE"
 
 
