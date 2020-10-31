@@ -38,21 +38,21 @@ static PyObject* LeptonCCI_RunRadFfc(PyObject* self) {
     {
         sprintf(sError, "LeptonCCI_RunRadFfc: Unable to open i2c port. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return NULL; // Propagate the error to the Python interpretor.
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
     sResult = LEP_RunRadFFC(&i2cPort);
     if(LEP_OK != sResult)
     {
         sprintf(sError, "LeptonCCI_RunRadFfc: Unable to run RAD FFC. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return NULL; // Propagate the error to the Python interpretor.
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
     sResult = LEP_ClosePort(&i2cPort);
     if(LEP_OK != sResult)
     {
         sprintf(sError, "LeptonCCI_RunRadFfc: Unable to close i2c port. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return NULL; // Propagate the error to the Python interpretor.
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
 
     Py_RETURN_NONE;
@@ -72,21 +72,21 @@ static PyObject* LeptonCCI_GetROI(PyObject* self) {
     {
         sprintf(sError, "LeptonCCI_GetROI: Unable to open i2c port. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return NULL; // Propagate the error to the Python interpretor.
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
     sResult = LEP_GetRadSpotmeterRoi(&i2cPort, &sROI);
     if(LEP_OK != sResult)
     {
         sprintf(sError, "LeptonCCI_GetROI: Unable to get spotmeter ROI. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return NULL; // Propagate the error to the Python interpretor.
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
     sResult = LEP_ClosePort(&i2cPort);
     if(LEP_OK != sResult)
     {
         sprintf(sError, "LeptonCCI_GetROI: Unable to close i2c port. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return NULL; // Propagate the error to the Python interpretor.
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
 
     return Py_BuildValue("iiii", sROI.startRow, sROI.startCol, sROI.endRow, sROI.endCol);
@@ -104,7 +104,8 @@ static PyObject* LeptonCCI_SetROI(PyObject* self, PyObject* args) {
     int startRow, startCol, endRow, endCol;
 
     if (!PyArg_ParseTuple(args, "(iiii)", &startCol, &startRow, &endCol, &endRow)){
-        return NULL;
+        sprintf(sError, "LeptonCCI_SetROI: Unable to parese arguments. args: (%i,%i,%i,%i).", startCol, startRow, endCol, endRow);
+        return Py_BuildValue("s", sError);
     }
     sROI.startRow = startRow;
     sROI.startCol = startCol;
@@ -115,21 +116,21 @@ static PyObject* LeptonCCI_SetROI(PyObject* self, PyObject* args) {
     {
         sprintf(sError, "LeptonCCI_SetROI: Unable to open i2c port. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return NULL; // Propagate the error to the Python interpretor.
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
     sResult = LEP_SetRadSpotmeterRoi(&i2cPort, sROI);
     if(LEP_OK != sResult)
     {
         sprintf(sError, "LeptonCCI_SetROI: Unable to set spotmeter ROI. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return NULL; // Propagate the error to the Python interpretor.
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
     sResult = LEP_ClosePort(&i2cPort);
     if(LEP_OK != sResult)
     {
         sprintf(sError, "LeptonCCI_SetROI: Unable to close i2c port. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return NULL; // Propagate the error to the Python interpretor.
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
 
     Py_RETURN_NONE;
@@ -151,21 +152,21 @@ static PyObject* LeptonCCI_GetROIValues(PyObject* self) {
     {
         sprintf(sError, "LeptonCCI_GetROIValues: Unable to open i2c port. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return NULL; // Propagate the error to the Python interpretor.
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
     sResult = LEP_GetRadSpotmeterObjInKelvinX100(&i2cPort, &sROIValues);
     if(LEP_OK != sResult)
     {
         sprintf(sError, "LeptonCCI_GetROIValues: Unable to get spotmeter ROI values. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return NULL; // Propagate the error to the Python interpretor.
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
     LEP_ClosePort(&i2cPort);
     if(LEP_OK != sResult)
     {
         sprintf(sError, "LeptonCCI_GetROIValues: Unable to close i2c port. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return NULL; // Propagate the error to the Python interpretor.
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
 
     return Py_BuildValue("fffi", (sROIValues.radSpotmeterValue/100.0)-273.15,
@@ -186,8 +187,8 @@ static PyObject* LeptonCCI_SetFluxLinearParams(PyObject* self, PyObject* args) {
     float sceneEmissivity, TBkg, tauWindow, TWindow, tauAtm, TAtm, reflWindow, TRefl;
 
     if (!PyArg_ParseTuple(args, "(ffffffff)", &sceneEmissivity, &TBkg, &tauWindow, &TWindow, &tauAtm, &TAtm, &reflWindow, &TRefl)){
-        PyErr_SetString(LeptonCCIError, "LeptonCCI_SetFluxLinearParams: Args parsing error.");
-        return NULL;
+        sprintf(sError, "LeptonCCI_SetFluxLinearParams: Args parsing error. SDK error code %i.", (int)sResult);
+        return Py_BuildValue("s", sError);
     }
 
     sFLParams.sceneEmissivity = CLAMP((int)(sceneEmissivity * 8192.0), 82, 8192);
@@ -204,21 +205,21 @@ static PyObject* LeptonCCI_SetFluxLinearParams(PyObject* self, PyObject* args) {
     {
         sprintf(sError, "LeptonCCI_SetFluxLinearParams: Unable to open i2c port. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return NULL; // Propagate the error to the Python interpretor.
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
     sResult = LEP_SetRadFluxLinearParams(&i2cPort, sFLParams);
     if(LEP_OK != sResult)
     {
         sprintf(sError, "LeptonCCI_SetFluxLinearParams: Unable to set spotmeter ROI. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return NULL; // Propagate the error to the Python interpretor.
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
     sResult = LEP_ClosePort(&i2cPort);
     if(LEP_OK != sResult)
     {
         sprintf(sError, "LeptonCCI_SetFluxLinearParams: Unable to close i2c port. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return NULL; // Propagate the error to the Python interpretor.
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
 
     Py_RETURN_NONE;
@@ -241,21 +242,21 @@ static PyObject* LeptonCCI_GetFluxLinearParams(PyObject* self) {
     {
         sprintf(sError, "LeptonCCI_GetFluxLinearParams: Unable to open i2c port. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return NULL; // Propagate the error to the Python interpretor.
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
     sResult = LEP_GetRadFluxLinearParams(&i2cPort, &sFLParams);
     if(LEP_OK != sResult)
     {
         sprintf(sError, "LeptonCCI_GetFluxLinearParams: Unable to get spotmeter ROI values. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return NULL; // Propagate the error to the Python interpretor.
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
     LEP_ClosePort(&i2cPort);
     if(LEP_OK != sResult)
     {
         sprintf(sError, "LeptonCCI_GetFluxLinearParams: Unable to close i2c port. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return NULL; // Propagate the error to the Python interpretor.
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
 
     return Py_BuildValue("ffffffff", sFLParams.sceneEmissivity/8192.0,
@@ -284,21 +285,21 @@ static PyObject* LeptonCCI_GetAuxTemp(PyObject* self) {
     {
         sprintf(sError, "LeptonCCI_GetAuxTemp: Unable to open i2c port. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return NULL; // Propagate the error to the Python interpretor.
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
     sResult = LEP_GetSysAuxTemperatureCelcius(&i2cPort, &sAuxTemp);
     if(LEP_OK != sResult)
     {
         sprintf(sError, "LeptonCCI_GetAuxTemp: Unable to get Aux temperature. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return NULL; // Propagate the error to the Python interpretor.
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
     sResult = LEP_ClosePort(&i2cPort);
     if(LEP_OK != sResult)
     {
         sprintf(sError, "LeptonCCI_GetAuxTemp: Unable to close i2c port. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return NULL; // Propagate the error to the Python interpretor.
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
 
     return Py_BuildValue("f", (float)sAuxTemp);
@@ -319,21 +320,21 @@ static PyObject* LeptonCCI_GetFpaTemp(PyObject* self) {
     {
         sprintf(sError, "LeptonCCI_GetFpaTemp: Unable to open i2c port. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return NULL; // Propagate the error to the Python interpretor.
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
     sResult = LEP_GetSysFpaTemperatureCelcius(&i2cPort, &sFpaTemp);
     if(LEP_OK != sResult)
     {
         sprintf(sError, "LeptonCCI_GetFpaTemp: Unable to get FPA temperature. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return NULL; // Propagate the error to the Python interpretor.
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
     sResult = LEP_ClosePort(&i2cPort);
     if(LEP_OK != sResult)
     {
         sprintf(sError, "LeptonCCI_GetFpaTemp: Unable to close i2c port. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return NULL; // Propagate the error to the Python interpretor.
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
 
     return Py_BuildValue("f", (float)sFpaTemp);
