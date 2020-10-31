@@ -14,7 +14,7 @@ from picamera import PiCamera
 from picamera.color import Color
 from SACFaceFinder import FaceFinder
 
-# Gobals
+######### Gobals ###########
 state = "IDLE"
 values = (0,0,0,0)
 # Settings. We will need to get these from a JSON file.
@@ -24,10 +24,19 @@ faceSizeUpperLimit = 280
 faceSizeLowerLimit = 220
 transformMatrix = np.array([[1.5689e-1, 8.6462e-3, -1.1660e+1],[1.0613e-4, 1.6609e-1, -1.4066e+1]])
 
+# Globals for logging
 currentTime = int(round(time.time()))
 lastLogTime = 0
 logInterval = 2 # seconds
 
+# Globals for FFC timing
+lastFFCTime = 0
+needsFFC = False
+maxFFCInterval = 30 # seconds.
+############################
+
+
+######## Functions #########
 def addText(image, sMessage):
     font = cv2.FONT_HERSHEY_SIMPLEX
     org = (50, 50)
@@ -59,13 +68,14 @@ def writeLog(updateRoIValues):
     f.write(line)
 
 
-
 # Start Displaying thread and init shared memory connection
 def startDisplay():
     print("[INFO]: Starting display thread...")
-    call(["./SACDisplayMixer/OGLESSimpleImageWithIPC"])
+    call(["./SACDisplayMixer/OGLESSimpleImageWithIPC"]) 
+############################
 
 
+######## main init #########
 th1 = Thread(target=startDisplay)
 th1.start()
 time.sleep(1)
@@ -103,6 +113,7 @@ try:
         # get an image from the camera
         image = frame.array
 
+        currentTime = int(round(time.time()))
         alreadyLogged = False
 
         # run state machine
@@ -126,7 +137,9 @@ try:
 
 
         elif state == "RUN_FFC":
-            #l.RunRadFfc()
+            if currentTime > (lastFFCTime + maxFFCInterval):
+                l.RunRadFfc()
+                lastFFCTime = currentTime
             state = "SET_FLUX_LINEAR_PARAMS"
 
 
@@ -190,7 +203,6 @@ try:
             print("[ERROR]: Can not write to shared memory: " + str(e))
 
         # periodically write to log
-        currentTime = int(round(time.time()))
         if currentTime > lastLogTime + logInterval:
             if not alreadyLogged:
                 writeLog(False)
