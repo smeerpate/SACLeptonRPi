@@ -32,7 +32,7 @@ logInterval = 2 # seconds
 # Globals for FFC timing
 lastFFCTime = 0
 needsFFC = False
-maxFFCInterval = 30 # seconds.
+maxFFCInterval = 20 # seconds.
 ############################
 
 
