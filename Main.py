@@ -30,13 +30,13 @@ maxVal = 0
 feverThresh = 35.4
 
 def startDisplay():
-    call(["../../SACLeptonRPi/SACDisplayMixer/OGLESSimpleImageWithIPC"])
+    call(["./SACDisplayMixer/OGLESSimpleImageWithIPC"])
    
 th1 = Thread(target=startDisplay)
 th1.start()
 time.sleep(1)
 
-key = ipc.ftok(".", ord('i'))
+key = ipc.ftok("/home/pi/SACLeptonRPi", ord('i'))
 shm = ipc.SharedMemory(key, 0, 0)
 
 camera = PiCamera()
