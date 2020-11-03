@@ -1,12 +1,12 @@
 import RPi.GPIO as GPIO
-from ButtonInput import ButtonInput
+from .ButtonInput import ButtonInput
 
 class InputManager(object):
     """description of class"""
 
     def __init__(self, up, ok, down):
         self._buttonInput = None
-
+        
         GPIO.setmode(GPIO.BCM)
 
         GPIO.setup(up, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  
