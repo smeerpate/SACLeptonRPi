@@ -208,7 +208,7 @@ class Lepton(object):
       messages -= count
 
 
-  def capture(self, data_buffer = None, log_time = False, debug_print = True, retry_reset = True):
+  def capture(self, data_buffer = None, log_time = False, debug_print = False, retry_reset = True):
     """Capture a frame of data.
     Captures 80x60 uint16 array of non-normalized (raw 12-bit) data. Returns that frame and a frame_id (which
     is currently just the sum of all pixels). The Lepton will return multiple, identical frames at a rate of up
