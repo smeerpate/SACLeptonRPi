@@ -1,0 +1,103 @@
+{
+    "py/object": "Settings.Settings",
+    "showMeanTemperature": {
+        "py/object": "BooleanSetting.BooleanSetting",
+        "name": "Show mean temperature",
+        "value": false
+    },
+    "showFoundFace": {
+        "py/object": "BooleanSetting.BooleanSetting",
+        "name": "Show found face",
+        "value": false
+    },
+    "showWarmestZones": {
+        "py/object": "BooleanSetting.BooleanSetting",
+        "name": "Show warmest zones",
+        "value": false
+    },
+    "screenPosition": {
+        "py/object": "TupleSetting.TupleSetting",
+        "name": "Screen position",
+        "value": {
+            "py/tuple": [0, 50]
+        }
+    },
+    "screenDimensions": {
+        "py/object": "TupleSetting.TupleSetting",
+        "name": "Screen dimensions",
+        "value": {
+            "py/tuple": [360, 270]
+        }
+    },
+    "threshold": {
+        "py/object": "NumberSetting.NumberSetting",
+        "name": "Threshold",
+        "value": 36.2,
+        "unit": "deg",
+        "step": 0.1,
+        "decimals": 1,
+        "minimum": 35,
+        "maximum": 40
+    },
+    "offset": {
+        "py/object": "NumberSetting.NumberSetting",
+        "name": "Offset",
+        "value": 0.5,
+        "unit": "deg",
+        "step": 0.1,
+        "decimals": 1,
+        "minimum": 0,
+        "maximum": 2
+    },
+    "epsilon": {
+        "py/object": "NumberSetting.NumberSetting",
+        "name": "Epsilon",
+        "value": 1.5,
+        "unit": "err",
+        "step": 0.1,
+        "decimals": 1,
+        "minimum": 0,
+        "maximum": 3
+    },
+    "measurementsPerMean": {
+        "py/object": "NumberSetting.NumberSetting",
+        "name": "Measurements per mean",
+        "value": 3,
+        "unit": "m/m",
+        "step": 1,
+        "decimals": 0,
+        "minimum": 1,
+        "maximum": 5
+    },
+    "brightness": {
+        "py/object": "NumberSetting.NumberSetting",
+        "name": "Brightness",
+        "value": 47,
+        "unit": "%",
+        "step": 1,
+        "decimals": 0,
+        "minimum": 0,
+        "maximum": 100
+    },
+    "alarmColor": {
+        "py/object": "ColorSetting.ColorSetting",
+        "name": "Alarm color",
+        "red": 241,
+        "green": 18,
+        "blue": 180
+    },
+    "okColor": {
+        "py/object": "ColorSetting.ColorSetting",
+        "name": "OK color",
+        "red": 5,
+        "green": 255,
+        "blue": 100
+    },
+    "idleColor": {
+        "py/object": "ColorSetting.ColorSetting",
+        "name": "Idle color",
+        "red": 0,
+        "green": 255,
+        "blue": 255
+    }
+}
