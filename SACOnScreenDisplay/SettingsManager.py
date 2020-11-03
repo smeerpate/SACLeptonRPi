@@ -1,12 +1,12 @@
 import os
 import jsonpickle
 
-from Settings import Settings
-from Setting import Setting
-from NumberSetting import NumberSetting
-from BooleanSetting import BooleanSetting
-from TupleSetting import TupleSetting
-from ColorSetting import ColorSetting
+from .Settings import Settings
+from .Setting import Setting
+from .NumberSetting import NumberSetting
+from .BooleanSetting import BooleanSetting
+from .TupleSetting import TupleSetting
+from .ColorSetting import ColorSetting
 
 class SettingsManager(object):
     """description of class"""

@@ -1,4 +1,4 @@
-from ButtonInput import ButtonInput
+from .ButtonInput import ButtonInput
 
 class Setting(object):
     """description of class"""

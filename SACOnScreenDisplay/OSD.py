@@ -1,10 +1,10 @@
 import cv2 as cv
 
-from MenuItem import MenuItem
-from Settings import Settings
-from InputManager import InputManager
-from SettingsManager import SettingsManager
-from ButtonInput import ButtonInput
+from .MenuItem import MenuItem
+from .Settings import Settings
+from .InputManager import InputManager
+from .SettingsManager import SettingsManager
+from .ButtonInput import ButtonInput
 
 class OSD(object):
     """description of class"""

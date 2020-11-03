@@ -1,4 +1,4 @@
-from Setting import Setting
+from .Setting import Setting
 
 class Settings(object):
     """description of class"""

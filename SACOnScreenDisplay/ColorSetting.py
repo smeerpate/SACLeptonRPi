@@ -1,5 +1,5 @@
-from Setting import Setting
-from ButtonInput import ButtonInput
+from .Setting import Setting
+from .ButtonInput import ButtonInput
 import cv2 as cv
 
 class ColorSetting(Setting):

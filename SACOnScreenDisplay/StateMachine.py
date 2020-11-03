@@ -2,8 +2,8 @@ import cv2 as cv
 import random
 import numpy as np
 from Lepton import Lepton
-from LedDriver import LedDriver
-from SettingsManager import SettingsManager
+from .LedDriver import LedDriver
+from .SettingsManager import SettingsManager
 
 class StateMachine(object):
     """description of class"""
