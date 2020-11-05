@@ -119,8 +119,8 @@ class StateMachine(object):
             thRoi = (thRect_x, thRect_y, thRect_xe, thRect_ye)
             print(str(thRoi))
             l.SetROI(thRoi)
-            values = l.GetROIValues()
-            print(str(values))
+            self.values = l.GetROIValues()
+            print(str(self.values))
             #writeLog(True)
             alreadyLogged = True
             self.state = "WAIT_FOR_NO_FACE"
@@ -128,7 +128,7 @@ class StateMachine(object):
         elif self.state == "WAIT_FOR_NO_FACE":
             if self.ff.getTcFaceContours(image) == True:
                 self.state = "WAIT_FOR_NO_FACE"
-                self.addText(image, str(values[1]) + " degC")
+                self.addText(image, str(self.values[1]) + " degC")
             else:
                 self.state = "IDLE"
 
