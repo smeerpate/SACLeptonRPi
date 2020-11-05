@@ -70,8 +70,11 @@ class StateMachine(object):
 
         currentTime = int(round(time.time()))
         alreadyLogged = False
+        
 
         if self.state == "IDLE":
+            color = settings.idleColor
+            self.ledDriver.output(color.red, color.green, color.blue, 100)
             if self.ff.getTcFaceContours(image) == True:
                 self.state = "WAIT_FOR_SIZE_OK"
             else:
@@ -131,7 +134,6 @@ class StateMachine(object):
                 temp = self.values[1]
                 print("Temp: " + str(temp) + "DegC")                
 
-                settings = self.settingsManager.getSettings()
                 color = None
 
                 if temp > settings.threshold.value:
