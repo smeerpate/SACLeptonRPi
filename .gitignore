@@ -133,3 +133,4 @@ dmypy.json
 .vs/slnx.sqlite
 *.sqlite
 *.sqlite
+*.sqlite

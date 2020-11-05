@@ -82,7 +82,7 @@ class StateMachine(object):
 
         elif self.state == "WAIT_FOR_SIZE_OK":
             if self.ff.getTcFaceContours(image) == True:
-                if checkFaceSize(image, self.ff.getTcFaceROIWidth(), self.faceSizeLowerLimit, self.faceSizeUpperLimit) == False:
+                if self.checkFaceSize(image, self.ff.getTcFaceROIWidth(), self.faceSizeLowerLimit, self.faceSizeUpperLimit) == False:
                     self.state = "WAIT_FOR_SIZE_OK"
                 else:
                     self.state = "RUN_FFC"
