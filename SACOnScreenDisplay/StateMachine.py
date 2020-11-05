@@ -35,23 +35,23 @@ class StateMachine(object):
         self.needsFFC = False
         self.maxFFCInterval = 20 # seconds.
 
-    def addText(self, image, sMessage):
+    def addText(self, image, sMessage, color):
         font = cv.FONT_HERSHEY_SIMPLEX
         org = (50, 50)
         fontScale = 1
-        color = (255, 0, 0)
         thickness = 2
         cv.putText(image, sMessage, org, font, fontScale, color, thickness, cv.LINE_AA)
 
     def checkFaceSize(self, image, currWidth, minWidth, maxWidth):
+        color = (255, 0, 0)
         if currWidth > maxWidth:
-            self.addText(image, 'Ga wat verder staan.')
+            self.addText(image, 'Ga wat verder staan.', color)
             return False
         elif currWidth < minWidth:
-            self.addText(image, 'Ga wat dichter staan.')
+            self.addText(image, 'Ga wat dichter staan.', color)
             return False
         else:
-            self.addText(image, 'Afstand OK.')
+            self.addText(image, 'Afstand OK.', color)
             return True
 
     def run(self, image):
@@ -77,7 +77,7 @@ class StateMachine(object):
             else:
                 self.state = "IDLE"
                 #print("face not present")
-                self.addText(image, 'Geen gezicht gevonden.')
+                self.addText(image, 'Geen gezicht gevonden.', (255, 0, 0))
 
         elif self.state == "WAIT_FOR_SIZE_OK":
             if self.ff.getTcFaceContours(image) == True:
@@ -128,7 +128,19 @@ class StateMachine(object):
         elif self.state == "WAIT_FOR_NO_FACE":
             if self.ff.getTcFaceContours(image) == True:
                 self.state = "WAIT_FOR_NO_FACE"
-                self.addText(image, str(self.values[1]) + " degC")
+                temp = self.values[1]
+                print("Temp: " + str(temp) + "DegC")                
+
+                settings = self.settingsManager.getSettings()
+                color = None
+
+                if temp > settings.threshold.value:
+                    color = settings.alarmColor                    
+                else:
+                    color = settings.okColor
+                txt = "Temp: " + str(temp) + " " + settings.threshold.unit
+                self.addText(image, txt, (color.red, color.green, color.blue))
+                self.ledDriver.output(color.red, color.green, color.blue, 100)
             else:
                 self.state = "IDLE"
 
