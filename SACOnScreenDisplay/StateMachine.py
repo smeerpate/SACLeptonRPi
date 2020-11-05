@@ -14,7 +14,6 @@ class StateMachine(object):
         self.state = "IDLE"
         self.settingsManager = settingsManager
         self.ledDriver = ledDriver
-        self.faceDet = cv.CascadeClassifier("/home/pi//SACLeptonRPi/haarcascade_frontalface_default.xml")
 
         self.values = (0, 0, 0, 0)
         self.ff = FaceFinder()
