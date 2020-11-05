@@ -1,6 +1,7 @@
 import cv2 as cv
 import random
 import numpy as np
+import time
 import LeptonCCI as l
 from .LedDriver import LedDriver
 from .SettingsManager import SettingsManager
