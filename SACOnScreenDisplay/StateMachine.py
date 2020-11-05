@@ -113,10 +113,10 @@ class StateMachine(object):
         elif self.state == "GET_TEMPERATURE":
             thRect_x, thRect_y, thRect_w, thRect_h = cv.boundingRect(self.ff.getThFaceContours())
             # x and y should not be negativeor lager then the FPA. Clip the values.
-            thRect_x = max(0, min(thRect_x, thSensorWidth-2))
-            thRect_y = max(0, min(thRect_y, thSensorHeight-2))
-            thRect_xe = max(0, min(thRect_x + thRect_w, thSensorWidth-1))
-            thRect_ye = max(0, min(thRect_y + thRect_w, thSensorHeight-1))
+            thRect_x = max(0, min(thRect_x, self.thSensorWidth-2))
+            thRect_y = max(0, min(thRect_y, self.thSensorHeight-2))
+            thRect_xe = max(0, min(thRect_x + thRect_w, self.thSensorWidth-1))
+            thRect_ye = max(0, min(thRect_y + thRect_w, self.thSensorHeight-1))
             thRoi = (thRect_x, thRect_y, thRect_xe, thRect_ye)
             print(str(thRoi))
             l.SetROI(thRoi)
