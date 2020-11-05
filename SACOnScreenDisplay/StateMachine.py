@@ -56,7 +56,7 @@ class StateMachine(object):
 
     def run(self, image):
 
-        print("Running state machine")
+        #print("Running state machine")
         
         settings = self.settingsManager.getSettings()
         # Steps:

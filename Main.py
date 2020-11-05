@@ -50,11 +50,6 @@ shm.attach()
 
 for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=True):
     frame = data.array
-
-    # if OSD is running -> OSD.Run()
-    # else
-    # if there was an input -> statemachine.stop() + OSD.Run()
-    # else -> statemachine.run()
     
     if osd.isRunning() or inputManager.hasInput():
         stateMachine.reset()
@@ -62,7 +57,6 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
     else:
         stateMachine.run(frame)
                 
-    #key = cv.waitKey(1) & 0xFF
     rawCapture.truncate(0)
     shm.write(cv.flip(frame, 0))
     
