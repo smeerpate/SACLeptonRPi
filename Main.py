@@ -60,7 +60,8 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
     rawCapture.truncate(0)
     frame = cv.flip(frame, 0)
     
-    shm.write(cv.rotate(frame, cv.ROTATE_90_COUNTERCLOCKWISE))
+    #shm.write(cv.rotate(frame, cv.ROTATE_90_COUNTERCLOCKWISE))
+    shm.write(frame)
     
     
 
