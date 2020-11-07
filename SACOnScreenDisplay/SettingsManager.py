@@ -29,13 +29,13 @@ class SettingsManager(object):
                 self.settings = self.__getDefaultSettings()
                 self.saveSettings(self.settings)
 
-        #self.__printSettings(settings)
+        self.__printSettings()
         return self.settings
 
-    def __printSettings(self, settings):
-        print("Treshold: " + str(settings.threshold.value) + str(settings.threshold.unit))
-        print("Offset: " + str(settings.offset.value))
-        print("MeasurementsPerMean: " + str(settings.measurementsPerMean.value))
+    def __printSettings(self):
+        print("Treshold: " + str(self.settings.threshold.value) + str(self.settings.threshold.unit))
+        print("Offset: " + str(self.settings.offset.value))
+        print("MeasurementsPerMean: " + str(self.settings.measurementsPerMean.value))
 
     def __getDefaultSettings(self):
         settings = Settings()
