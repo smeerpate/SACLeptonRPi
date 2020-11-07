@@ -44,6 +44,15 @@ def showInFrameBufferTopBottom(imageTop, imageBottom, fbSize):
     with open('/dev/fb0', 'rb+') as _fBuf:
         _fBuf.write(fbCont)
 
+def startDisplay():
+    call(["./SACDisplayMixer/OGLESSimpleImageWithIPC"])
+
+th1 = Thread(target=startDisplay)
+th1.start()
+time.sleep(1)
+
+key = ipc.ftok("/home/pi/SACLeptonRPi", ord('i'))
+shm = ipc.SharedMemory(key, 0, 0)
 
 try:
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):

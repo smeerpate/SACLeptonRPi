@@ -121,7 +121,8 @@ class StateMachine(object):
             self.state = "GET_TEMPERATURE"
 
         elif self.state == "GET_TEMPERATURE":
-            thRect_x, thRect_y, thRect_w, thRect_h = cv.boundingRect(self.ff.getThFaceContours())
+            thROI = self.ff.getThFaceContours()
+            thRect_x, thRect_y, thRect_w, thRect_h = cv.boundingRect(thROI)
             if settings.showFoundFace.value:
                     self.addRectangle(image, (thRect_x, thRect_y, thRect_w, thRect_h), (0, 255, 255))
             #if settings.showFoundFace.value:
