@@ -44,7 +44,7 @@ class SettingsManager(object):
         settings.showMeanTemperature = showMeanTemperature
 
         showFoundFace = BooleanSetting("Show found face")
-        showFoundFace.value = False
+        showFoundFace.value = True
         settings.showFoundFace = showFoundFace
 
         showWarmestZones = BooleanSetting("Show warmest zones")

@@ -146,3 +146,4 @@ dmypy.json
 .vs/SACLeptonRPi/v16/.suo
 .vs/slnx.sqlite
 *.sqlite
+*.sqlite
