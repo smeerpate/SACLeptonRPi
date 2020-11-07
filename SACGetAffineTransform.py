@@ -64,7 +64,9 @@ try:
         tcImage = frame.array
         #shm.write(cv2.flip(tcImage, 0))
         #time.sleep(3)
+        print("TC Shape: " + tcImage.shape)
         tcImage = cv2.cvtColor(tcImage, cv2.COLOR_BGR2GRAY)
+        print("TC Shape gray: " + tcImage.shape)
         shm.write(cv2.flip(tcImage, 0))
         time.sleep(1)
         raw,_ = l.capture()
@@ -73,7 +75,7 @@ try:
 #        thImage = cv2.resize(np.uint8(raw), singleOutputImageSize, interpolation = cv2.INTER_AREA)
 #        tcImage = cv2.resize(tcImage, singleOutputImageSize, interpolation = cv2.INTER_AREA)
         thImage = np.uint8(raw) # 80x60
-        shm.write(cv2.flip(thImage, 0))
+        #shm.write(cv2.flip(thImage, 0))
         tcImage = tcImage # 640x480
         # find spots in both images
         del tcCircles[:]
