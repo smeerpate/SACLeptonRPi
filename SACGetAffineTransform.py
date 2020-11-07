@@ -62,7 +62,6 @@ shm.attach()
 try:
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
         tcImage = frame.array
-        shm.write(tcImage)
         tcImage = cv2.cvtColor(tcImage, cv2.COLOR_BGR2GRAY)
         raw,_ = l.capture()
         cv2.normalize(raw, raw, 0, 65535, cv2.NORM_MINMAX)
@@ -102,9 +101,10 @@ try:
         tcImage = cv2.cvtColor(tcImage, cv2.COLOR_GRAY2BGR)
         thImage = cv2.cvtColor(thImage, cv2.COLOR_GRAY2BGR)
 
-        #print(tcImage.shape)
-        #print(thImage.shape)
+        print(tcImage.shape)
+        print(thImage.shape)
         shm.write(tcImage)
+        shm.write(thImage)
 
         #showInFrameBufferTopBottom(tcImage, thImage, (screenWidth, screenHeight))
  #       b,g,r = cv2.split(tcImage)
