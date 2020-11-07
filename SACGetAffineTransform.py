@@ -73,6 +73,7 @@ try:
 #        thImage = cv2.resize(np.uint8(raw), singleOutputImageSize, interpolation = cv2.INTER_AREA)
 #        tcImage = cv2.resize(tcImage, singleOutputImageSize, interpolation = cv2.INTER_AREA)
         thImage = np.uint8(raw) # 80x60
+        shm.write(cv2.flip(thImage, 0))
         tcImage = tcImage # 640x480
         # find spots in both images
         del tcCircles[:]
