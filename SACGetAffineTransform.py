@@ -57,6 +57,7 @@ time.sleep(1)
 
 key = ipc.ftok("/home/pi/SACLeptonRPi", ord('i'))
 shm = ipc.SharedMemory(key, 0, 0)
+shm.attach()
 
 try:
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
@@ -123,6 +124,7 @@ try:
 
 except KeyboardInterrupt:
     camera.close()
+    shm.detach()
     print(tcCircles)
     print(thCircles)
     tri1 = np.array([np.float32(tcCircles[0]),np.float32(tcCircles[1]),np.float32(tcCircles[2])])
