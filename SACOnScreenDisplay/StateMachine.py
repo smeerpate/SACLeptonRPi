@@ -84,7 +84,7 @@ class StateMachine(object):
                 self.state = "WAIT_FOR_SIZE_OK"
                 if settings.showFoundFace.value:
                     print("Showing found face")
-                    self.addRectangle(image, ff.tcRoi)
+                    self.addRectangle(image, self.ff.tcRoi)
                     time.sleep(3)
             else:
                 self.state = "IDLE"
