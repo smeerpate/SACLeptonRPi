@@ -96,7 +96,9 @@ try:
         tcImage = cv2.cvtColor(tcImage, cv2.COLOR_GRAY2BGR)
         thImage = cv2.cvtColor(thImage, cv2.COLOR_GRAY2BGR)
 
-        showInFrameBufferTopBottom(tcImage, thImage, (screenWidth, screenHeight))
+        shm.write(thImage)
+
+        #showInFrameBufferTopBottom(tcImage, thImage, (screenWidth, screenHeight))
  #       b,g,r = cv2.split(tcImage)
  #       fbImageTop = cv2.merge((b,g,r,alpha))
  #       fbCanvas[0:singleOutputImageSize[1], 0:singleOutputImageSize[0]] = fbImageTop
