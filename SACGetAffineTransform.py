@@ -70,7 +70,7 @@ try:
         print("TC Shape gray: ")
         print(tcImage.shape)
         shm.write(cv2.flip(tcImage, 0))
-        time.sleep(1)
+        #time.sleep(1)
         raw,_ = l.capture()
         cv2.normalize(raw, raw, 0, 65535, cv2.NORM_MINMAX)
         np.right_shift(raw, 8, raw)
