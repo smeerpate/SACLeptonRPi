@@ -118,6 +118,7 @@ class StateMachine(object):
                 startPoint = (thRect_x, thRect_y)
                 endPoint = (thRect_x + thRect_w, thRect_y + thRect_h)
                 cv.rectangle(image, startPoint, endPoint, (255, 255, 0), 1) 
+                time.sleep(3)
             # x and y should not be negativeor lager then the FPA. Clip the values.
             thRect_x = max(0, min(thRect_x, self.thSensorWidth-2))
             thRect_y = max(0, min(thRect_y, self.thSensorHeight-2))
