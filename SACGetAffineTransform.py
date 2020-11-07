@@ -64,9 +64,11 @@ try:
         tcImage = frame.array
         #shm.write(cv2.flip(tcImage, 0))
         #time.sleep(3)
-        print("TC Shape: " + tcImage.shape)
+        print("TC Shape: ")
+        print(tcImage.shape)
         tcImage = cv2.cvtColor(tcImage, cv2.COLOR_BGR2GRAY)
-        print("TC Shape gray: " + tcImage.shape)
+        print("TC Shape gray: ")
+        print(tcImage.shape)
         shm.write(cv2.flip(tcImage, 0))
         time.sleep(1)
         raw,_ = l.capture()
