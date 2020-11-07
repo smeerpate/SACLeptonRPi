@@ -102,7 +102,7 @@ try:
 
         print(tcImage.shape)
         print(thImage.shape)
-        shm.write(thImage)
+        shm.write(tcImage)
 
         #showInFrameBufferTopBottom(tcImage, thImage, (screenWidth, screenHeight))
  #       b,g,r = cv2.split(tcImage)
