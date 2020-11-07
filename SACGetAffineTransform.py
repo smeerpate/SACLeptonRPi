@@ -31,7 +31,7 @@ thCircles = []
 
 # fbSize is (width,height)
 def showInFrameBufferTopBottom(imageTop, imageBottom, fbSize):
-    imSize = (fbSize[0], fbSize[1]/2)
+    imSize = (int(fbSize[0]), int(fbSize[1]/2))
     _a = np.ones((int(imSize[1]),int(imSize[0])), dtype=np.uint8)*255
     _imageTop = cv2.resize(imageTop, imSize, interpolation = cv2.INTER_AREA)
     _imageBottom = cv2.resize(imageBottom, imSize, interpolation = cv2.INTER_AREA)
