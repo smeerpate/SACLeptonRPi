@@ -62,7 +62,7 @@ shm.attach()
 try:
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
         tcImage = frame.array
-        shm.write(cv2.flip(tcImage, 0))
+        #shm.write(cv2.flip(tcImage, 0))
         time.sleep(3)
         tcImage = cv2.cvtColor(tcImage, cv2.COLOR_BGR2GRAY)
         shm.write(cv2.flip(tcImage, 0))
