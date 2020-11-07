@@ -45,8 +45,9 @@ def showInFrameBufferTopBottom(imageTop, imageBottom, fbSize):
     _imageBottom = cv2.merge((_b,_g,_r,_a))
     fbCont[(fbSize[1]/2):((fbSize[1]/2)+imSize[1]), 0:imSize[0]] = _imageBottom
     # Write to frame buffer
-    with open('/dev/fb0', 'rb+') as _fBuf:
-        _fBuf.write(fbCont)
+    #with open('/dev/fb0', 'rb+') as _fBuf:
+    #    _fBuf.write(fbCont)
+    shm.write(cv2.flip(fbCont, 0))
 
 def startDisplay():
     call(["./SACDisplayMixer/OGLESSimpleImageWithIPC"])
@@ -61,16 +62,8 @@ shm.attach()
 
 try:
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-        tcImage = frame.array
-        print("TC Shape: ")
-        print(tcImage.shape)
-        shm.write(cv2.flip(tcImage, 0))
-        time.sleep(1)        
+        tcImage = frame.array    
         tcImage = cv2.cvtColor(tcImage, cv2.COLOR_BGR2GRAY)
-        print("TC Shape gray: ")
-        print(tcImage.shape)
-        shm.write(cv2.flip(tcImage, 0))
-        time.sleep(1)
         raw,_ = l.capture()
         cv2.normalize(raw, raw, 0, 65535, cv2.NORM_MINMAX)
         np.right_shift(raw, 8, raw)
@@ -115,7 +108,7 @@ try:
         #shm.write(cv2.flip(tcImage, 0))
         #shm.write(cv2.flip(thImage, 0))
 
-        #showInFrameBufferTopBottom(tcImage, thImage, (screenWidth, screenHeight))
+        showInFrameBufferTopBottom(tcImage, thImage, (screenWidth, screenHeight))
  #       b,g,r = cv2.split(tcImage)
  #       fbImageTop = cv2.merge((b,g,r,alpha))
  #       fbCanvas[0:singleOutputImageSize[1], 0:singleOutputImageSize[0]] = fbImageTop
