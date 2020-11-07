@@ -79,7 +79,6 @@ class StateMachine(object):
                 self.state = "WAIT_FOR_SIZE_OK"
             else:
                 self.state = "IDLE"
-                #print("face not present")
                 self.addText(image, 'Geen gezicht gevonden.', (255, 0, 0))
 
         elif self.state == "WAIT_FOR_SIZE_OK":
@@ -114,6 +113,8 @@ class StateMachine(object):
 
         elif self.state == "GET_TEMPERATURE":
             thRect_x, thRect_y, thRect_w, thRect_h = cv.boundingRect(self.ff.getThFaceContours())
+            if settings.showFoundFace.value:
+                print("Showing found face")
             # x and y should not be negativeor lager then the FPA. Clip the values.
             thRect_x = max(0, min(thRect_x, self.thSensorWidth-2))
             thRect_y = max(0, min(thRect_y, self.thSensorHeight-2))
