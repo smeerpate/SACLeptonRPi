@@ -42,10 +42,10 @@ class StateMachine(object):
         thickness = 2
         cv.putText(image, sMessage, org, font, fontScale, color, thickness, cv.LINE_AA)
 
-    def addRectangle(self, image, roi):
+    def addRectangle(self, image, roi, color):
         startPoint = (roi[0], roi[1])
         endPoint = (roi[0] + roi[2], roi[1] + roi[3])
-        cv.rectangle(image, startPoint, endPoint, (255, 255, 0), 1)
+        cv.rectangle(image, startPoint, endPoint, color, 1)
 
     def checkFaceSize(self, image, currWidth, minWidth, maxWidth):
         color = (255, 0, 0)
@@ -83,7 +83,7 @@ class StateMachine(object):
             if self.ff.getTcFaceContours(image) == True:
                 self.state = "WAIT_FOR_SIZE_OK"
                 if settings.showFoundFace.value:
-                    self.addRectangle(image, self.ff.tcROI)
+                    self.addRectangle(image, self.ff.tcROI, (255, 255, 0))
             else:
                 self.state = "IDLE"
                 self.addText(image, 'Geen gezicht gevonden.', (255, 0, 0))
@@ -95,7 +95,7 @@ class StateMachine(object):
                 else:
                     self.state = "RUN_FFC"
             if settings.showFoundFace.value:
-                    self.addRectangle(image, self.ff.tcROI)
+                    self.addRectangle(image, self.ff.tcROI, (255, 255, 0))
             else:
                 self.state = "IDLE"
 
@@ -122,6 +122,8 @@ class StateMachine(object):
 
         elif self.state == "GET_TEMPERATURE":
             thRect_x, thRect_y, thRect_w, thRect_h = cv.boundingRect(self.ff.getThFaceContours())
+            if settings.showFoundFace.value:
+                    self.addRectangle(image, (thRect_x, thRect_y, thRect_w, thRect_h), (0, 255, 255))
             #if settings.showFoundFace.value:
             #    print("Showing found face")
             #    startPoint = (thRect_x, thRect_y)
