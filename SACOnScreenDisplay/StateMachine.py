@@ -42,6 +42,11 @@ class StateMachine(object):
         thickness = 2
         cv.putText(image, sMessage, org, font, fontScale, color, thickness, cv.LINE_AA)
 
+    def addRectangle(self, image, roi):
+        startPoint = (roi[0], roi[1])
+        endPoint = (roi[0] + roi[2], roi[1] + roi[3])
+        cv.rectangle(image, startPoint, endPoint, (255, 255, 0), 1)
+
     def checkFaceSize(self, image, currWidth, minWidth, maxWidth):
         color = (255, 0, 0)
         if currWidth > maxWidth:
@@ -77,6 +82,10 @@ class StateMachine(object):
             self.ledDriver.output(color.red, color.green, color.blue, 100)
             if self.ff.getTcFaceContours(image) == True:
                 self.state = "WAIT_FOR_SIZE_OK"
+                if settings.showFoundFace.value:
+                    print("Showing found face")
+                    self.addRectangle(image, ff.tcRoi)
+                    time.sleep(3)
             else:
                 self.state = "IDLE"
                 self.addText(image, 'Geen gezicht gevonden.', (255, 0, 0))
@@ -113,12 +122,12 @@ class StateMachine(object):
 
         elif self.state == "GET_TEMPERATURE":
             thRect_x, thRect_y, thRect_w, thRect_h = cv.boundingRect(self.ff.getThFaceContours())
-            if settings.showFoundFace.value:
-                print("Showing found face")
-                startPoint = (thRect_x, thRect_y)
-                endPoint = (thRect_x + thRect_w, thRect_y + thRect_h)
-                cv.rectangle(image, startPoint, endPoint, (255, 255, 0), 1) 
-                time.sleep(3)
+            #if settings.showFoundFace.value:
+            #    print("Showing found face")
+            #    startPoint = (thRect_x, thRect_y)
+            #    endPoint = (thRect_x + thRect_w, thRect_y + thRect_h)
+            #    cv.rectangle(image, startPoint, endPoint, (255, 255, 0), 1) 
+            #    time.sleep(3)
             # x and y should not be negativeor lager then the FPA. Clip the values.
             thRect_x = max(0, min(thRect_x, self.thSensorWidth-2))
             thRect_y = max(0, min(thRect_y, self.thSensorHeight-2))
