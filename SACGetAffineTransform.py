@@ -19,7 +19,7 @@ time.sleep(0.1)
 l = Lepton()
 
 singleOutputImageSize = (int((screenHeight/2)*aspectRatio), screenHeight/2) # (cols,rows) or (width,height) or (x,y)
-print("x,y = " + singleOutputImageSize[0] + " , " + singleOutputImageSize[1])
+print("x,y = " + str(singleOutputImageSize[0]) + " , " + str(singleOutputImageSize[1]))
 alpha = np.ones((singleOutputImageSize[1],singleOutputImageSize[0]), dtype)*255
 fbCanvas = np.zeros((screenHeight, screenWidth, 4), dtype=np.uint8)
 
