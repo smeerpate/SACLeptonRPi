@@ -20,7 +20,7 @@ class SettingsManager(object):
             return self.settings
         else:
             if os.path.isfile(self.settingsFile):
-                print("Reading settings from file")
+                print("Reading settings from file: " + self.settingsFile)
                 f = open(self.settingsFile, "r")
                 self.settings = jsonpickle.decode(f.read())
                 f.close()
