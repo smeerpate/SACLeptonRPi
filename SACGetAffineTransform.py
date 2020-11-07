@@ -61,6 +61,7 @@ shm = ipc.SharedMemory(key, 0, 0)
 try:
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
         tcImage = frame.array
+        shm.write(tcImage)
         tcImage = cv2.cvtColor(tcImage, cv2.COLOR_BGR2GRAY)
         raw,_ = l.capture()
         cv2.normalize(raw, raw, 0, 65535, cv2.NORM_MINMAX)
