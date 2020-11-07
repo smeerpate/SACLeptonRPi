@@ -45,9 +45,9 @@ def showInFrameBufferTopBottom(imageTop, imageBottom, fbSize):
     _imageBottom = cv2.merge((_b,_g,_r,_a))
     fbCont[(fbSize[1]/2):((fbSize[1]/2)+imSize[1]), 0:imSize[0]] = _imageBottom
     # Write to frame buffer
-    #with open('/dev/fb0', 'rb+') as _fBuf:
-    #    _fBuf.write(fbCont)
-    shm.write(cv2.flip(fbCont, 0))
+    with open('/dev/fb0', 'rb+') as _fBuf:
+        _fBuf.write(fbCont)
+    #shm.write(cv2.flip(fbCont, 0))
 
 def startDisplay():
     call(["./SACDisplayMixer/OGLESSimpleImageWithIPC"])
