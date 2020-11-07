@@ -85,7 +85,6 @@ class StateMachine(object):
                 if settings.showFoundFace.value:
                     print("Showing found face")
                     self.addRectangle(image, self.ff.tcROI)
-                    time.sleep(3)
             else:
                 self.state = "IDLE"
                 self.addText(image, 'Geen gezicht gevonden.', (255, 0, 0))
