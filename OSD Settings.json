@@ -96,7 +96,7 @@
     "idleColor": {
         "py/object": "ColorSetting.ColorSetting",
         "name": "Idle color",
-        "red": 0,
+        "red": 255,
         "green": 255,
         "blue": 255
     }
