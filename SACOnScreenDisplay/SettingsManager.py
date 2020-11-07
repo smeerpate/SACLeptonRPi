@@ -117,8 +117,8 @@ class SettingsManager(object):
         settings.okColor = okColor
 
         idleColor = ColorSetting("Idle color")
-        idleColor.red = 0
-        idleColor.green = 0
+        idleColor.red = 255
+        idleColor.green = 255
         idleColor.blue = 255
         settings.idleColor = idleColor
 
