@@ -82,9 +82,9 @@
     "alarmColor": {
         "py/object": "ColorSetting.ColorSetting",
         "name": "Alarm color",
-        "red": 241,
-        "green": 18,
-        "blue": 180
+        "red": 255,
+        "green": 0,
+        "blue": 0
     },
     "okColor": {
         "py/object": "ColorSetting.ColorSetting",
