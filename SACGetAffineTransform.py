@@ -110,8 +110,8 @@ try:
         tcImage = cv2.cvtColor(tcImage, cv2.COLOR_GRAY2BGR)
         thImage = cv2.cvtColor(thImage, cv2.COLOR_GRAY2BGR)
 
-        print(tcImage.shape)
-        print(thImage.shape)
+        #print(tcImage.shape)
+        #print(thImage.shape)
         #shm.write(cv2.flip(tcImage, 0))
         #shm.write(cv2.flip(thImage, 0))
 
