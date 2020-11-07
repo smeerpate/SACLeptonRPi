@@ -100,7 +100,7 @@ try:
         tcImage = cv2.cvtColor(tcImage, cv2.COLOR_GRAY2BGR)
         thImage = cv2.cvtColor(thImage, cv2.COLOR_GRAY2BGR)
 
-        print("size: " + thImage.size)
+        print("size: " + str(thImage.size))
         shm.write(thImage)
 
         #showInFrameBufferTopBottom(tcImage, thImage, (screenWidth, screenHeight))
