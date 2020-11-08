@@ -58,12 +58,13 @@ def combine_two_color_images(image1, image2, shm):
 def getAffineTransformation():
     print(tcCircles)
     print(thCircles)
-    tri1 = np.array([np.float32(tcCircles[0]),np.float32(tcCircles[1]),np.float32(tcCircles[2])])
-    tri2 = np.array([np.float32(thCircles[0]),np.float32(thCircles[1]),np.float32(thCircles[2])])
-    afTrans = cv2.getAffineTransform(tri1,tri2)
-    print(afTrans)
-    afTrans = cv2.getAffineTransform(tri2,tri1)
-    print(afTrans)
+    if len(tcCircles) == 3 and len(thCircles) == 3:
+        tri1 = np.array([np.float32(tcCircles[0]),np.float32(tcCircles[1]),np.float32(tcCircles[2])])
+        tri2 = np.array([np.float32(thCircles[0]),np.float32(thCircles[1]),np.float32(thCircles[2])])
+        afTrans = cv2.getAffineTransform(tri1,tri2)
+        print(afTrans)
+        afTrans = cv2.getAffineTransform(tri2,tri1)
+        print(afTrans)
 
 def startDisplay():
     call(["./SACDisplayMixer/OGLESSimpleImageWithIPC"])
