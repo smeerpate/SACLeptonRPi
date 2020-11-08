@@ -140,7 +140,7 @@ class StateMachine(object):
             thRect_ye = max(0, min(thRect_y + thRect_w, self.thSensorHeight-1))
             thRoi = (thRect_x, thRect_y, thRect_xe, thRect_ye)
             raw,_ = self.lepton.capture()
-            cv.normalize(raw, raw, 0, 65535, cv2.NORM_MINMAX)
+            cv.normalize(raw, raw, 0, 65535, cv.NORM_MINMAX)
             np.right_shift(raw, 8, raw)
             thImage = np.uint8(raw) # 80x60
 
