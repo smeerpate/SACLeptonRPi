@@ -56,7 +56,8 @@ def combine_two_color_images(image1, image2, shm):
     print(image2.shape)
 
     foreground, background = image1.copy(), image2.copy()
-
+    shm.write(cv2.add(foreground, background))
+    return
     foreground_height = foreground.shape[0]
     foreground_width = foreground.shape[1]
     alpha =0.5
