@@ -3,6 +3,7 @@ import random
 import numpy as np
 import time
 import LeptonCCI as l
+from Lepton import Lepton
 from .LedDriver import LedDriver
 from .SettingsManager import SettingsManager
 from SACFaceFinder import FaceFinder
@@ -14,6 +15,7 @@ class StateMachine(object):
         self.state = "IDLE"
         self.settingsManager = settingsManager
         self.ledDriver = ledDriver
+        self.lepton = Lepton()
 
         self.values = (0, 0, 0, 0)
         self.ff = FaceFinder()
@@ -137,9 +139,11 @@ class StateMachine(object):
             thRect_xe = max(0, min(thRect_x + thRect_w, self.thSensorWidth-1))
             thRect_ye = max(0, min(thRect_y + thRect_w, self.thSensorHeight-1))
             thRoi = (thRect_x, thRect_y, thRect_xe, thRect_ye)
+            print("TH ROI to set:")
             print(str(thRoi))
             l.SetROI(thRoi)
             self.values = l.GetROIValues()
+            print("TH ROI from Lepton:")
             print(str(self.values))
             #writeLog(True)
             alreadyLogged = True
