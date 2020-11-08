@@ -50,7 +50,7 @@ shm.attach()
 
 for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=True):
     frame = data.array
-    frame.setflags(write=1)
+    frame = frame.copy()
     if osd.isRunning() or inputManager.hasInput():
         stateMachine.reset()
         osd.run(frame)        
