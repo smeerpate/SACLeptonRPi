@@ -50,6 +50,10 @@ def showInFrameBufferTopBottom(imageTop, imageBottom, fbSize):
     #shm.write(cv2.flip(fbCont, 0))
 
 def combine_two_color_images(image1, image2, shm):
+    print("shape1")
+    print(image1.shape)
+    print("shape2")
+    print(image2.shape)
 
     foreground, background = image1.copy(), image2.copy()
 
