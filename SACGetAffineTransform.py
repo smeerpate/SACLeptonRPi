@@ -58,7 +58,7 @@ def combine_two_color_images(image1, image2, shm):
     alpha =0.5
 
     # do composite on the upper-left corner of background image.
-    blended_portion = cv.addWeighted(foreground,
+    blended_portion = cv2.addWeighted(foreground,
                 alpha,
                 background[:foreground_height,:foreground_width,:],
                 1 - alpha,
