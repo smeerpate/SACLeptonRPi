@@ -94,8 +94,7 @@ try:
         thImage = np.uint8(raw) # 80x60
         cv2.imwrite('/home/pi/SACLeptonRPi/thermal.jpg', thImage)
         #shm.write(cv2.flip(thImage, 0))
-        tcImage = tcImage # 640x480
-        combine_two_color_images(tcImage, thImage, shm)
+        tcImage = tcImage # 640x480        
         # find spots in both images
         del tcCircles[:]
         del thCircles[:]
@@ -126,7 +125,7 @@ try:
 
         tcImage = cv2.cvtColor(tcImage, cv2.COLOR_GRAY2BGR)
         thImage = cv2.cvtColor(thImage, cv2.COLOR_GRAY2BGR)
-
+        combine_two_color_images(tcImage, thImage, shm)
         #print(tcImage.shape)
         #print(thImage.shape)
         #shm.write(cv2.flip(tcImage, 0))
