@@ -125,8 +125,6 @@ class StateMachine(object):
         elif self.state == "GET_TEMPERATURE":
             thROI = self.ff.getThFaceContours()
             thRect_x, thRect_y, thRect_w, thRect_h = cv.boundingRect(thROI)
-            if settings.showFoundFace.value:
-                    self.addRectangle(image, (thRect_x, thRect_y, thRect_w, thRect_h), (0, 255, 255))
             # x and y should not be negativeor lager then the FPA. Clip the values.
             thRect_x = max(0, min(thRect_x, self.thSensorWidth-2))
             thRect_y = max(0, min(thRect_y, self.thSensorHeight-2))
@@ -134,15 +132,14 @@ class StateMachine(object):
             thRect_ye = max(0, min(thRect_y + thRect_w, self.thSensorHeight-1))
             thRoi = (thRect_x, thRect_y, thRect_xe, thRect_ye)
 
-
-            raw,_ = self.lepton.capture()
-            cv.normalize(raw, raw, 0, 65535, cv.NORM_MINMAX)
-            np.right_shift(raw, 8, raw)
-            thImage = np.uint8(raw) # 80x60
-            self.addRectangle(thImage, thRoi, (255, 255, 255))
-            x_offset=y_offset=0
-            image[y_offset:y_offset+thImage.shape[0], x_offset:x_offset+thImage.shape[1]] = thImage
-
+            if settings.showFoundFace.value:
+                raw,_ = self.lepton.capture()
+                cv.normalize(raw, raw, 0, 65535, cv.NORM_MINMAX)
+                np.right_shift(raw, 8, raw)
+                thImage = np.uint8(raw) # 80x60
+                self.addRectangle(thImage, thRoi, (255, 255, 255))
+                x_offset=y_offset=0
+                image[y_offset:y_offset+thImage.shape[0], x_offset:x_offset+thImage.shape[1]] = thImage
 
             print("TH ROI to set:")
             print(str(thRoi))
