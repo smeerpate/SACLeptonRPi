@@ -49,6 +49,24 @@ def showInFrameBufferTopBottom(imageTop, imageBottom, fbSize):
         _fBuf.write(fbCont)
     #shm.write(cv2.flip(fbCont, 0))
 
+def combine_two_color_images(image1, image2, shm):
+
+    foreground, background = image1.copy(), image2.copy()
+
+    foreground_height = foreground.shape[0]
+    foreground_width = foreground.shape[1]
+    alpha =0.5
+
+    # do composite on the upper-left corner of background image.
+    blended_portion = cv.addWeighted(foreground,
+                alpha,
+                background[:foreground_height,:foreground_width,:],
+                1 - alpha,
+                0,
+                background)
+    background[:foreground_height,:foreground_width,:] = blended_portion
+    shm.write(cv2.flip(background, 0))
+
 def startDisplay():
     call(["./SACDisplayMixer/OGLESSimpleImageWithIPC"])
 
@@ -73,6 +91,7 @@ try:
         cv2.imwrite('/home/pi/SACLeptonRPi/thermal.jpg', thImage)
         #shm.write(cv2.flip(thImage, 0))
         tcImage = tcImage # 640x480
+        combine_two_color_images(tcImage, thImage, shm)
         # find spots in both images
         del tcCircles[:]
         del thCircles[:]
@@ -109,7 +128,7 @@ try:
         #shm.write(cv2.flip(tcImage, 0))
         #shm.write(cv2.flip(thImage, 0))
 
-        showInFrameBufferTopBottom(tcImage, thImage, (screenWidth, screenHeight))
+        #showInFrameBufferTopBottom(tcImage, thImage, (screenWidth, screenHeight))
  #       b,g,r = cv2.split(tcImage)
  #       fbImageTop = cv2.merge((b,g,r,alpha))
  #       fbCanvas[0:singleOutputImageSize[1], 0:singleOutputImageSize[0]] = fbImageTop
