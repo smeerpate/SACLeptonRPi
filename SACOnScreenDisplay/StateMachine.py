@@ -139,6 +139,16 @@ class StateMachine(object):
             thRect_xe = max(0, min(thRect_x + thRect_w, self.thSensorWidth-1))
             thRect_ye = max(0, min(thRect_y + thRect_w, self.thSensorHeight-1))
             thRoi = (thRect_x, thRect_y, thRect_xe, thRect_ye)
+            raw,_ = self.lepton.capture()
+            cv.normalize(raw, raw, 0, 65535, cv2.NORM_MINMAX)
+            np.right_shift(raw, 8, raw)
+            thImage = np.uint8(raw) # 80x60
+
+
+            x_offset=y_offset=0
+            image[y_offset:y_offset+thImage.shape[0], x_offset:x_offset+thImage.shape[1]] = thImage
+
+
             print("TH ROI to set:")
             print(str(thRoi))
             l.SetROI(thRoi)
