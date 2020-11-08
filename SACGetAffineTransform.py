@@ -58,21 +58,7 @@ def combine_two_color_images(image1, image2, shm):
     foreground, background = image1.copy(), image2.copy()
     x_offset=y_offset=0
     foreground[y_offset:y_offset+background.shape[0], x_offset:x_offset+background.shape[1]] = background
-    shm.write(foreground)
-    return
-    foreground_height = foreground.shape[0]
-    foreground_width = foreground.shape[1]
-    alpha =0.5
-
-    # do composite on the upper-left corner of background image.
-    blended_portion = cv2.addWeighted(foreground,
-                alpha,
-                background[:foreground_height,:foreground_width,:],
-                1 - alpha,
-                0,
-                background)
-    background[:foreground_height,:foreground_width,:] = blended_portion
-    shm.write(cv2.flip(background, 0))
+    shm.write(cv2.flip(foreground, 0))
 
 def startDisplay():
     call(["./SACDisplayMixer/OGLESSimpleImageWithIPC"])
