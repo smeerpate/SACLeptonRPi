@@ -50,15 +50,20 @@ def showInFrameBufferTopBottom(imageTop, imageBottom, fbSize):
     #shm.write(cv2.flip(fbCont, 0))
 
 def combine_two_color_images(image1, image2, shm):
-    print("shape1")
-    print(image1.shape)
-    print("shape2")
-    print(image2.shape)
-
     foreground, background = image1.copy(), image2.copy()
     x_offset=y_offset=0
     foreground[y_offset:y_offset+background.shape[0], x_offset:x_offset+background.shape[1]] = background
     shm.write(cv2.flip(foreground, 0))
+
+def getAffineTransformation():
+    print(tcCircles)
+    print(thCircles)
+    tri1 = np.array([np.float32(tcCircles[0]),np.float32(tcCircles[1]),np.float32(tcCircles[2])])
+    tri2 = np.array([np.float32(thCircles[0]),np.float32(thCircles[1]),np.float32(thCircles[2])])
+    afTrans = cv2.getAffineTransform(tri1,tri2)
+    print(afTrans)
+    afTrans = cv2.getAffineTransform(tri2,tri1)
+    print(afTrans)
 
 def startDisplay():
     call(["./SACDisplayMixer/OGLESSimpleImageWithIPC"])
@@ -113,10 +118,11 @@ try:
             cv2.putText(thImage, "x:{},y:{}".format(x,y), (int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 2)
             thCircles.append((x,y))
 
-
+        getAffineTransformation()
         tcImage = cv2.cvtColor(tcImage, cv2.COLOR_GRAY2BGR)
         thImage = cv2.cvtColor(thImage, cv2.COLOR_GRAY2BGR)
         combine_two_color_images(tcImage, thImage, shm)
+
         #print(tcImage.shape)
         #print(thImage.shape)
         #shm.write(cv2.flip(tcImage, 0))
@@ -136,16 +142,8 @@ try:
 
         rawCapture.truncate()
         rawCapture.seek(0)
-        time.sleep(3)
 
 except KeyboardInterrupt:
     camera.close()
     shm.detach()
-    print(tcCircles)
-    print(thCircles)
-    tri1 = np.array([np.float32(tcCircles[0]),np.float32(tcCircles[1]),np.float32(tcCircles[2])])
-    tri2 = np.array([np.float32(thCircles[0]),np.float32(thCircles[1]),np.float32(thCircles[2])])
-    afTrans = cv2.getAffineTransform(tri1,tri2)
-    print(afTrans)
-    afTrans = cv2.getAffineTransform(tri2,tri1)
-    print(afTrans)
+    getAffineTransformation()
