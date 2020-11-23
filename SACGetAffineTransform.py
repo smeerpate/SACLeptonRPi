@@ -61,6 +61,7 @@ def getAffineTransformation():
     print(tcCircles)
     print(thCircles)
     if len(tcCircles) == 3 and len(thCircles) == 3:
+        print("Calculating affine...");
         tri1 = np.array([np.float32(tcCircles[0]),np.float32(tcCircles[1]),np.float32(tcCircles[2])])
         tri2 = np.array([np.float32(thCircles[0]),np.float32(thCircles[1]),np.float32(thCircles[2])])
         afTrans = cv2.getAffineTransform(tri1,tri2)
