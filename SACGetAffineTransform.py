@@ -94,7 +94,7 @@ try:
         del tcCircles[:]
         del thCircles[:]
         # true color:
-        thresh = cv2.threshold(tcImage, 60, 255, cv2.THRESH_BINARY_INV)[1]
+        thresh = cv2.threshold(tcImage, 40, 255, cv2.THRESH_BINARY_INV)[1]
         cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         if len(cnts)==2:
             cnts = cnts[0]
