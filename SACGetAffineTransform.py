@@ -104,6 +104,7 @@ try:
         for (i, c) in enumerate(cnts):
             ((x, y), _) = cv2.minEnclosingCircle(c)
             #cv2.putText(tcImage, "x:{},y:{}".format(x,y), (int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 2)
+            cv2.putText(tcImage, "{}".format(i), (int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1)
             tcCircles.append((x,y))
 
         # thermal:
