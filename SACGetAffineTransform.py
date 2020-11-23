@@ -116,7 +116,8 @@ try:
         print("Found " + str(len(cnts)) + " circles on Lepton Camera")
         for (i, c) in enumerate(cnts):
             ((x, y), _) = cv2.minEnclosingCircle(c)
-            cv2.putText(thImage, "x:{},y:{}".format(x,y), (int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 2)
+            #cv2.putText(thImage, "x:{},y:{}".format(x,y), (int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 2)
+            cv2.putText(thImage, "x{}".format(i), (int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1)
             thCircles.append((x,y))
 
         getAffineTransformation()
