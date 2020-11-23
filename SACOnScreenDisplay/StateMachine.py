@@ -25,7 +25,10 @@ class StateMachine(object):
         self.faceSizeUpperLimit = 280
         self.faceSizeLowerLimit = 220
         #self.transformMatrix = np.array([[1.5689e-1, 8.6462e-3, -1.1660e+1],[1.0613e-4, 1.6609e-1, -1.4066e+1]])
-        self.transformMatrix = np.array([[1.70100612e-1, 4.91086300e-4, -2.62737066e+1],[5.51191729e-3, 1.75597084e-1, -2.09686199e+1]])
+        #Affine 1
+        #self.transformMatrix = np.array([[1.70100612e-1, 4.91086300e-4, -2.62737066e+1],[5.51191729e-3, 1.75597084e-1, -2.09686199e+1]])
+        #Affine 2
+        self.transformMatrix = np.array([[5.87940641e+0, -1.64427328e-2, 1.54129017e+2],[-1.84552050e-1, 5.69537151e+0, 1.14575214e+2]])
         self.ff.setTransformMatrix(self.transformMatrix)
 
         # Globals for logging
