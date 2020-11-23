@@ -1,8 +1,9 @@
 {
   "ExpandedNodes": [
     "",
+    "\\SACOnScreenDisplay",
     "\\SACTempMeasure"
   ],
-  "SelectedNode": "\\README.md",
+  "SelectedNode": "\\SACOnScreenDisplay\\StateMachine.py",
   "PreviewInSolutionExplorer": false
 }
