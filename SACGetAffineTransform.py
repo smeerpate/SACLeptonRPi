@@ -53,6 +53,8 @@ def combine_two_color_images(image1, image2, shm):
     foreground, background = image1.copy(), image2.copy()
     x_offset=y_offset=0
     foreground[y_offset:y_offset+background.shape[0], x_offset:x_offset+background.shape[1]] = background
+    img = cv2.flip(foreground, 0);
+    cv2.imwrite('/home/pi/SACLeptonRPi/Calibration.jpg', thImage)
     shm.write(cv2.flip(foreground, 0))
 
 def getAffineTransformation():
