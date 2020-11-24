@@ -2,18 +2,14 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import cv2
-from RectangleOfInterestFinder import RectangleOfInterestFinder
 
 ########################################################
 # Facefinder
 ########################################################
-class FaceFinder(RectangleOfInterestFinder):
+class RectangleOfInterestFinder:
 
-    def __init__(self, imageSize = (640,480), minFaceSize = (180,180)):
+    def __init__(self, imageSize = (640,480)):
         self.imageSize = imageSize
-        self.minFaceSize = minFaceSize
-        # load frontal face  classifier
-        self.faceDet = cv2.CascadeClassifier("/home/pi/SACLeptonRPi/haarcascade_frontalface_default.xml")
 
     ####################################################
     # Sets the the transformation matrix (M) for mapping
@@ -32,20 +28,9 @@ class FaceFinder(RectangleOfInterestFinder):
     # Fills out the true color ROI.
     ####################################################
     def getTcContours(self, image):
-        gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-        rects = self.faceDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=self.minFaceSize)
-        if len(rects) > 0:
-            # only consider first face found.
-            # rect comes in a tuple (x,y,w,h).
-            # todo: check for biggest bounding box.
-            self.tcROI = rects[0]
-            return True
-        else:
-            # no faces found
-            self.tcROI = (-1,-1,-1,-1)
-            return False
+        return null
 
-    def getTcFaceROIWidth(self):
+    def getTcROIWidth(self):
         return self.tcROI[2]
 
 

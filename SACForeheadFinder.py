@@ -7,13 +7,15 @@ from RectangleOfInterestFinder import RectangleOfInterestFinder
 ########################################################
 # Facefinder
 ########################################################
-class FaceFinder(RectangleOfInterestFinder):
+class ForeheadFinder(RectangleOfInterestFinder):
 
-    def __init__(self, imageSize = (640,480), minFaceSize = (180,180)):
+    def __init__(self, imageSize = (640,480), minFaceSize = (180,180), minEyesSize = (250,40)):
         self.imageSize = imageSize
         self.minFaceSize = minFaceSize
+        self.minEyesSize = minEyesSize
         # load frontal face  classifier
         self.faceDet = cv2.CascadeClassifier("/home/pi/SACLeptonRPi/haarcascade_frontalface_default.xml")
+        self.eyesDet = cv2.CascadeClassifier("/home/pi/SACLeptonRPi/haarcascade_frontaleyes.xml")
 
     ####################################################
     # Sets the the transformation matrix (M) for mapping
@@ -34,18 +36,31 @@ class FaceFinder(RectangleOfInterestFinder):
     def getTcContours(self, image):
         gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
         rects = self.faceDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=self.minFaceSize)
+      
         if len(rects) > 0:
             # only consider first face found.
             # rect comes in a tuple (x,y,w,h).
             # todo: check for biggest bounding box.
-            self.tcROI = rects[0]
+            eyesRects = self.eyesDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=self.minEyesSize)
+            # Determine forehead
+            faceRect = rects[0]
+            eyesRect = eyesRects[0]
+
+            x = eyesRect[0]
+            y = faceRect[1]
+            w = eyesRect[2]
+            h = faceRect[3] - eyesRect[3]
+
+            self.tcROI = (x, y, w, h)
+            tcROI_x, tcROI_y, tcROI_w, tcROI_h = self.tcROI
+            cv2.rectangle(image,(tcROI_x,tcROI_y),(tcROI_x + tcROI_w,tcROI_y + tcROI_h), (200,255,150), 2)
             return True
         else:
             # no faces found
             self.tcROI = (-1,-1,-1,-1)
             return False
 
-    def getTcFaceROIWidth(self):
+    def getTcForeheadROIWidth(self):
         return self.tcROI[2]
 
 

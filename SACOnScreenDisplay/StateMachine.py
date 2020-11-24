@@ -7,6 +7,7 @@ from Lepton import Lepton
 from .LedDriver import LedDriver
 from .SettingsManager import SettingsManager
 from SACFaceFinder import FaceFinder
+from SACForeheadFinder import ForeheadFinder
 
 class StateMachine(object):
     """description of class"""
@@ -18,18 +19,17 @@ class StateMachine(object):
         self.lepton = Lepton()
 
         self.values = (0, 0, 0, 0)
-        self.ff = FaceFinder()
+        self.roiFinder = FaceFinder()+6+
         # Settings. We will need to get these from a JSON file.
         self.thSensorWidth = 80
         self.thSensorHeight = 60
         self.faceSizeUpperLimit = 280
         self.faceSizeLowerLimit = 220
-        #self.transformMatrix = np.array([[1.5689e-1, 8.6462e-3, -1.1660e+1],[1.0613e-4, 1.6609e-1, -1.4066e+1]])
         #Affine 1
         self.transformMatrix = np.array([[1.70100612e-1, 4.91086300e-4, -2.62737066e+1],[5.51191729e-3, 1.75597084e-1, -2.09686199e+1]])
         #Affine 2
         #self.transformMatrix = np.array([[5.87940641e+0, -1.64427328e-2, 1.54129017e+2],[-1.84552050e-1, 5.69537151e+0, 1.14575214e+2]])
-        self.ff.setTransformMatrix(self.transformMatrix)
+        self.roiFinder.setTransformMatrix(self.transformMatrix)
 
         # Globals for logging
         self.currentTime = int(round(time.time()))
@@ -86,22 +86,22 @@ class StateMachine(object):
         if self.state == "IDLE":
             color = settings.idleColor
             self.ledDriver.output(color.red, color.green, color.blue, 100)
-            if self.ff.getTcFaceContours(image) == True:
+            if self.roiFinder.getTcFaceContours(image) == True:
                 self.state = "WAIT_FOR_SIZE_OK"
                 if settings.showFoundFace.value:
-                    self.addRectangle(image, self.ff.tcROI, (255, 255, 0))
+                    self.addRectangle(image, self.roiFinder.tcROI, (255, 255, 0))
             else:
                 self.state = "IDLE"
                 self.addText(image, 'Geen gezicht gevonden.', (255, 0, 0))
 
         elif self.state == "WAIT_FOR_SIZE_OK":
-            if self.ff.getTcFaceContours(image) == True:
-                if self.checkFaceSize(image, self.ff.getTcFaceROIWidth(), self.faceSizeLowerLimit, self.faceSizeUpperLimit) == False:
+            if self.roiFInder.getTcFaceContours(image) == True:
+                if self.checkFaceSize(image, self.roiFinder.getTcFaceROIWidth(), self.faceSizeLowerLimit, self.faceSizeUpperLimit) == False:
                     self.state = "WAIT_FOR_SIZE_OK"
                 else:
                     self.state = "RUN_FFC"
             if settings.showFoundFace.value:
-                    self.addRectangle(image, self.ff.tcROI, (255, 255, 0))
+                    self.addRectangle(image, self.roiFinder.tcROI, (255, 255, 0))
             else:
                 self.state = "IDLE"
 
@@ -127,7 +127,7 @@ class StateMachine(object):
             self.state = "GET_TEMPERATURE"
 
         elif self.state == "GET_TEMPERATURE":
-            thROI = self.ff.getThFaceContours()
+            thROI = self.roiFinder.getThFaceContours()
             thRect_x, thRect_y, thRect_w, thRect_h = cv.boundingRect(thROI)
             # x and y should not be negativeor lager then the FPA. Clip the values.
             thRect_x = max(0, min(thRect_x, self.thSensorWidth-2))
@@ -156,7 +156,7 @@ class StateMachine(object):
             self.state = "WAIT_FOR_NO_FACE"
 
         elif self.state == "WAIT_FOR_NO_FACE":
-            if self.ff.getTcFaceContours(image) == True:
+            if self.roiFinder.getTcFaceContours(image) == True:
                 self.state = "WAIT_FOR_NO_FACE"
                 temp = self.values[1]
                 print("Temp: " + str(temp) + "DegC")                
@@ -174,7 +174,7 @@ class StateMachine(object):
                 self.state = "IDLE"
 
         elif self.state == "TEMP_OK":
-            if self.ff.getTcFaceContours(image) == True:
+            if self.roiFinder.getTcFaceContours(image) == True:
                 self.state = "TEMP_OK"
             else:
                 self.state = "IDLE"
