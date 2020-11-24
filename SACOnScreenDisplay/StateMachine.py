@@ -136,6 +136,12 @@ class StateMachine(object):
             #thRect_ye = max(0, min(thRect_y + thRect_w, self.thSensorHeight-1))
             #thRoi = (thRect_x, thRect_y, thRect_xe, thRect_ye)
 
+            x = thRoi[0][0]
+            y = thRoi[0][1]
+            w = thRoi[1][0] - thRoi[0][0]
+            h = thRoi[2][1] - thRoi[0][1]
+            thRoi = (x,y,w,h)
+
             if settings.showFoundFace.value:
                 raw,_ = self.lepton.capture()
                 cv.normalize(raw, raw, 0, 65535, cv.NORM_MINMAX)
