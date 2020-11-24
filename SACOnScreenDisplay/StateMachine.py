@@ -2,6 +2,7 @@ import cv2 as cv
 import random
 import numpy as np
 import time
+import sys
 import LeptonCCI as l
 from Lepton import Lepton
 from .LedDriver import LedDriver
@@ -12,11 +13,12 @@ from SACForeheadFinder import ForeheadFinder
 class StateMachine(object):
     """description of class"""
 
-    def __init__(self, settingsManager, ledDriver):
+    def __init__(self, settingsManager, ledDriver, file):
         self.state = "IDLE"
         self.settingsManager = settingsManager
         self.ledDriver = ledDriver
         self.lepton = Lepton()
+        self.logFile = file
 
         self.values = (0, 0, 0, 0)
         #self.roiFinder = FaceFinder()
@@ -53,6 +55,14 @@ class StateMachine(object):
         startPoint = (roi[0], roi[1])
         endPoint = (roi[0] + roi[2], roi[1] + roi[3])
         cv.rectangle(image, startPoint, endPoint, color, 1)
+
+    def writeLog(self, thRoiSet):
+        line = str(int(round(time.time()))) + "," + str(self.roiFinder.name) + "," + str(l.GetAuxTemp()) + "," + str(l.GetFpaTemp()) + "," + str(l.GetROIValues()) + "," + str(l.GetROI()) + "," + str(thRoiSet) + ",\n"
+        line = line.replace('(','')
+        line =line.replace(')','')
+        line = line.replace(',',';')
+        line = line.replace('.',',')
+        f.write(line)
 
     def checkFaceSize(self, image, currWidth, minWidth, maxWidth):
         return True
@@ -159,8 +169,7 @@ class StateMachine(object):
             self.values = l.GetROIValues()
             print("TH ROI from Lepton:")
             print(str(self.values))
-            #writeLog(True)
-            alreadyLogged = True
+            self.writeLog(thRoi)
             self.state = "WAIT_FOR_NO_FACE"
 
         elif self.state == "WAIT_FOR_NO_FACE":

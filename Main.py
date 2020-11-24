@@ -2,6 +2,7 @@ import os
 import cv2 as cv
 import sysv_ipc as ipc
 import time 
+import sys
 from subprocess import call
 from threading import Thread
 from SACOnScreenDisplay.InputManager import InputManager
@@ -47,6 +48,7 @@ camera.framerate = 5
 time.sleep(0.5)
 
 shm.attach()
+f = open("SACTemplog.csv", "a")
 
 for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=True):
     frame = data.array
@@ -72,5 +74,6 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
 # When everything done, release the capture
 ledDriver.stop()
 shm.detach()
+f.close()
 cap.release()
 cv.destroyAllWindows()
