@@ -73,7 +73,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
             return False
 
     def showRect(self, image, rect, color):
-        x, y, w, h = faceRect
+        x, y, w, h = rect
         cv2.rectangle(image,(x,y),(x + w,y + h), color, 2)
 
     def getTcForeheadROIWidth(self):
