@@ -95,7 +95,7 @@ class StateMachine(object):
                 self.addText(image, 'Geen gezicht gevonden.', (255, 0, 0))
 
         elif self.state == "WAIT_FOR_SIZE_OK":
-            if self.roiFInder.getTcContours(image) == True:
+            if self.roiFinder.getTcContours(image) == True:
                 if self.checkFaceSize(image, self.roiFinder.getTcROIWidth(), self.faceSizeLowerLimit, self.faceSizeUpperLimit) == False:
                     self.state = "WAIT_FOR_SIZE_OK"
                 else:
