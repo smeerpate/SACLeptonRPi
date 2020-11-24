@@ -57,11 +57,7 @@ class StateMachine(object):
         cv.rectangle(image, startPoint, endPoint, color, 1)
 
     def writeLog(self, thRoiSet):
-        line = str(int(round(time.time()))) + "," + str(self.roiFinder.name) + "," + str(l.GetAuxTemp()) + "," + str(l.GetFpaTemp()) + "," + str(l.GetROIValues()) + "," + str(l.GetROI()) + "," + str(thRoiSet) + ",\n"
-        line = line.replace('(','')
-        line =line.replace(')','')
-        line = line.replace(',',';')
-        line = line.replace('.',',')
+        line = str(int(round(time.time()))) + ";" + str(self.roiFinder.name) + ";" + str(l.GetAuxTemp()) + ";" + str(l.GetFpaTemp()) + ";" + str(l.GetROIValues()) + ";" + str(l.GetROI()) + ";" + str(thRoiSet) + ",\n"
         self.logFile.write(line)
 
     def checkFaceSize(self, image, currWidth, minWidth, maxWidth):
@@ -165,7 +161,7 @@ class StateMachine(object):
 
             print("TH ROI to set:")
             print(str(thRoi))
-            l.SetROI(thRoi)
+            print(str(l.SetROI(thRoi)))
             self.values = l.GetROIValues()
             print("TH ROI from Lepton:")
             print(str(self.values))
