@@ -161,7 +161,8 @@ class StateMachine(object):
 
             print("TH ROI to set:")
             print(str(thRoi))
-            print(str(l.SetROI(thRoi)))
+            #print(str(l.SetROI(thRoi)))
+            print(str(l.SetROI((20, 30, 60, 50))))
             self.values = l.GetROIValues()
             print("TH ROI from Lepton:")
             print(str(self.values))
