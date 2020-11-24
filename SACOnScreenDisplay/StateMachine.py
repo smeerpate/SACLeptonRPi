@@ -134,7 +134,7 @@ class StateMachine(object):
             #thRect_y = max(0, min(thRect_y, self.thSensorHeight-2))
             #thRect_xe = max(0, min(thRect_x + thRect_w, self.thSensorWidth-1))
             #thRect_ye = max(0, min(thRect_y + thRect_w, self.thSensorHeight-1))
-            thCorrected = (thRect_x, thRect_y, thRect_xe, thRect_ye)
+            thCorrected = (thRect_x, thRect_y, thRect_w, thRect_h)
 
             x = thRoi[0][0]
             y = thRoi[0][1]
