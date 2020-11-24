@@ -16,7 +16,7 @@ from picamera import PiCamera
 settingsManager = SettingsManager()
 inputManager = InputManager(5, 6, 13)
 ledDriver = LedDriver(17, 27, 22)
-f = open("SACTemplog.csv", "a")
+f = open("SACTemplog2.csv", "a")
 stateMachine = StateMachine(settingsManager, ledDriver, f)
 osd = OSD(inputManager, settingsManager)
 
