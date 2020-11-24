@@ -19,7 +19,7 @@ class StateMachine(object):
         self.lepton = Lepton()
 
         self.values = (0, 0, 0, 0)
-        self.roiFinder = FaceFinder()+6+
+        self.roiFinder = FaceFinder()
         # Settings. We will need to get these from a JSON file.
         self.thSensorWidth = 80
         self.thSensorHeight = 60
