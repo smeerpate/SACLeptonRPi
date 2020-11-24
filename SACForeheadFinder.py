@@ -16,6 +16,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
         # load frontal face  classifier
         self.faceDet = cv2.CascadeClassifier("/home/pi/SACLeptonRPi/haarcascade_frontalface_default.xml")
         self.eyesDet = cv2.CascadeClassifier("/home/pi/SACLeptonRPi/haarcascade_frontaleyes.xml")
+        self.name = "Forehead"
 
     ####################################################
     # Sets the the transformation matrix (M) for mapping

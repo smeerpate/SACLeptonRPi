@@ -10,6 +10,7 @@ class RectangleOfInterestFinder:
 
     def __init__(self, imageSize = (640,480)):
         self.imageSize = imageSize
+        self.name = "ROI"
 
     ####################################################
     # Sets the the transformation matrix (M) for mapping

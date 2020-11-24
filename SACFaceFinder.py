@@ -14,6 +14,7 @@ class FaceFinder(RectangleOfInterestFinder):
         self.minFaceSize = minFaceSize
         # load frontal face  classifier
         self.faceDet = cv2.CascadeClassifier("/home/pi/SACLeptonRPi/haarcascade_frontalface_default.xml")
+        self.name = "Face"
 
     ####################################################
     # Sets the the transformation matrix (M) for mapping
