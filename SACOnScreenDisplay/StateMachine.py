@@ -27,8 +27,7 @@ class StateMachine(object):
         self.faceSizeUpperLimit = 280
         self.faceSizeLowerLimit = 220
         #Affine 1
-        #self.transformMatrix = np.array([[1.70100612e-1, 4.91086300e-4, -2.62737066e+1],[5.51191729e-3, 1.75597084e-1, -2.09686199e+1]])
-        self.transformMatrix = np.array([[1.7010e-1, 4.9108e-4, -2.6273e+1],[5.5119e-3, 1.7559e-1, -2.0968e+1]])
+        self.transformMatrix = np.array([[1.70100612e-1, 4.91086300e-4, -2.62737066e+1],[5.51191729e-3, 1.75597084e-1, -2.09686199e+1]])
         #Affine 2
         #self.transformMatrix = np.array([[5.87940641e+0, -1.64427328e-2, 1.54129017e+2],[-1.84552050e-1, 5.69537151e+0, 1.14575214e+2]])
         self.roiFinder.setTransformMatrix(self.transformMatrix)
@@ -140,6 +139,7 @@ class StateMachine(object):
             w = thRoi[1][0] - thRoi[0][0]
             h = thRoi[2][1] - thRoi[0][1]
             thRoi = (x,y,w,h)
+            thRoi = (x + w/2, y, w/2, h)
             print("Total pixels: ")
             print(w*h)
 
