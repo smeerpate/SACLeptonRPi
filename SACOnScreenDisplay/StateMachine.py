@@ -165,6 +165,7 @@ class StateMachine(object):
             #print(str(l.SetROI((20, 30, 60, 50))))
             self.values = l.GetROIValues()
             print("TH ROI from Lepton:")
+            print(str(l.GetROI()))
             print(str(self.values))
             self.writeLog(thRoi)
             self.state = "WAIT_FOR_NO_FACE"
