@@ -42,19 +42,23 @@ class ForeheadFinder(RectangleOfInterestFinder):
             # rect comes in a tuple (x,y,w,h).
             # todo: check for biggest bounding box.
             eyesRects = self.eyesDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=self.minEyesSize)
-            # Determine forehead
-            faceRect = rects[0]
-            eyesRect = eyesRects[0]
+            if len(eyesRect) > 0:
+                # Determine forehead
+                faceRect = rects[0]
+                eyesRect = eyesRects[0]
 
-            x = eyesRect[0]
-            y = faceRect[1]
-            w = eyesRect[2]
-            h = faceRect[3] - eyesRect[3]
+                x = eyesRect[0]
+                y = faceRect[1]
+                w = eyesRect[2]
+                h = faceRect[3] - eyesRect[3]
 
-            self.tcROI = (x, y, w, h)
-            tcROI_x, tcROI_y, tcROI_w, tcROI_h = self.tcROI
-            cv2.rectangle(image,(tcROI_x,tcROI_y),(tcROI_x + tcROI_w,tcROI_y + tcROI_h), (200,255,150), 2)
-            return True
+                self.tcROI = (x, y, w, h)
+                tcROI_x, tcROI_y, tcROI_w, tcROI_h = self.tcROI
+                cv2.rectangle(image,(tcROI_x,tcROI_y),(tcROI_x + tcROI_w,tcROI_y + tcROI_h), (200,255,150), 2)
+                return True
+            else:
+                self.tcROI = (-1,-1,-1,-1)
+                return False
         else:
             # no faces found
             self.tcROI = (-1,-1,-1,-1)
