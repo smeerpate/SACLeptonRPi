@@ -42,7 +42,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
             # rect comes in a tuple (x,y,w,h).
             # todo: check for biggest bounding box.
             eyesRects = self.eyesDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=self.minEyesSize)
-            if len(eyesRect) > 0:
+            if len(eyesRects) > 0:
                 # Determine forehead
                 faceRect = rects[0]
                 eyesRect = eyesRects[0]
