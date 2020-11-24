@@ -87,22 +87,18 @@ class StateMachine(object):
         if self.state == "IDLE":
             color = settings.idleColor
             self.ledDriver.output(color.red, color.green, color.blue, 100)
-            if self.roiFinder.getTcContours(image) == True:
+            if self.roiFinder.getTcContours(image, settings.showFoundFace.value) == True:
                 self.state = "WAIT_FOR_SIZE_OK"
-                if settings.showFoundFace.value:
-                    self.addRectangle(image, self.roiFinder.tcROI, (255, 255, 0))
             else:
                 self.state = "IDLE"
                 self.addText(image, 'Geen gezicht gevonden.', (255, 0, 0))
 
         elif self.state == "WAIT_FOR_SIZE_OK":
-            if self.roiFinder.getTcContours(image) == True:
+            if self.roiFinder.getTcContours(image, settings.showFoundFace.value) == True:
                 if self.checkFaceSize(image, self.roiFinder.getTcROIWidth(), self.faceSizeLowerLimit, self.faceSizeUpperLimit) == False:
                     self.state = "WAIT_FOR_SIZE_OK"
                 else:
                     self.state = "RUN_FFC"
-            if settings.showFoundFace.value:
-                    self.addRectangle(image, self.roiFinder.tcROI, (255, 255, 0))
             else:
                 self.state = "IDLE"
 

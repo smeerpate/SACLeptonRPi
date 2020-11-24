@@ -27,7 +27,7 @@ class RectangleOfInterestFinder:
     # if none was found.
     # Fills out the true color ROI.
     ####################################################
-    def getTcContours(self, image):
+    def getTcContours(self, image, showRois):
         return null
 
     def getTcROIWidth(self):

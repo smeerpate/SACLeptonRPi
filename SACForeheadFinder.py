@@ -33,7 +33,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
     # if none was found.
     # Fills out the true color ROI.
     ####################################################
-    def getTcContours(self, image):
+    def getTcContours(self, image, showRois):
         gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
         rects = self.faceDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=self.minFaceSize)
       
@@ -41,11 +41,18 @@ class ForeheadFinder(RectangleOfInterestFinder):
             # only consider first face found.
             # rect comes in a tuple (x,y,w,h).
             # todo: check for biggest bounding box.
+            faceRect = rects[0]
+
+            if showRois:
+                self.showRect(image, faceRect, (200,255,150))
+
             eyesRects = self.eyesDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=self.minEyesSize)
             if len(eyesRects) > 0:
-                # Determine forehead
-                faceRect = rects[0]
+                # Determine forehead                
                 eyesRect = eyesRects[0]
+
+                if showRois:
+                    self.showRect(image, eyesRect, (255, 150, 200))
 
                 x = eyesRect[0]
                 y = faceRect[1]
@@ -53,8 +60,9 @@ class ForeheadFinder(RectangleOfInterestFinder):
                 h = faceRect[3] - eyesRect[3]
 
                 self.tcROI = (x, y, w, h)
-                tcROI_x, tcROI_y, tcROI_w, tcROI_h = self.tcROI
-                cv2.rectangle(image,(tcROI_x,tcROI_y),(tcROI_x + tcROI_w,tcROI_y + tcROI_h), (200,255,150), 2)
+
+                if showRois:
+                    self.showRect(image, self.tcROI, (150, 255, 200))
                 return True
             else:
                 self.tcROI = (-1,-1,-1,-1)
@@ -63,6 +71,10 @@ class ForeheadFinder(RectangleOfInterestFinder):
             # no faces found
             self.tcROI = (-1,-1,-1,-1)
             return False
+
+    def showRect(self, image, rect, color):
+        x, y, w, h = faceRect
+        cv2.rectangle(image,(x,y),(x + w,y + h), color, 2)
 
     def getTcForeheadROIWidth(self):
         return self.tcROI[2]
