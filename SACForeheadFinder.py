@@ -57,7 +57,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
                 x = eyesRect[0]
                 y = faceRect[1]
                 w = eyesRect[2]
-                h = faceRect[3] - eyesRect[3]
+                h = eyesRect[1] - faceRect[1]
 
                 self.tcROI = (x, y, w, h)
 
