@@ -36,7 +36,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
     ####################################################
     def getTcContours(self, image, showRois):
         gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-        rects = self.faceDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=self.minFaceSize)
+        rects = self.faceDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
       
         if len(rects) > 0:
             # only consider first face found.
