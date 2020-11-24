@@ -128,13 +128,13 @@ class StateMachine(object):
 
         elif self.state == "GET_TEMPERATURE":
             thRoi = self.roiFinder.getThContours()
-            #thRect_x, thRect_y, thRect_w, thRect_h = cv.boundingRect(thRoi)
+            thRect_x, thRect_y, thRect_w, thRect_h = cv.boundingRect(thRoi)
             # x and y should not be negativeor lager then the FPA. Clip the values.
-            #thRect_x = max(0, min(thRect_x, self.thSensorWidth-2))
-            #thRect_y = max(0, min(thRect_y, self.thSensorHeight-2))
-            #thRect_xe = max(0, min(thRect_x + thRect_w, self.thSensorWidth-1))
-            #thRect_ye = max(0, min(thRect_y + thRect_w, self.thSensorHeight-1))
-            #thRoi = (thRect_x, thRect_y, thRect_xe, thRect_ye)
+            thRect_x = max(0, min(thRect_x, self.thSensorWidth-2))
+            thRect_y = max(0, min(thRect_y, self.thSensorHeight-2))
+            thRect_xe = max(0, min(thRect_x + thRect_w, self.thSensorWidth-1))
+            thRect_ye = max(0, min(thRect_y + thRect_w, self.thSensorHeight-1))
+            thCorrected = (thRect_x, thRect_y, thRect_xe, thRect_ye)
 
             x = thRoi[0][0]
             y = thRoi[0][1]
@@ -148,6 +148,7 @@ class StateMachine(object):
                 np.right_shift(raw, 8, raw)
                 thImage = np.uint8(raw) # 80x60
                 self.addRectangle(thImage, thRoi, (255, 255, 255))
+                self.addRectangle(thImage, thCorrected, (255, 0, 0))
                 x_offset=y_offset=0
                 image[y_offset:y_offset+thImage.shape[0], x_offset:x_offset+thImage.shape[1]] = thImage
 
