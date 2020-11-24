@@ -64,7 +64,7 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
     
     shm.write(frame)
 
-    if stateMachine.state == "WAIT_FOR_NO_FACE":
+    #if stateMachine.state == "WAIT_FOR_NO_FACE":
         #time.sleep(5)
     
     
