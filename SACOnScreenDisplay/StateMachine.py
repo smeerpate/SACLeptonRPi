@@ -154,7 +154,7 @@ class StateMachine(object):
             self.state = "WAIT_FOR_NO_FACE"
 
         elif self.state == "WAIT_FOR_NO_FACE":
-            if self.roiFinder.getTcContours(image) == True:
+            if self.roiFinder.getTcContours(image, settings.showFoundFace.value) == True:
                 self.state = "WAIT_FOR_NO_FACE"
                 temp = self.values[1]
                 print("Temp: " + str(temp) + "DegC")                
@@ -172,7 +172,7 @@ class StateMachine(object):
                 self.state = "IDLE"
 
         elif self.state == "TEMP_OK":
-            if self.roiFinder.getTcContours(image) == True:
+            if self.roiFinder.getTcContours(image, settings.showFoundFace.value) == True:
                 self.state = "TEMP_OK"
             else:
                 self.state = "IDLE"
