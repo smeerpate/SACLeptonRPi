@@ -55,6 +55,7 @@ class StateMachine(object):
         cv.rectangle(image, startPoint, endPoint, color, 1)
 
     def checkFaceSize(self, image, currWidth, minWidth, maxWidth):
+        return True
         color = (255, 0, 0)
         if currWidth > maxWidth:
             self.addText(image, 'Ga wat verder staan.', color)
