@@ -62,7 +62,7 @@ class StateMachine(object):
         line =line.replace(')','')
         line = line.replace(',',';')
         line = line.replace('.',',')
-        f.write(line)
+        self.logFile.write(line)
 
     def checkFaceSize(self, image, currWidth, minWidth, maxWidth):
         return True
