@@ -86,7 +86,7 @@ class StateMachine(object):
         if self.state == "IDLE":
             color = settings.idleColor
             self.ledDriver.output(color.red, color.green, color.blue, 100)
-            if self.roiFinder.getTcFaceContours(image) == True:
+            if self.roiFinder.getTcContours(image) == True:
                 self.state = "WAIT_FOR_SIZE_OK"
                 if settings.showFoundFace.value:
                     self.addRectangle(image, self.roiFinder.tcROI, (255, 255, 0))
@@ -95,8 +95,8 @@ class StateMachine(object):
                 self.addText(image, 'Geen gezicht gevonden.', (255, 0, 0))
 
         elif self.state == "WAIT_FOR_SIZE_OK":
-            if self.roiFInder.getTcFaceContours(image) == True:
-                if self.checkFaceSize(image, self.roiFinder.getTcFaceROIWidth(), self.faceSizeLowerLimit, self.faceSizeUpperLimit) == False:
+            if self.roiFInder.getTcContours(image) == True:
+                if self.checkFaceSize(image, self.roiFinder.getTcROIWidth(), self.faceSizeLowerLimit, self.faceSizeUpperLimit) == False:
                     self.state = "WAIT_FOR_SIZE_OK"
                 else:
                     self.state = "RUN_FFC"
@@ -127,7 +127,7 @@ class StateMachine(object):
             self.state = "GET_TEMPERATURE"
 
         elif self.state == "GET_TEMPERATURE":
-            thROI = self.roiFinder.getThFaceContours()
+            thROI = self.roiFinder.getThContours()
             thRect_x, thRect_y, thRect_w, thRect_h = cv.boundingRect(thROI)
             # x and y should not be negativeor lager then the FPA. Clip the values.
             thRect_x = max(0, min(thRect_x, self.thSensorWidth-2))
@@ -156,7 +156,7 @@ class StateMachine(object):
             self.state = "WAIT_FOR_NO_FACE"
 
         elif self.state == "WAIT_FOR_NO_FACE":
-            if self.roiFinder.getTcFaceContours(image) == True:
+            if self.roiFinder.getTcContours(image) == True:
                 self.state = "WAIT_FOR_NO_FACE"
                 temp = self.values[1]
                 print("Temp: " + str(temp) + "DegC")                
@@ -174,7 +174,7 @@ class StateMachine(object):
                 self.state = "IDLE"
 
         elif self.state == "TEMP_OK":
-            if self.roiFinder.getTcFaceContours(image) == True:
+            if self.roiFinder.getTcContours(image) == True:
                 self.state = "TEMP_OK"
             else:
                 self.state = "IDLE"
