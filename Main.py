@@ -16,7 +16,8 @@ from picamera import PiCamera
 settingsManager = SettingsManager()
 inputManager = InputManager(5, 6, 13)
 ledDriver = LedDriver(17, 27, 22)
-stateMachine = StateMachine(settingsManager, ledDriver)
+f = open("SACTemplog.csv", "a")
+stateMachine = StateMachine(settingsManager, ledDriver, f)
 osd = OSD(inputManager, settingsManager)
 
 # Target screen is 12", 1024x768 or 768x1024 in portrait mode
@@ -48,7 +49,6 @@ camera.framerate = 5
 time.sleep(0.5)
 
 shm.attach()
-f = open("SACTemplog.csv", "a")
 
 for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=True):
     frame = data.array
