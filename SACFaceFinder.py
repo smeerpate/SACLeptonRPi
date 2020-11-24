@@ -31,19 +31,25 @@ class FaceFinder(RectangleOfInterestFinder):
     # if none was found.
     # Fills out the true color ROI.
     ####################################################
-    def getTcContours(self, image):
+    def getTcContours(self, image, showRois):
         gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
         rects = self.faceDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=self.minFaceSize)
         if len(rects) > 0:
             # only consider first face found.
             # rect comes in a tuple (x,y,w,h).
             # todo: check for biggest bounding box.
+            if showRois:
+                    self.showRect(image, rects[0], (255, 150, 200))
             self.tcROI = rects[0]
             return True
         else:
             # no faces found
             self.tcROI = (-1,-1,-1,-1)
             return False
+
+    def showRect(self, image, rect, color):
+        x, y, w, h = rect
+        cv2.rectangle(image,(x,y),(x + w,y + h), color, 2)
 
     def getTcFaceROIWidth(self):
         return self.tcROI[2]
