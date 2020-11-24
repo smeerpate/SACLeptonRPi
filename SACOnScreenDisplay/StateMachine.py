@@ -148,7 +148,8 @@ class StateMachine(object):
                 np.right_shift(raw, 8, raw)
                 thImage = np.uint8(raw) # 80x60
                 #self.addRectangle(thImage, thRoi, (255, 255, 255))
-                self.addRectangle(thImage, thCorrected, (255, 0, 0))
+                #self.addRectangle(thImage, thCorrected, (255, 0, 0))
+                self.addRectangle(thImage, (10, 5, 30, 40), (255,255,255))
                 x_offset=y_offset=0
                 image[y_offset:y_offset+thImage.shape[0], x_offset:x_offset+thImage.shape[1]] = thImage
 
