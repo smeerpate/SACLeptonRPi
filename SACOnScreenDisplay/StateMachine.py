@@ -27,9 +27,9 @@ class StateMachine(object):
         self.faceSizeUpperLimit = 280
         self.faceSizeLowerLimit = 220
         #Affine 1
-        #self.transformMatrix = np.array([[1.70100612e-1, 4.91086300e-4, -2.62737066e+1],[5.51191729e-3, 1.75597084e-1, -2.09686199e+1]])
+        self.transformMatrix = np.array([[1.70100612e-1, 4.91086300e-4, -2.62737066e+1],[5.51191729e-3, 1.75597084e-1, -2.09686199e+1]])
         #Affine 2
-        self.transformMatrix = np.array([[5.87940641e+0, -1.64427328e-2, 1.54129017e+2],[-1.84552050e-1, 5.69537151e+0, 1.14575214e+2]])
+        #self.transformMatrix = np.array([[5.87940641e+0, -1.64427328e-2, 1.54129017e+2],[-1.84552050e-1, 5.69537151e+0, 1.14575214e+2]])
         self.roiFinder.setTransformMatrix(self.transformMatrix)
 
         # Globals for logging
@@ -50,8 +50,6 @@ class StateMachine(object):
         cv.putText(image, sMessage, org, font, fontScale, color, thickness, cv.LINE_AA)
 
     def addRectangle(self, image, roi, color):
-        print("ROI")
-        print(roi);
         startPoint = (roi[0], roi[1])
         endPoint = (roi[0] + roi[2], roi[1] + roi[3])
         cv.rectangle(image, startPoint, endPoint, color, 1)
@@ -141,6 +139,8 @@ class StateMachine(object):
             w = thRoi[1][0] - thRoi[0][0]
             h = thRoi[2][1] - thRoi[0][1]
             thRoi = (x,y,w,h)
+            print("Total pixels: ")
+            print(w*h)
 
             if settings.showFoundFace.value:
                 raw,_ = self.lepton.capture()
