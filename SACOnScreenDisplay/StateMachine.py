@@ -52,7 +52,7 @@ class StateMachine(object):
         cv.putText(image, sMessage, org, font, fontScale, color, thickness, cv.LINE_AA)
 
     def addRectangle(self, image, roi, color):
-        startPoint = (roi[0], roi[1])
+        startPoint = (roi[1], roi[0])
         endPoint = (roi[1] + roi[3], roi[0] + roi[2])
         cv.rectangle(image, startPoint, endPoint, color, 1)
 
