@@ -143,16 +143,14 @@ class StateMachine(object):
             print("TH ROI before")
             print(str(thRoi))
 
-
-
-
             x = int(thRoi[0][0])
             y = int(thRoi[0][1])
-            w = int(thRoi[1][0] - thRoi[0][0])
-            h = int(thRoi[2][1] - thRoi[0][1])
-            thRoi = (x, y, int(x + w/2), int(y+h))
-            print("Total pixels: ")
-            print(w*h)
+            #w = int(thRoi[1][0] - thRoi[0][0])
+            #h = int(thRoi[2][1] - thRoi[0][1])
+            #thRoi = (y, x, int(y+h), int(x + w/2))
+            thRoi = (y, x, int(thRoi[3][1]), int(thRoi[3][0]))
+            #print("Total pixels: ")
+            #print(w*h)
 
             if settings.showFoundFace.value:
                 raw,_ = self.lepton.capture()
