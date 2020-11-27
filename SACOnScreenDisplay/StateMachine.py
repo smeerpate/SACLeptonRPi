@@ -143,12 +143,14 @@ class StateMachine(object):
             print("TH ROI before")
             print(str(thRoi))
 
-            x = int(thRoi[0][0])
-            y = int(thRoi[0][1])
+            xstart = int(thRoi[0][0])
+            ystart = int(thRoi[0][1])
+            xend = int(thRoi[3][0])
+            yend = int(thRoi[3][1])
             #w = int(thRoi[1][0] - thRoi[0][0])
             #h = int(thRoi[2][1] - thRoi[0][1])
             #thRoi = (y, x, int(y+h), int(x + w/2))
-            thRoi = (y, x, int(thRoi[3][1]/2), int(thRoi[3][0]/2))
+            thRoi = (ystart, xstart, yend, xend)
             #print("Total pixels: ")
             #print(w*h)
 
