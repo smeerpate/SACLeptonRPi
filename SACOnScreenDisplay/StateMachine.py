@@ -148,7 +148,7 @@ class StateMachine(object):
             #w = int(thRoi[1][0] - thRoi[0][0])
             #h = int(thRoi[2][1] - thRoi[0][1])
             #thRoi = (y, x, int(y+h), int(x + w/2))
-            thRoi = (y, x, int(thRoi[3][1]), int(thRoi[3][0]))
+            thRoi = (x, y, int(thRoi[3][0]), int(thRoi[3][1]))
             #print("Total pixels: ")
             #print(w*h)
 
