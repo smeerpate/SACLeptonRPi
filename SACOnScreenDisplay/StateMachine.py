@@ -214,7 +214,7 @@ class StateMachine(object):
         #h = int(thRoi[2][1] - thRoi[0][1])
         #thRoi = (y, x, int(y+h), int(x + w/2))
         #return (10, 20),(30,40)
-        return (10, 10),(70,50)
+        return (5, 5),(35,55)
         #return (xstart, ystart), (xend, yend)
 
     def reset(self):
