@@ -145,6 +145,11 @@ class StateMachine(object):
             print(str(thRoiContours))
 
             thRoi = self.getRoiFromContours(thRoiContours)
+
+            # Flip thRoi vertically
+            start, end = thRoi
+            w = end[0] - start[0]
+            thRoi = (80 - start[0] - width, start[1]), (80 - start[0], end[1])
             
             #print("Total pixels: ")
             #print(w*h)
