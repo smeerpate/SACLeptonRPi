@@ -201,7 +201,7 @@ class StateMachine(object):
 
         startPoint, endPoint = thRoi
 
-        print(str(l.SetROI(startPoint[1], startPoint[0], endPoint[1], endPoint[0])))
+        print(str(l.SetROI((startPoint[1], startPoint[0], endPoint[1], endPoint[0]))))
 
     def getRoiFromContours(self, roiContours):
         # ROI Contours: LT, RT, LB, RB
