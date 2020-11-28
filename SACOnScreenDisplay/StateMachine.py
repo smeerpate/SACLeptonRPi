@@ -57,7 +57,7 @@ class StateMachine(object):
         cv.rectangle(image, startPoint, endPoint, color, 1)
 
     def writeLog(self, thRoiSet):
-        line = str(int(round(time.time()))) + ";" + str(self.roiFinder.name) + ";" + str(l.GetAuxTemp()) + ";" + str(l.GetFpaTemp()) + ";" + str(l.GetROIValues()) + ";" + str(l.GetROI()) + ";" + str(thRoiSet) + ",\n"
+        line = str(int(round(time.time()))) + ";" + str(self.roiFinder.name) + ";" + str(l.GetAuxTemp()) + ";" + str(l.GetFpaTemp()) + ";" + str(l.GetROIValues()) + ";" + str(l.GetROI()) + ";" + str(thRoiSet) + "\n"
         self.logFile.write(line)
 
     def checkFaceSize(self, image, currWidth, minWidth, maxWidth):

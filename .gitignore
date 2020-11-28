@@ -129,7 +129,6 @@ dmypy.json
 .pyre/
 
 # Measurements
-*.csv
 .vs/slnx.sqlite
 *.sqlite
 *.sqlite
