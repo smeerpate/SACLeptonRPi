@@ -211,10 +211,8 @@ class StateMachine(object):
         xend = int(roiContours[3][0])
         yend = int(roiContours[3][1])
         #leftSide = (5, 5),(35,55)
-        rightSide = (45, 5), (75, 55)
-        #return (10, 20),(30,40)
-        return rightSide
-        #return (xstart, ystart), (xend, yend)
+        #rightSide = (45, 5), (75, 55)
+        return (xstart, ystart), (xend, yend)
 
     def reset(self):
         print("Resetting state machine")
