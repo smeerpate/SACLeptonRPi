@@ -154,7 +154,7 @@ class StateMachine(object):
             # Translate a bit to the right
             start, end = thRoi
             xTrans = 5
-            thRoi = (start[0] + xTrans, start[1]), (end[0] + xTrans, end[0])
+            thRoi = (start[0] + xTrans, start[1]), (end[0] + xTrans, end[1])
             
             #print("Total pixels: ")
             #print(w*h)
