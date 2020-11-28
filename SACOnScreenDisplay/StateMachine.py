@@ -196,7 +196,6 @@ class StateMachine(object):
        
     def setThRoiOnLepton(self, thRoi):
         # TH ROI: tuple (start point, end point)
-        thRoi = ((10,10),(70, 50))
         print("Setting ROI on Lepton:")
         print(str(thRoi))
 
@@ -214,7 +213,8 @@ class StateMachine(object):
         #w = int(thRoi[1][0] - thRoi[0][0])
         #h = int(thRoi[2][1] - thRoi[0][1])
         #thRoi = (y, x, int(y+h), int(x + w/2))
-        return (xstart, ystart), (xend, yend)
+        return (10,10),(70, 50)
+        #return (xstart, ystart), (xend, yend)
 
     def reset(self):
         print("Resetting state machine")
