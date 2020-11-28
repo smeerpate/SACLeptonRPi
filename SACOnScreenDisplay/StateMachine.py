@@ -159,19 +159,19 @@ class StateMachine(object):
             #print("Total pixels: ")
             #print(w*h)
 
-            if settings.showFoundFace.value:
-                raw,_ = self.lepton.capture()
-                cv.normalize(raw, raw, 0, 65535, cv.NORM_MINMAX)
-                np.right_shift(raw, 8, raw)
-                thImage = np.uint8(raw) # 80x60
+            #if settings.showFoundFace.value:
+                #raw,_ = self.lepton.capture()
+                #cv.normalize(raw, raw, 0, 65535, cv.NORM_MINMAX)
+                #np.right_shift(raw, 8, raw)
+                #thImage = np.uint8(raw) # 80x60
 
-                self.addRectangle(thImage, thRoi, (255, 255, 255))
+                #self.addRectangle(thImage, thRoi, (255, 255, 255))
                 #self.addRectangle(thImage, thCorrected, (255, 0, 0))
-                self.roiFinder.getTcContours(image, settings.showFoundFace.value)
-                x_offset=y_offset=0
-                image[y_offset:y_offset+thImage.shape[0], x_offset:x_offset+thImage.shape[1]] = thImage
-                imageName = "Forehead " + str(int(round(time.time())))
-                cv.imwrite('/home/pi/SACLeptonRPi/' + imageName +'.jpg', image)
+                #self.roiFinder.getTcContours(image, settings.showFoundFace.value)
+                #x_offset=y_offset=0
+                #image[y_offset:y_offset+thImage.shape[0], x_offset:x_offset+thImage.shape[1]] = thImage
+                #imageName = "Forehead " + str(int(round(time.time())))
+                #cv.imwrite('/home/pi/SACLeptonRPi/' + imageName +'.jpg', image)
 
             self.setThRoiOnLepton(thRoi)
             
