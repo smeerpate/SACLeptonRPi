@@ -52,8 +52,8 @@ class StateMachine(object):
         cv.putText(image, sMessage, org, font, fontScale, color, thickness, cv.LINE_AA)
 
     def addRectangle(self, image, roi, color):
-        startPoint = (roi[1], roi[0])
-        endPoint = (roi[1] + roi[3], roi[0] + roi[2])
+        # ROI: tuple (start point, end point)
+        startPoint, endPoint = roi
         cv.rectangle(image, startPoint, endPoint, color, 1)
 
     def writeLog(self, thRoiSet):
@@ -131,26 +131,21 @@ class StateMachine(object):
             self.state = "GET_TEMPERATURE"
 
         elif self.state == "GET_TEMPERATURE":
-            thRoi = self.roiFinder.getThContours()
-            thRect_x, thRect_y, thRect_w, thRect_h = cv.boundingRect(thRoi)
+            thRoiContours = self.roiFinder.getThContours() # LT, RT, LB, RB
+
+            #thRect_x, thRect_y, thRect_w, thRect_h = cv.boundingRect(thRoi)
             # x and y should not be negativeor lager then the FPA. Clip the values.
             #thRect_x = max(0, min(thRect_x, self.thSensorWidth-2))
             #thRect_y = max(0, min(thRect_y, self.thSensorHeight-2))
             #thRect_w = max(0, min(thRect_x + thRect_w, self.thSensorWidth-1))
             #thRect_h = max(0, min(thRect_y + thRect_w, self.thSensorHeight-1))
-            thCorrected = (thRect_x, thRect_y, thRect_w, thRect_h)
+            #thCorrected = (thRect_x, thRect_y, thRect_w, thRect_h)
 
-            print("TH ROI before")
-            print(str(thRoi))
+            print("TH ROI Contours")
+            print(str(thRoiContours))
 
-            xstart = int(thRoi[0][0])
-            ystart = int(thRoi[0][1])
-            xend = int(thRoi[3][0])
-            yend = int(thRoi[3][1])
-            #w = int(thRoi[1][0] - thRoi[0][0])
-            #h = int(thRoi[2][1] - thRoi[0][1])
-            #thRoi = (y, x, int(y+h), int(x + w/2))
-            thRoi = (ystart, xstart, yend, xend)
+            thRoi = self.getRoiFromContours(thRoiContours)
+            
             #print("Total pixels: ")
             #print(w*h)
 
@@ -165,10 +160,8 @@ class StateMachine(object):
                 x_offset=y_offset=0
                 image[y_offset:y_offset+thImage.shape[0], x_offset:x_offset+thImage.shape[1]] = thImage
 
-            print("TH ROI to set:")
-            print(str(thRoi))
-            #print(str(l.SetROI(thRoi)))
-            print(str(l.SetROI((10, 10, 70, 50))))
+            self.setThRoiOnLepton(thRoi)
+            
             self.values = l.GetROIValues()
             print("TH ROI from Lepton:")
             print(str(l.GetROI()))
@@ -200,7 +193,27 @@ class StateMachine(object):
             else:
                 self.state = "IDLE"
 
-        
+       
+    def setThRoiOnLepton(self, thRoi):
+        # TH ROI: tuple (start point, end point)
+        print("Setting ROI on Lepton:")
+        print(str(thRoi))
+
+        startPoint, endPoint = thRoi
+
+        print(str(l.SetROI(startPoint[1], startPoint[0], endPoint[1], endPoint[0])))
+
+    def getRoiFromContours(self, roiContours):
+        # ROI Contours: LT, RT, LB, RB
+        # Returns a tuple (start point, end point)
+        xstart = int(roiContours[0][0])
+        ystart = int(roiContours[0][1])
+        xend = int(roiContours[3][0])
+        yend = int(roiContours[3][1])
+        #w = int(thRoi[1][0] - thRoi[0][0])
+        #h = int(thRoi[2][1] - thRoi[0][1])
+        #thRoi = (y, x, int(y+h), int(x + w/2))
+        return (xstart, ystart), (xend, yend)
 
     def reset(self):
         print("Resetting state machine")
