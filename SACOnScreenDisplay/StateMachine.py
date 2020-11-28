@@ -21,8 +21,8 @@ class StateMachine(object):
         self.logFile = file
 
         self.values = (0, 0, 0, 0)
-        #self.roiFinder = FaceFinder()
-        self.roiFinder = ForeheadFinder()
+        self.roiFinder = FaceFinder()
+        #self.roiFinder = ForeheadFinder()
         # Settings. We will need to get these from a JSON file.
         self.thSensorWidth = 80
         self.thSensorHeight = 60
