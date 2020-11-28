@@ -167,6 +167,7 @@ class StateMachine(object):
 
                 self.addRectangle(thImage, thRoi, (255, 255, 255))
                 #self.addRectangle(thImage, thCorrected, (255, 0, 0))
+                self.roiFinder.getTcContours(image, settings.showFoundFace.value)
                 x_offset=y_offset=0
                 image[y_offset:y_offset+thImage.shape[0], x_offset:x_offset+thImage.shape[1]] = thImage
                 imageName = "Forehead " + str(int(round(time.time())))
