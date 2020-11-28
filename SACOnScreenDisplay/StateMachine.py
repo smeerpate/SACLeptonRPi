@@ -169,6 +169,8 @@ class StateMachine(object):
                 #self.addRectangle(thImage, thCorrected, (255, 0, 0))
                 x_offset=y_offset=0
                 image[y_offset:y_offset+thImage.shape[0], x_offset:x_offset+thImage.shape[1]] = thImage
+                imageName = "Forehead " + str(int(round(time.time())))
+                cv.imwrite('/home/pi/SACLeptonRPi/' + imageName +'.jpg', img)
 
             self.setThRoiOnLepton(thRoi)
             
