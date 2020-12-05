@@ -24,6 +24,7 @@ class DisplayMixer(object):
             self.shm.attach()
             self.isRunning = True;
 
+        image = cv.flip(image, 0)
         self.shm.write(image)
 
     def stop(self):

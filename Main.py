@@ -47,8 +47,7 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
     else:
         stateMachine.run(frame)
                 
-    rawCapture.truncate(0)
-    frame = cv.flip(frame, 0)
+    rawCapture.truncate(0)    
     
     #print(frame.shape)
     
