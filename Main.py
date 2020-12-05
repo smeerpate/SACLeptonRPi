@@ -12,13 +12,13 @@ from SACOnScreenDisplay.DisplayMixer import DisplayMixer
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 
+displayMixer = DisplayMixer()
 settingsManager = SettingsManager()
 inputManager = InputManager(5, 6, 13)
 ledDriver = LedDriver(17, 27, 22)
 f = open("Logging/SAC Temp Log.csv", "a")
 stateMachine = StateMachine(settingsManager, ledDriver, f, displayMixer)
 osd = OSD(inputManager, settingsManager, displayMixer)
-displayMixer = DisplayMixer()
 
 # Target screen is 12", 1024x768 or 768x1024 in portrait mode
 screenWidth = 768
