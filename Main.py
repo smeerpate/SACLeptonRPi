@@ -16,8 +16,8 @@ settingsManager = SettingsManager()
 inputManager = InputManager(5, 6, 13)
 ledDriver = LedDriver(17, 27, 22)
 f = open("Logging/SAC Temp Log.csv", "a")
-stateMachine = StateMachine(settingsManager, ledDriver, f)
-osd = OSD(inputManager, settingsManager)
+stateMachine = StateMachine(settingsManager, ledDriver, f, displayMixer)
+osd = OSD(inputManager, settingsManager, displayMixer)
 displayMixer = DisplayMixer()
 
 # Target screen is 12", 1024x768 or 768x1024 in portrait mode
@@ -52,7 +52,7 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
     
     #print(frame.shape)
     
-    displayMixer.show(frame)
+    #displayMixer.show(frame)
 
     #if stateMachine.state == "WAIT_FOR_NO_FACE":
         #time.sleep(5)

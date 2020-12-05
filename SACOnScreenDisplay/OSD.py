@@ -5,13 +5,15 @@ from .Settings import Settings
 from .InputManager import InputManager
 from .SettingsManager import SettingsManager
 from .ButtonInput import ButtonInput
+from .DisplayMixer import DisplayMixer
 
 class OSD(object):
     """description of class"""
 
-    def __init__(self, inputManager, settingsManager):
+    def __init__(self, inputManager, settingsManager, displayMixer):
         self.inputManager = inputManager
         self.settingsManager = settingsManager
+        self.displayMixer = displayMixer
         self.settings = None
         
         self.areMenusActive = False

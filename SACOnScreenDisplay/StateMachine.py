@@ -9,16 +9,18 @@ from .LedDriver import LedDriver
 from .SettingsManager import SettingsManager
 from SACFaceFinder import FaceFinder
 from SACForeheadFinder import ForeheadFinder
+from .DisplayMixer import DisplayMixer
 
 class StateMachine(object):
     """description of class"""
 
-    def __init__(self, settingsManager, ledDriver, file):
+    def __init__(self, settingsManager, ledDriver, file, displayMixer):
         self.state = "IDLE"
         self.settingsManager = settingsManager
         self.ledDriver = ledDriver
         self.lepton = Lepton()
         self.logFile = file
+        self.displayMixer = displayMixer
 
         self.values = (0, 0, 0, 0)
         #self.roiFinder = FaceFinder()
@@ -107,6 +109,7 @@ class StateMachine(object):
                     self.state = "WAIT_FOR_SIZE_OK"
                 else:
                     self.state = "RUN_FFC"
+                    self.displayMixer.show(image);
             else:
                 self.state = "IDLE"
 
