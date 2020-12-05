@@ -20,13 +20,13 @@ class DisplayMixer(object):
             time.sleep(1)
 
             key = ipc.ftok("/home/pi/SACLeptonRPi", ord('i'))
-            shm = ipc.SharedMemory(key, 0, 0)
-            shm.attach()
+            self.shm = ipc.SharedMemory(key, 0, 0)
+            self.shm.attach()
             self.isRunning = True;
 
-        shm.write(image)
+        self.shm.write(image)
 
     def stop(self):
         if self.isRunning:
-            shm.detach()
+            self.shm.detach()
             self.isRunning = False;
