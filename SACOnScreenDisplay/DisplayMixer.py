@@ -31,7 +31,7 @@ class DisplayMixer(object):
         b_channel, g_channel, r_channel = cv.split(image)
         alpha_channel = np.ones(b_channel.shape, dtype=b_channel.dtype) * 255 #creating a dummy alpha channel image.
         img_RGBA = cv.merge((r_channel, g_channel, b_channel, alpha_channel))
-        self.shm.write(np.zeros([480, 640, 4], dtype=np.uint8))
+        self.shm.write(np.zeros([640, 480, 4], dtype=np.uint8))
         #startDisplay()
 
     def hide(self):
