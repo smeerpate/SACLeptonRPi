@@ -3,8 +3,6 @@ import cv2 as cv
 import sysv_ipc as ipc
 import time 
 import sys
-from subprocess import call
-from threading import Thread
 from SACOnScreenDisplay.InputManager import InputManager
 from SACOnScreenDisplay.SettingsManager import SettingsManager
 from SACOnScreenDisplay.LedDriver import LedDriver
