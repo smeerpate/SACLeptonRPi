@@ -1,6 +1,9 @@
 from subprocess import call
 from threading import Thread
 
+def startDisplay():
+        call(["./SACDisplayMixer/OGLESSimpleImageWithIPC"])
+
 class DisplayMixer(object):
     """description of class"""
 
@@ -10,7 +13,7 @@ class DisplayMixer(object):
 
     def show(self, image):       
         if not self.isRunning:
-            th1 = Thread(target=self.startDisplay)
+            th1 = Thread(target=startDisplay)
             th1.start()
             time.sleep(1)
 
@@ -25,6 +28,3 @@ class DisplayMixer(object):
         if self.isRunning:
             shm.detach()
             self.isRunning = False;
-
-    def startDisplay():
-        call(["./SACDisplayMixer/OGLESSimpleImageWithIPC"])
