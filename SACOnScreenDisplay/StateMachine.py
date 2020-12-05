@@ -99,6 +99,7 @@ class StateMachine(object):
             self.ledDriver.output(color.red, color.green, color.blue, 100)
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value) == True:
                 self.state = "WAIT_FOR_SIZE_OK"
+                self.displayMixer.show(image);
             else:
                 self.state = "IDLE"
                 self.addText(image, 'Geen gezicht gevonden.', (255, 0, 0))
@@ -107,6 +108,7 @@ class StateMachine(object):
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value) == True:
                 if self.checkFaceSize(image, self.roiFinder.getTcROIWidth(), self.faceSizeLowerLimit, self.faceSizeUpperLimit) == False:
                     self.state = "WAIT_FOR_SIZE_OK"
+                    self.displayMixer.show(image);
                 else:
                     self.state = "RUN_FFC"
                     self.displayMixer.show(image);
@@ -118,6 +120,7 @@ class StateMachine(object):
                 l.RunRadFfc()
                 self.lastFFCTime = currentTime
             self.state = "SET_FLUX_LINEAR_PARAMS"
+            self.displayMixer.show(image);
 
         elif self.state == "SET_FLUX_LINEAR_PARAMS":
             sensorTemp = l.GetAuxTemp()
@@ -133,6 +136,7 @@ class StateMachine(object):
             print(str(FLParams))
             l.SetFluxLinearParams(FLParams)
             self.state = "GET_TEMPERATURE"
+            self.displayMixer.show(image);
 
         elif self.state == "GET_TEMPERATURE":
             thRoiContours = self.roiFinder.getThContours() # LT, RT, LB, RB
@@ -185,6 +189,7 @@ class StateMachine(object):
             print(str(self.values))
             self.writeLog(thRoi)
             self.state = "WAIT_FOR_NO_FACE"
+            self.displayMixer.show(image);
 
         elif self.state == "WAIT_FOR_NO_FACE":
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value) == True:
@@ -209,6 +214,7 @@ class StateMachine(object):
         elif self.state == "TEMP_OK":
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value) == True:
                 self.state = "TEMP_OK"
+                self.displayMixer.show(image);
             else:
                 self.state = "IDLE"
 
