@@ -30,6 +30,8 @@ class StateMachine(object):
         self.faceSizeLowerLimit = 220
         #Affine 1
         self.transformMatrix = self.settingsManager.getSettings().affineTransform.value
+        print("Affine transform:")
+        print(self.transformMatrix)
         #self.transformMatrix = np.array([[1.70100612e-1, 4.91086300e-4, -2.62737066e+1],[5.51191729e-3, 1.75597084e-1, -2.09686199e+1]])
         self.roiFinder.setTransformMatrix(self.transformMatrix)
 
