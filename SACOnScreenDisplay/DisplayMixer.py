@@ -30,5 +30,6 @@ class DisplayMixer(object):
 
     def stop(self):
         if self.isRunning:
+            print("Stopping...")
             self.shm.detach()
             self.isRunning = False;
