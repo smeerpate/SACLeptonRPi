@@ -13,11 +13,12 @@ class DisplayMixer(object):
     def __init__(self):
         self.isRunning = False;
         self.shm = None;
+        self.mixerThread = None
 
     def show(self, image):       
         if not self.isRunning:
-            th1 = Thread(target=startDisplay)
-            th1.start()
+            self.mixerThread = Thread(target=startDisplay)
+            self.mixerThread.start()
             time.sleep(1)
 
             key = ipc.ftok("/home/pi/SACLeptonRPi", ord('i'))
@@ -32,4 +33,5 @@ class DisplayMixer(object):
         if self.isRunning:
             print("Stopping...")
             self.shm.detach()
+            self.mixerThread.kill()
             self.isRunning = False;
