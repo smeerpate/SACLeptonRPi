@@ -10,7 +10,7 @@ class DisplayMixer(object):
 
     def show(self, image):       
         if not self.isRunning:
-            th1 = Thread(target=startDisplay)
+            th1 = Thread(target=self.startDisplay)
             th1.start()
             time.sleep(1)
 
