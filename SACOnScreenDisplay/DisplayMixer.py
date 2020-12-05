@@ -1,6 +1,7 @@
 from subprocess import call
 from threading import Thread
 import time
+import sysv_ipc as ipc
 
 def startDisplay():
         call(["./SACDisplayMixer/OGLESSimpleImageWithIPC"])
