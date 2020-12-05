@@ -1,5 +1,6 @@
 import os
 import jsonpickle
+import numpy as np
 
 from .Settings import Settings
 from .Setting import Setting
