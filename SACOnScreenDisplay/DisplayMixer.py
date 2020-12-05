@@ -22,7 +22,7 @@ class DisplayMixer(object):
             self.mixerThread.start()
             time.sleep(1)
             
-            key = ipc.ftok("/home/pi/SACLeptonRPi", ord('k'))
+            key = ipc.ftok("/home/pi/SACLeptonRPi", ord('i'))
             self.shm = ipc.SharedMemory(key, 0, 0)
             self.shm.attach()
             self.isRunning = True;
