@@ -17,10 +17,10 @@ class DisplayMixer(object):
 
     def show(self, image):       
         if not self.isRunning:
-            self.mixerThread = Thread(target=startDisplay)
-            self.mixerThread.start()
-            time.sleep(1)
-
+            #self.mixerThread = Thread(target=startDisplay)
+            #self.mixerThread.start()
+            #time.sleep(1)
+            
             key = ipc.ftok("/home/pi/SACLeptonRPi", ord('i'))
             self.shm = ipc.SharedMemory(key, 0, 0)
             self.shm.attach()
@@ -28,11 +28,10 @@ class DisplayMixer(object):
 
         image = cv.flip(image, 0)
         self.shm.write(image)
+        startDisplay()
 
     def stop(self):
         if self.isRunning:
             print("Stopping...")
             self.shm.detach()
-            self.mixerThread._stop()
-            self.mixerThread.join()
             self.isRunning = False;
