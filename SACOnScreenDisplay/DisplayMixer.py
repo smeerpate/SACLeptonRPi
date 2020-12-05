@@ -8,7 +8,7 @@ class DisplayMixer(object):
         self.isRunning = False;
         self.shm = None;
 
-    def show(image):       
+    def show(self, image):       
         if not self.isRunning:
             th1 = Thread(target=startDisplay)
             th1.start()
@@ -21,7 +21,7 @@ class DisplayMixer(object):
 
         shm.write(image)
 
-    def stop():
+    def stop(self):
         if self.isRunning:
             shm.detach()
             self.isRunning = False;
