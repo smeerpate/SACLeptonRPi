@@ -209,7 +209,7 @@ class StateMachine(object):
                 self.displayMixer.show(image);
             else:
                 self.state = "IDLE"
-                self.displayMixer.stop();
+                self.displayMixer.hide();
 
         elif self.state == "TEMP_OK":
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value) == True:

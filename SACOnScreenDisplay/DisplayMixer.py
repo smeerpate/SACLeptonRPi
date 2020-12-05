@@ -17,9 +17,9 @@ class DisplayMixer(object):
 
     def show(self, image):       
         if not self.isRunning:
-            #self.mixerThread = Thread(target=startDisplay)
-            #self.mixerThread.start()
-            #time.sleep(1)
+            self.mixerThread = Thread(target=startDisplay)
+            self.mixerThread.start()
+            time.sleep(1)
             
             key = ipc.ftok("/home/pi/SACLeptonRPi", ord('i'))
             self.shm = ipc.SharedMemory(key, 0, 0)
@@ -27,8 +27,15 @@ class DisplayMixer(object):
             self.isRunning = True;
 
         image = cv.flip(image, 0)
-        self.shm.write(image)
-        startDisplay()
+        b_channel, g_channel, r_channel = cv2.split(img)
+        alpha_channel = np.ones(b_channel.shape, dtype=b_channel.dtype) * 255 #creating a dummy alpha channel image.
+        img_RGBA = cv2.merge((r_channel, g_channel, b_channel, alpha_channel))
+        self.shm.write(img_RGBA)
+        #startDisplay()
+
+    def hide(self):
+        transparent = np.zeros([480, 640, 4], dtype=np.uint8)
+        self.shm.write(transparent)
 
     def stop(self):
         if self.isRunning:

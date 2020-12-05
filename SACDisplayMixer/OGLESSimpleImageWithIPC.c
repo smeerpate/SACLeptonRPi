@@ -178,9 +178,9 @@ void Update(ESContext *esContext, float deltatime)
    //userData->textureId = CreateSimpleTexture2D (esContext);
    //esContext->userData = userData;
    // Load the texture
-   glTexImage2D ( GL_TEXTURE_2D, 0, GL_RGB,
+   glTexImage2D ( GL_TEXTURE_2D, 0, GL_RGBA,
                   userData->width, userData->height,
-                  0, GL_RGB, GL_UNSIGNED_BYTE, pSharedMemory );
+                  0, GL_RGBA, GL_UNSIGNED_BYTE, pSharedMemory );
 
    //printf("shmValue = %d\n", *pSharedMemory);
    return;
@@ -213,7 +213,7 @@ int main ( int argc, char *argv[] ) {
    width = 640;
    height = 480;
 
-   pSharedMemory = initSharedMemory(width * height * 3);
+   pSharedMemory = initSharedMemory(width * height * 4);
    image = pSharedMemory;
 
    userData.image = image;
