@@ -125,6 +125,7 @@ class SettingsManager(object):
 
         affineTransform = AffineTransformSetting("Affine transform")
         affineTransform.value = np.array([[1.70100612e-1, 4.91086300e-4, -2.62737066e+1],[5.51191729e-3, 1.75597084e-1, -2.09686199e+1]]) #Default
+        settings.affaffineTransform = affineTransform
 
         return settings
 
