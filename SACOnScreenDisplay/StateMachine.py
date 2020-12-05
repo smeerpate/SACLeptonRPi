@@ -201,8 +201,10 @@ class StateMachine(object):
                 txt = "Temp: " + str(temp) + " " + settings.threshold.unit
                 self.addText(image, txt, (color.red, color.green, color.blue))
                 self.ledDriver.output(color.red, color.green, color.blue, 100)
+                self.displayMixer.show(image);
             else:
                 self.state = "IDLE"
+                self.displayMixer.stop();
 
         elif self.state == "TEMP_OK":
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value) == True:
