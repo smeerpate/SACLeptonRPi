@@ -10,6 +10,7 @@ from SACOnScreenDisplay.SettingsManager import SettingsManager
 from SACOnScreenDisplay.LedDriver import LedDriver
 from SACOnScreenDisplay.StateMachine import StateMachine
 from SACOnScreenDisplay.OSD import OSD
+from SACOnScreenDisplay.DisplayMixer import DisplayMixer
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 
@@ -19,6 +20,7 @@ ledDriver = LedDriver(17, 27, 22)
 f = open("Logging/SAC Temp Log.csv", "a")
 stateMachine = StateMachine(settingsManager, ledDriver, f)
 osd = OSD(inputManager, settingsManager)
+displayMixer = DisplayMixer()
 
 # Target screen is 12", 1024x768 or 768x1024 in portrait mode
 screenWidth = 768
@@ -31,24 +33,12 @@ corrVal = 0
 maxVal = 0
 feverThresh = 35.4
 
-def startDisplay():
-    call(["./SACDisplayMixer/OGLESSimpleImageWithIPC"])
-   
-th1 = Thread(target=startDisplay)
-th1.start()
-time.sleep(1)
-
-key = ipc.ftok("/home/pi/SACLeptonRPi", ord('i'))
-shm = ipc.SharedMemory(key, 0, 0)
-
 camera = PiCamera()
 camera.resolution = (640, 480)
 rawCapture = PiRGBArray(camera, size=(640, 480))
 camera.meter_mode = 'spot'
 camera.framerate = 5
 time.sleep(0.5)
-
-shm.attach()
 
 for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=True):
     frame = data.array
@@ -64,7 +54,7 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
     
     #print(frame.shape)
     
-    shm.write(frame)
+    displayMixer.show(frame)
 
     #if stateMachine.state == "WAIT_FOR_NO_FACE":
         #time.sleep(5)
@@ -73,7 +63,7 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
 
 # When everything done, release the capture
 ledDriver.stop()
-shm.detach()
+displayMixer.stop()
 f.close()
 cap.release()
 cv.destroyAllWindows()
