@@ -33,5 +33,6 @@ class DisplayMixer(object):
         if self.isRunning:
             print("Stopping...")
             self.shm.detach()
-            self.mixerThread.kill()
+            self.mixerThread._stop()
+            self.mixerThread.join()
             self.isRunning = False;
