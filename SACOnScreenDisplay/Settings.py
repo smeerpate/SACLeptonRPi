@@ -17,4 +17,5 @@ class Settings(object):
         self.alarmColor = None
         self.okColor = None
         self.idleColor = None
+        self.affineTransform = None
 

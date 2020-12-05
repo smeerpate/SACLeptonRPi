@@ -7,6 +7,7 @@ from .NumberSetting import NumberSetting
 from .BooleanSetting import BooleanSetting
 from .TupleSetting import TupleSetting
 from .ColorSetting import ColorSetting
+from .AffineTransformSetting import AffineTransformSetting
 
 class SettingsManager(object):
     """description of class"""
@@ -60,7 +61,7 @@ class SettingsManager(object):
         settings.screenDimensions = screenDimensions
 
         threshold = NumberSetting("Threshold")
-        threshold.value = 35.7
+        threshold.value = 36.0
         threshold.unit = 'deg'
         threshold.step = 0.1
         threshold.decimals = 1
@@ -121,6 +122,9 @@ class SettingsManager(object):
         idleColor.green = 255
         idleColor.blue = 255
         settings.idleColor = idleColor
+
+        affineTransform = AffineTransformSetting("Affine transform")
+        affineTransform.value = np.array([[1.70100612e-1, 4.91086300e-4, -2.62737066e+1],[5.51191729e-3, 1.75597084e-1, -2.09686199e+1]]) #Default
 
         return settings
 
