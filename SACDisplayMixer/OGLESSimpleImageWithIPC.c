@@ -86,9 +86,9 @@ GLuint CreateSimpleTexture2D(ESContext *esContext) {
    // Bind the texture object
    glBindTexture ( GL_TEXTURE_2D, textureId );
    // Load the texture
-   glTexImage2D ( GL_TEXTURE_2D, 0, GL_RGB,
+   glTexImage2D ( GL_TEXTURE_2D, 0, GL_RGBA,
 		  userData->width, userData->height,
-		  0, GL_RGB, GL_UNSIGNED_BYTE, pixels );
+		  0, GL_RGBA, GL_UNSIGNED_BYTE, pixels );
    // Set the filtering mode
    glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
    glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
