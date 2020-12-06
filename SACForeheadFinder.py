@@ -17,6 +17,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
         self.faceDet = cv2.CascadeClassifier("/home/pi/SACLeptonRPi/haarcascade_frontalface_default.xml")
         self.eyesDet = cv2.CascadeClassifier("/home/pi/SACLeptonRPi/haarcascade_frontaleyes.xml")
         self.name = "Forehead"
+        self.faceFound = False
 
     ####################################################
     # Sets the the transformation matrix (M) for mapping
@@ -46,6 +47,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
 
             if showRois:
                 self.showRect(image, faceRect, (200,255,150))
+                self.faceFound = True
 
             eyesRects = self.eyesDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
             if len(eyesRects) > 0:
@@ -71,6 +73,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
         else:
             # no faces found
             self.tcROI = (-1,-1,-1,-1)
+            self.faceFound = False
             return False
 
     def showRect(self, image, rect, color):
