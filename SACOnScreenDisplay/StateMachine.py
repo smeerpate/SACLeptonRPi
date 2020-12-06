@@ -76,8 +76,6 @@ class StateMachine(object):
             return True
 
     def run(self, image):
-
-        #print("Running state machine")
         
         settings = self.settingsManager.getSettings()
         # Steps:
@@ -126,11 +124,11 @@ class StateMachine(object):
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
                 self.addText(image, "Measuring temperature...", (255, 0, 0))
                 self.displayMixer.show(image)
-                self.runFfc()
-                #if currentTime > (self.lastFFCTime + self.maxFFCInterval):
-                #    l.RunRadFfc()
-                #    self.lastFFCTime = currentTime
-                #self.state = "SET_FLUX_LINEAR_PARAMS"                
+                
+                if currentTime > (self.lastFFCTime + self.maxFFCInterval):
+                    l.RunRadFfc()
+                    self.lastFFCTime = currentTime
+                self.state = "SET_FLUX_LINEAR_PARAMS"                
             else:
                 self.state = "IDLE"
                 self.displayMixer.hide()
@@ -248,8 +246,8 @@ class StateMachine(object):
         #thRect_h = max(0, min(thRect_y + thRect_w, self.thSensorHeight-1))
         #thCorrected = (thRect_x, thRect_y, thRect_w, thRect_h)
 
-        print("TH ROI Contours")
-        print(str(thRoiContours))
+        #print("TH ROI Contours")
+        #print(str(thRoiContours))
 
         thRoi = self.getRoiFromContours(thRoiContours)
 
@@ -283,9 +281,9 @@ class StateMachine(object):
         self.setThRoiOnLepton(thRoi)
             
         self.values = l.GetROIValues()
-        print("TH ROI from Lepton:")
-        print(str(l.GetROI()))
-        print(str(self.values))
+        #print("TH ROI from Lepton:")
+        #print(str(l.GetROI()))
+        #print(str(self.values))
         self.writeLog(thRoi)
         self.state = "WAIT_FOR_NO_FACE"
 
@@ -310,8 +308,8 @@ class StateMachine(object):
        
     def setThRoiOnLepton(self, thRoi):
         # TH ROI: tuple (start point, end point)
-        print("Setting ROI on Lepton:")
-        print(str(thRoi))
+        #print("Setting ROI on Lepton:")
+        #print(str(thRoi))
 
         startPoint, endPoint = thRoi
 
