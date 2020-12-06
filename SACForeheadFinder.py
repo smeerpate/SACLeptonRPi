@@ -43,6 +43,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
             # only consider first face found.
             # rect comes in a tuple (x,y,w,h).
             # todo: check for biggest bounding box.
+            # todo: check if face is in the middle!
             faceRect = rects[0]
 
             if showRois:

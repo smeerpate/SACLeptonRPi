@@ -115,6 +115,7 @@ class StateMachine(object):
                     self.displayMixer.show(image)
                 else:
                     self.state = "RUN_FFC"
+                    self.addText(image, "Measuring temperature...", (255, 0, 0))
                     self.displayMixer.show(image)
             else:
                 self.state = "IDLE"
@@ -122,17 +123,18 @@ class StateMachine(object):
 
         elif self.state == "RUN_FFC":
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
+                self.displayMixer.show(image)
                 if currentTime > (self.lastFFCTime + self.maxFFCInterval):
                     l.RunRadFfc()
                     self.lastFFCTime = currentTime
-                self.state = "SET_FLUX_LINEAR_PARAMS"
-                self.displayMixer.show(image)
+                self.state = "SET_FLUX_LINEAR_PARAMS"                
             else:
                 self.state = "IDLE"
                 self.displayMixer.hide()
 
         elif self.state == "SET_FLUX_LINEAR_PARAMS":
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
+                self.displayMixer.show(image)
                 sensorTemp = l.GetAuxTemp()
                 sceneEmissivity = 0.98
                 TBkg = sensorTemp
@@ -145,15 +147,13 @@ class StateMachine(object):
                 FLParams = (sceneEmissivity,TBkg,tauWindow,TWindow,tauAtm,TAtm,reflWindow,TRefl)
                 print(str(FLParams))
                 l.SetFluxLinearParams(FLParams)
-                self.state = "GET_TEMPERATURE"
-                self.displayMixer.show(image)
+                self.state = "GET_TEMPERATURE"                
             else:
                 self.state = "IDLE"
                 self.displayMixer.hide()
 
         elif self.state == "GET_TEMPERATURE":
-            if self.roiFinder.getTcContours(image, settings.showFoundFace.value):    
-                self.addText(image, "Measuring temperature...", (255, 0, 0))
+            if self.roiFinder.getTcContours(image, settings.showFoundFace.value):  
                 self.displayMixer.show(image);
                 thRoiContours = self.roiFinder.getThContours() # LT, RT, LB, RB
 
@@ -224,10 +224,9 @@ class StateMachine(object):
                 else:
                     color = settings.okColor
                     self.addText(image, "Ok, you can enter.", (0, 255, 0))
-                #txt = "Temp: " + str(temp) + " " + settings.threshold.unit
-                #self.addText(image, txt, (color.red, color.green, color.blue))
-                self.ledDriver.output(color.red, color.green, color.blue, 100)
+
                 self.displayMixer.show(image);
+                self.ledDriver.output(color.red, color.green, color.blue, 100)                
             else:
                 self.state = "IDLE"
                 self.displayMixer.hide();
