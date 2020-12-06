@@ -123,6 +123,7 @@ class StateMachine(object):
 
         elif self.state == "RUN_FFC":
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
+                self.addText(image, "Measuring temperature...", (255, 0, 0))
                 self.displayMixer.show(image)
                 if currentTime > (self.lastFFCTime + self.maxFFCInterval):
                     l.RunRadFfc()
@@ -134,6 +135,7 @@ class StateMachine(object):
 
         elif self.state == "SET_FLUX_LINEAR_PARAMS":
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
+                self.addText(image, "Measuring temperature...", (255, 0, 0))
                 self.displayMixer.show(image)
                 sensorTemp = l.GetAuxTemp()
                 sceneEmissivity = 0.98
