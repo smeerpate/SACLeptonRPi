@@ -125,7 +125,7 @@ class StateMachine(object):
                 l.RunRadFfc()
                 self.lastFFCTime = currentTime
             self.state = "SET_FLUX_LINEAR_PARAMS"
-            self.displayMixer.show(image);
+            #self.displayMixer.show(image);
 
         elif self.state == "SET_FLUX_LINEAR_PARAMS":
             sensorTemp = l.GetAuxTemp()
@@ -141,7 +141,7 @@ class StateMachine(object):
             print(str(FLParams))
             l.SetFluxLinearParams(FLParams)
             self.state = "GET_TEMPERATURE"
-            self.displayMixer.show(image);
+            #self.displayMixer.show(image);
 
         elif self.state == "GET_TEMPERATURE":
             thRoiContours = self.roiFinder.getThContours() # LT, RT, LB, RB
@@ -197,7 +197,8 @@ class StateMachine(object):
             self.displayMixer.show(image);
 
         elif self.state == "WAIT_FOR_NO_FACE":
-            if self.roiFinder.getTcContours(image, settings.showFoundFace.value) == True:
+            self.roiFinder.getTcContours(image, settings.showFoundFace.value)
+            if self.roiFinder.faceFound:
                 self.state = "WAIT_FOR_NO_FACE"
                 temp = self.values[1]
                 print("Temp: " + str(temp) + "DegC")                
@@ -206,10 +207,12 @@ class StateMachine(object):
 
                 if temp > settings.threshold.value:
                     color = settings.alarmColor                    
+                    self.addText(image, "Not ok, please repeat or leave.", (255, 0, 0))
                 else:
                     color = settings.okColor
-                txt = "Temp: " + str(temp) + " " + settings.threshold.unit
-                self.addText(image, txt, (color.red, color.green, color.blue))
+                    self.addText(image, "Ok, you can enter.", (0, 255, 0))
+                #txt = "Temp: " + str(temp) + " " + settings.threshold.unit
+                #self.addText(image, txt, (color.red, color.green, color.blue))
                 self.ledDriver.output(color.red, color.green, color.blue, 100)
                 self.displayMixer.show(image);
             else:
@@ -222,6 +225,7 @@ class StateMachine(object):
                 self.displayMixer.show(image);
             else:
                 self.state = "IDLE"
+                self.displayMixer.hide()
 
        
     def setThRoiOnLepton(self, thRoi):
