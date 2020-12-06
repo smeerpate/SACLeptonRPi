@@ -103,8 +103,10 @@ class StateMachine(object):
             else:
                 if self.roiFinder.faceFound:
                     self.addText(image, "Please look at the machine for a temperature scan.", (255, 0, 0))
+                    self.displayMixer.show(image)
+
                 self.state = "IDLE"
-                self.displayMixer.show(image)
+                self.displayMixer.hide()                
 
         elif self.state == "WAIT_FOR_SIZE_OK":
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value) == True:
