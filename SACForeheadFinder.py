@@ -39,7 +39,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
         gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
         rects = self.faceDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
       
-        if len(rects) > 0:
+        if len(rects) == 1 and rects[0][0] > 220 and (rects[0][0] + rects[0][2]) < 420:
             # only consider first face found.
             # rect comes in a tuple (x,y,w,h).
             # todo: check for biggest bounding box.
