@@ -25,7 +25,6 @@ class StateMachine(object):
         self.values = (0, 0, 0, 0)
         #self.roiFinder = FaceFinder()
         self.roiFinder = ForeheadFinder()
-        # Settings. We will need to get these from a JSON file.
         self.thSensorWidth = 80
         self.thSensorHeight = 60
         self.faceSizeUpperLimit = 280
@@ -97,9 +96,9 @@ class StateMachine(object):
         if self.state == "IDLE":
             color = settings.idleColor
             self.ledDriver.output(color.red, color.green, color.blue, 100)
-            if self.roiFinder.getTcContours(image, settings.showFoundFace.value) == True: #Face + eyes found -> forehead ok
+            if self.roiFinder.getTcContours(image, settings.showFoundFace.value): #Face + eyes found -> forehead ok
                 self.state = "WAIT_FOR_SIZE_OK"
-                self.displayMixer.show(image);
+                self.displayMixer.show(image)
             else:
                 if self.roiFinder.faceFound:
                     self.addText(image, "Please look at the machine for a temperature scan.", (255, 0, 0))
@@ -110,91 +109,105 @@ class StateMachine(object):
                 self.state = "IDLE"                
 
         elif self.state == "WAIT_FOR_SIZE_OK":
-            if self.roiFinder.getTcContours(image, settings.showFoundFace.value) == True:
-                if self.checkFaceSize(image, self.roiFinder.getTcROIWidth(), self.faceSizeLowerLimit, self.faceSizeUpperLimit) == False:
+            if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
+                if not self.checkFaceSize(image, self.roiFinder.getTcROIWidth(), self.faceSizeLowerLimit, self.faceSizeUpperLimit):
                     self.state = "WAIT_FOR_SIZE_OK"
-                    self.displayMixer.show(image);
+                    self.displayMixer.show(image)
                 else:
                     self.state = "RUN_FFC"
-                    self.displayMixer.show(image);
+                    self.displayMixer.show(image)
             else:
                 self.state = "IDLE"
+                self.displayMixer.hide()
 
         elif self.state == "RUN_FFC":
-            if currentTime > (self.lastFFCTime + self.maxFFCInterval):
-                l.RunRadFfc()
-                self.lastFFCTime = currentTime
-            self.state = "SET_FLUX_LINEAR_PARAMS"
-            #self.displayMixer.show(image);
+            if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
+                if currentTime > (self.lastFFCTime + self.maxFFCInterval):
+                    l.RunRadFfc()
+                    self.lastFFCTime = currentTime
+                self.state = "SET_FLUX_LINEAR_PARAMS"
+                self.displayMixer.show(image)
+            else:
+                self.state = "IDLE"
+                self.displayMixer.hide()
 
         elif self.state == "SET_FLUX_LINEAR_PARAMS":
-            sensorTemp = l.GetAuxTemp()
-            sceneEmissivity = 0.98
-            TBkg = sensorTemp
-            tauWindow = 1.0
-            TWindow = sensorTemp
-            tauAtm = 1.0
-            TAtm = sensorTemp
-            reflWindow = 0.0
-            TRefl = sensorTemp
-            FLParams = (sceneEmissivity,TBkg,tauWindow,TWindow,tauAtm,TAtm,reflWindow,TRefl)
-            print(str(FLParams))
-            l.SetFluxLinearParams(FLParams)
-            self.state = "GET_TEMPERATURE"
-            #self.displayMixer.show(image);
+            if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
+                sensorTemp = l.GetAuxTemp()
+                sceneEmissivity = 0.98
+                TBkg = sensorTemp
+                tauWindow = 1.0
+                TWindow = sensorTemp
+                tauAtm = 1.0
+                TAtm = sensorTemp
+                reflWindow = 0.0
+                TRefl = sensorTemp
+                FLParams = (sceneEmissivity,TBkg,tauWindow,TWindow,tauAtm,TAtm,reflWindow,TRefl)
+                print(str(FLParams))
+                l.SetFluxLinearParams(FLParams)
+                self.state = "GET_TEMPERATURE"
+                self.displayMixer.show(image)
+            else:
+                self.state = "IDLE"
+                self.displayMixer.hide()
 
         elif self.state == "GET_TEMPERATURE":
-            thRoiContours = self.roiFinder.getThContours() # LT, RT, LB, RB
+            if self.roiFinder.getTcContours(image, settings.showFoundFace.value):    
+                self.addText(image, "Measuring temperature...", (255, 0, 0))
+                self.displayMixer.show(image);
+                thRoiContours = self.roiFinder.getThContours() # LT, RT, LB, RB
 
-            #thRect_x, thRect_y, thRect_w, thRect_h = cv.boundingRect(thRoi)
-            # x and y should not be negativeor lager then the FPA. Clip the values.
-            #thRect_x = max(0, min(thRect_x, self.thSensorWidth-2))
-            #thRect_y = max(0, min(thRect_y, self.thSensorHeight-2))
-            #thRect_w = max(0, min(thRect_x + thRect_w, self.thSensorWidth-1))
-            #thRect_h = max(0, min(thRect_y + thRect_w, self.thSensorHeight-1))
-            #thCorrected = (thRect_x, thRect_y, thRect_w, thRect_h)
+                #thRect_x, thRect_y, thRect_w, thRect_h = cv.boundingRect(thRoi)
+                # x and y should not be negativeor lager then the FPA. Clip the values.
+                #thRect_x = max(0, min(thRect_x, self.thSensorWidth-2))
+                #thRect_y = max(0, min(thRect_y, self.thSensorHeight-2))
+                #thRect_w = max(0, min(thRect_x + thRect_w, self.thSensorWidth-1))
+                #thRect_h = max(0, min(thRect_y + thRect_w, self.thSensorHeight-1))
+                #thCorrected = (thRect_x, thRect_y, thRect_w, thRect_h)
 
-            print("TH ROI Contours")
-            print(str(thRoiContours))
+                print("TH ROI Contours")
+                print(str(thRoiContours))
 
-            thRoi = self.getRoiFromContours(thRoiContours)
+                thRoi = self.getRoiFromContours(thRoiContours)
 
-            # Flip thRoi vertically
-            #start, end = thRoi
-            #w = end[0] - start[0]
-            #thRoi = (80 - start[0] - w, start[1]), (80 - start[0], end[1])
+                # Flip thRoi vertically
+                #start, end = thRoi
+                #w = end[0] - start[0]
+                #thRoi = (80 - start[0] - w, start[1]), (80 - start[0], end[1])
 
-            # Translate a bit to the right
-            start, end = thRoi
-            xTrans = 10
-            thRoi = (start[0] + xTrans, start[1]), (end[0] + xTrans, end[1])
+                # Translate a bit to the right
+                start, end = thRoi
+                xTrans = 10
+                thRoi = (start[0] + xTrans, start[1]), (end[0] + xTrans, end[1])
             
-            #print("Total pixels: ")
-            #print(w*h)
+                #print("Total pixels: ")
+                #print(w*h)
 
-            #if settings.showFoundFace.value:
-                #raw,_ = self.lepton.capture()
-                #cv.normalize(raw, raw, 0, 65535, cv.NORM_MINMAX)
-                #np.right_shift(raw, 8, raw)
-                #thImage = np.uint8(raw) # 80x60
+                #if settings.showFoundFace.value:
+                    #raw,_ = self.lepton.capture()
+                    #cv.normalize(raw, raw, 0, 65535, cv.NORM_MINMAX)
+                    #np.right_shift(raw, 8, raw)
+                    #thImage = np.uint8(raw) # 80x60
 
-                #self.addRectangle(thImage, thRoi, (255, 255, 255))
-                #self.addRectangle(thImage, thCorrected, (255, 0, 0))
-                #self.roiFinder.getTcContours(image, settings.showFoundFace.value)
-                #x_offset=y_offset=0
-                #image[y_offset:y_offset+thImage.shape[0], x_offset:x_offset+thImage.shape[1]] = thImage
-                #imageName = "Forehead " + str(int(round(time.time())))
-                #cv.imwrite('/home/pi/SACLeptonRPi/' + imageName +'.jpg', image)
+                    #self.addRectangle(thImage, thRoi, (255, 255, 255))
+                    #self.addRectangle(thImage, thCorrected, (255, 0, 0))
+                    #self.roiFinder.getTcContours(image, settings.showFoundFace.value)
+                    #x_offset=y_offset=0
+                    #image[y_offset:y_offset+thImage.shape[0], x_offset:x_offset+thImage.shape[1]] = thImage
+                    #imageName = "Forehead " + str(int(round(time.time())))
+                    #cv.imwrite('/home/pi/SACLeptonRPi/' + imageName +'.jpg', image)
 
-            self.setThRoiOnLepton(thRoi)
+                self.setThRoiOnLepton(thRoi)
             
-            self.values = l.GetROIValues()
-            print("TH ROI from Lepton:")
-            print(str(l.GetROI()))
-            print(str(self.values))
-            self.writeLog(thRoi)
-            self.state = "WAIT_FOR_NO_FACE"
-            self.displayMixer.show(image);
+                self.values = l.GetROIValues()
+                print("TH ROI from Lepton:")
+                print(str(l.GetROI()))
+                print(str(self.values))
+                self.writeLog(thRoi)
+                self.state = "WAIT_FOR_NO_FACE"
+            else:
+                self.state = "IDLE"
+                self.displayMixer.hide()
 
         elif self.state == "WAIT_FOR_NO_FACE":
             self.roiFinder.getTcContours(image, settings.showFoundFace.value)
@@ -218,14 +231,6 @@ class StateMachine(object):
             else:
                 self.state = "IDLE"
                 self.displayMixer.hide();
-
-        elif self.state == "TEMP_OK":
-            if self.roiFinder.getTcContours(image, settings.showFoundFace.value) == True:
-                self.state = "TEMP_OK"
-                self.displayMixer.show(image);
-            else:
-                self.state = "IDLE"
-                self.displayMixer.hide()
 
        
     def setThRoiOnLepton(self, thRoi):
