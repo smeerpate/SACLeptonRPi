@@ -97,14 +97,12 @@ class StateMachine(object):
         if self.state == "IDLE":
             color = settings.idleColor
             self.ledDriver.output(color.red, color.green, color.blue, 100)
-            if self.roiFinder.getTcContours(image, settings.showFoundFace.value) == True:
+            if self.roiFinder.getTcContours(image, settings.showFoundFace.value) == True: #Face + eyes found -> forehead ok
                 self.state = "WAIT_FOR_SIZE_OK"
                 self.displayMixer.show(image);
             else:
                 if self.roiFinder.faceFound:
-                    self.addText(image, "Please look at the machine for a temperature scan.")
-                else:                    
-                    self.addText(image, 'Geen gezicht gevonden.', (255, 0, 0))
+                    self.addText(image, "Please look at the machine for a temperature scan.", (255, 0, 0))
                 self.state = "IDLE"
                 self.displayMixer.show(image)
 
