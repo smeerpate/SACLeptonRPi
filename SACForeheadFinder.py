@@ -44,11 +44,15 @@ class ForeheadFinder(RectangleOfInterestFinder):
             # rect comes in a tuple (x,y,w,h).
             # todo: check for biggest bounding box.
             # todo: check if face is in the middle!
+
+
             faceRect = rects[0]
 
             if showRois:
                 self.showRect(image, faceRect, (200,255,150))
                 self.faceFound = True
+                self.tcROI = (x, y, w, h /4)
+                return True
 
             eyesRects = self.eyesDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
             if len(eyesRects) > 0:
