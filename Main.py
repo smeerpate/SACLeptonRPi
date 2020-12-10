@@ -46,8 +46,8 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
         osd.run(frame)        
     else:
         stateMachine.run(frame)
-        gray = cv.cvtColor(frame, cv.COLOR_RGB2GRAY)
-        displayMixer.show(gray);
+        #gray = cv.cvtColor(frame, cv.COLOR_RGB2GRAY)
+        #displayMixer.show(gray);
 
                 
     rawCapture.truncate(0)    
