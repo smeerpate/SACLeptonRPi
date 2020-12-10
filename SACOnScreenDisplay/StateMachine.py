@@ -191,7 +191,7 @@ class StateMachine(object):
                 #print("TH ROI from Lepton:")
                 #print(str(l.GetROI()))
                 #print(str(self.values))
-                self.writeLog(thRoi)
+                #self.writeLog(thRoi)
                 self.state = "WAIT_FOR_NO_FACE"
             else:
                 self.state = "IDLE"
