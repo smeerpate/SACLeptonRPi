@@ -22,7 +22,7 @@ class DisplayMixer(object):
 
     def show(self, image):     
         image = cv.flip(image, 0)
-        b_channel, g_channel, r_channel = cv.split(image)
+        r_channel, g_channel, b_channel = cv.split(image)
         alpha_channel = np.ones(b_channel.shape, dtype=b_channel.dtype) * 255 #creating a dummy alpha channel image.
         img_RGBA = cv.merge((r_channel, g_channel, b_channel, alpha_channel))
         self.shm.write(img_RGBA);

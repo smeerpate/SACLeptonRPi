@@ -1,9 +1,10 @@
 {
   "ExpandedNodes": [
     "",
+    "\\SACDisplayMixer",
     "\\SACOnScreenDisplay",
     "\\SACTempMeasure"
   ],
-  "SelectedNode": "\\SACGetAffineTransform.py",
+  "SelectedNode": "\\Main.py",
   "PreviewInSolutionExplorer": false
 }
