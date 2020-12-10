@@ -121,8 +121,8 @@ class StateMachine(object):
 
         elif self.state == "RUN_FFC":
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
-                self.addText(image, "Measuring temperature...", (255, 0, 0))
-                self.displayMixer.show(image)
+                #self.addText(image, "Measuring temperature...", (255, 0, 0))
+                #self.displayMixer.show(image)
                 self.runFfc()                
                 self.state = "SET_FLUX_LINEAR_PARAMS"                
             else:
@@ -131,8 +131,8 @@ class StateMachine(object):
 
         elif self.state == "SET_FLUX_LINEAR_PARAMS":
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
-                self.addText(image, "Measuring temperature...", (255, 0, 0))
-                self.displayMixer.show(image)
+                #self.addText(image, "Measuring temperature...", (255, 0, 0))
+                #self.displayMixer.show(image)
                 self.setFluxLinearParams()
                 self.state = "GET_TEMPERATURE"                
             else:
@@ -141,8 +141,8 @@ class StateMachine(object):
 
         elif self.state == "GET_TEMPERATURE":
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):  
-                self.addText(image, "Measuring temperature...", (255, 0, 0))
-                self.displayMixer.show(image);
+                #self.addText(image, "Measuring temperature...", (255, 0, 0))
+                #self.displayMixer.show(image);
                 thRoiContours = self.roiFinder.getThContours() # LT, RT, LB, RB
 
                 #thRect_x, thRect_y, thRect_w, thRect_h = cv.boundingRect(thRoi)
