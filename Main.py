@@ -34,7 +34,7 @@ feverThresh = 35.4
 camera = PiCamera()
 camera.resolution = (640, 480)
 rawCapture = PiRGBArray(camera, size=(640, 480))
-camera.meter_mode = 'average'
+camera.meter_mode = 'backlit'
 camera.framerate = 30
 time.sleep(0.5)
 
