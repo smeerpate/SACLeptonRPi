@@ -51,7 +51,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
             if showRois:
                 self.showRect(image, faceRect, (200,255,150))
                 self.faceFound = True
-                self.tcROI = (x, y, w, h /4)
+                self.tcROI = (faceRect[0], faceRect[1], faceRect[2], faceRect[3] /4)
                 return True
 
             eyesRects = self.eyesDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
