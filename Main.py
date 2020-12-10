@@ -35,6 +35,7 @@ camera = PiCamera()
 camera.resolution = (640, 480)
 rawCapture = PiRGBArray(camera, size=(640, 480))
 camera.meter_mode = 'spot'
+camera.awb_mode = 'off'
 camera.framerate = 30
 time.sleep(0.5)
 
