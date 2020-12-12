@@ -170,7 +170,7 @@ class StateMachine(object):
 
                 color = None
 
-                if temp > settings.threshold.value:
+                if self.values[1] > settings.threshold.value:
                     color = settings.alarmColor
                     self.displayMixer.showTemperatureNok(image)
                 else:
