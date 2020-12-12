@@ -135,7 +135,7 @@ class StateMachine(object):
             print("Set flux linear params took: " + str(int(round(time.time() * 1000)) - start) + "ms")
 
         elif self.state == "GET_TEMPERATURE":
-            start = int(round(time.time() * 1000))
+            startTime = int(round(time.time() * 1000))
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):  
                 thRoiContours = self.roiFinder.getThContours() # LT, RT, LB, RB
 
@@ -175,7 +175,7 @@ class StateMachine(object):
             else:
                 self.state = "IDLE"
                 self.displayMixer.hide()
-            print("Get temp took: " + str(int(round(time.time() * 1000)) - start) + "ms")
+            print("Get temp took: " + str(int(round(time.time() * 1000)) - startTime) + "ms")
 
         elif self.state == "WAIT_FOR_NO_FACE":
             self.roiFinder.getTcContours(image, settings.showFoundFace.value)
