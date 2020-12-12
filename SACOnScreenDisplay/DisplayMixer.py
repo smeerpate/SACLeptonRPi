@@ -34,9 +34,13 @@ class DisplayMixer(object):
 
         start = int(round(time.time() * 1000))
         slide = cv.imread(slideName)
+        print("read from disk: " + str(int(round(time.time() * 1000)) - start) + "ms")
+        start = int(round(time.time() * 1000))
         slide = cv.cvtColor(slide, cv.COLOR_RGB2RGBA)        
+        print("cvt color: " + str(int(round(time.time() * 1000)) - start) + "ms")
+        start = int(round(time.time() * 1000))
         slide = cv.flip(slide, 0) # maybe flipped on disk instead of doing it codewise???? because these slides are hardcoded so...
-        print("read, cvt + flip took: " + str(int(round(time.time() * 1000)) - start) + "ms")
+        print("flip took: " + str(int(round(time.time() * 1000)) - start) + "ms")
         #reclame = np.zeros([1110, 1080, 4], dtype=np.uint8)
         #reclame[:] = (0, 0, 255, 255)
         print("slide size: " + str(slide.shape))
