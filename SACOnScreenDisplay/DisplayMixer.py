@@ -35,7 +35,7 @@ class DisplayMixer(object):
         reclame[:] = (0, 0, 255, 255)
         print("reclame size: " + str(reclame.shape))
 
-        self.shm.write(np.hstack((img_RGBA, reclame)))
+        self.shm.write(np.vstack((img_RGBA, reclame)))
 
     def hide(self):
         transparent = np.zeros([1920, 1080, 4], dtype=np.uint8)
