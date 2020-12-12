@@ -211,8 +211,8 @@ int main ( int argc, char *argv[] ) {
    GLubyte *image;
 
    // The size of our image. If needed bigger change display width/height in esUtil as well.
-   width = 640;
-   height = 480;
+   width = 1080;
+   height = 1920;
 
    pSharedMemory = initSharedMemory(width * height * 4);
    image = pSharedMemory;
