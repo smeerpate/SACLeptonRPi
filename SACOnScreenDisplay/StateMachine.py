@@ -106,7 +106,11 @@ class StateMachine(object):
                     self.state = "WAIT_FOR_SIZE_OK"
                     self.displayMixer.showDontMove(image)
                 else:
-                    self.state = "RUN_FFC"
+                    self.currentTime = int(round(time.time()))
+                    if self.currentTime > (self.lastFFCTime + self.maxFFCInterval):
+                        self.state = "RUN_FFC"                        
+                    else:
+                        self.state = "SET_FLUX_LINEAR_PARAMS"
                     self.addText(image, "Initialising...", (255, 0, 0))
                     self.displayMixer.showDontMove(image)
             else:
@@ -119,7 +123,8 @@ class StateMachine(object):
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
                 self.addText(image, "Initialising...", (255, 0, 0))
                 self.displayMixer.showDontMove(image)
-                self.runFfc()                
+                self.runFfc()    
+                # maybe add a delay here
                 self.state = "SET_FLUX_LINEAR_PARAMS"                
             else:
                 self.state = "IDLE"
@@ -263,10 +268,8 @@ class StateMachine(object):
         self.state = "WAIT_FOR_NO_FACE"
 
     def runFfc(self):
-        currentTime = int(round(time.time()))
-        if self.currentTime > (self.lastFFCTime + self.maxFFCInterval):
-            l.RunRadFfc()
-            self.lastFFCTime = self.currentTime
+        l.RunRadFfc()
+        self.lastFFCTime = self.currentTime
 
     def setFluxLinearParams(self):
         sensorTemp = l.GetAuxTemp()
