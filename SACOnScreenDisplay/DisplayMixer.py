@@ -29,7 +29,7 @@ class DisplayMixer(object):
 
     def hide(self):
         transparent = np.zeros([1920, 1080, 4], dtype=np.uint8)
-        transparent[:] = (0, 0, 255)
+        transparent[:] = (0, 0, 255, 255)
         self.shm.write(transparent)
 
     def stop(self):
