@@ -32,7 +32,7 @@ class DisplayMixer(object):
         alpha_channel = np.ones(b_channel.shape, dtype=b_channel.dtype) * 255 #creating a dummy alpha channel image.
         img_RGBA = cv.merge((r_channel, g_channel, b_channel, alpha_channel))
 
-        slide = cv.imread("Slides/SAC_MEASURING.JPG")
+        slide = cv.imread("Slides/SAC_MEASURING.jpg")
         #reclame = np.zeros([1110, 1080, 4], dtype=np.uint8)
         #reclame[:] = (0, 0, 255, 255)
         print("slide size: " + str(slide.shape))
