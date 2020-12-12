@@ -57,7 +57,7 @@ class DisplayMixer(object):
         self.show(image, "Slides/SAC_DONTMOVE.jpg")
 
     def hide(self):
-        transparent = np.full([1920, 1080, 4], 255, dtype=np.uint8)
+        transparent = np.full([1920, 1080, 4], 0, dtype=np.uint8)
         self.shm.write(transparent)
 
     def stop(self):
