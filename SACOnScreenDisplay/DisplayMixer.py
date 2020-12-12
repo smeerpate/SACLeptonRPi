@@ -28,7 +28,8 @@ class DisplayMixer(object):
         self.shm.write(img_RGBA);
 
     def hide(self):
-        transparent = np.zeros([480, 640, 4], dtype=np.uint8)
+        transparent = np.zeros([1920, 1080, 4], dtype=np.uint8)
+        transparent[:] = (0, 0, 255)
         self.shm.write(transparent)
 
     def stop(self):
