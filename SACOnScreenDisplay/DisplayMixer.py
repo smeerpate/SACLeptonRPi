@@ -20,7 +20,7 @@ class DisplayMixer(object):
         self.shm = ipc.SharedMemory(key, 0, 0)
         self.shm.attach()
 
-    def show(self, image):     
+    def show(self, image, slideName):     
         # image = 480(h)*640(w)
         #start = int(round(time.time() * 1000))
         resizeFactor = 1.6875
@@ -33,7 +33,7 @@ class DisplayMixer(object):
         img_RGBA = cv.merge((r_channel, g_channel, b_channel, alpha_channel))
 
         start = int(round(time.time() * 1000))
-        slide = cv.imread("Slides/SAC_MEASURING.jpg")
+        slide = cv.imread(slideName)
         slide = cv.cvtColor(slide, cv.COLOR_RGB2RGBA)        
         slide = cv.flip(slide, 0) # maybe flipped on disk instead of doing it codewise???? because these slides are hardcoded so...
         print("read, cvt + flip took: " + str(int(round(time.time() * 1000)) - start) + "ms")
@@ -43,6 +43,18 @@ class DisplayMixer(object):
 
         self.shm.write(np.vstack((slide, img_RGBA)))
         #print("Show took: " + str(int(round(time.time() * 1000)) - start) + "ms")
+
+    def showMeasuring(self, image):
+        self.show(image, "Slides/SAC_MEASURING.jpg")
+
+    def showTemperatureOk(self, image):
+        self.show(image, "Slides/SAC_TEMPOK.jpg")
+
+    def showTemperatureNok(self, image):
+        self.show(image, "Slides/SAC_TEMPNOK.jpg")
+
+    def showDontMove(self, image):
+        self.show(image, "Slides/SAC_DONTMOVE.jpg")
 
     def hide(self):
         transparent = np.zeros([1920, 1080, 4], dtype=np.uint8)

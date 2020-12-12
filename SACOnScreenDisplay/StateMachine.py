@@ -88,11 +88,11 @@ class StateMachine(object):
             self.ledDriver.output(color.red, color.green, color.blue, 100)
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value): #Face + eyes found -> forehead ok
                 self.state = "WAIT_FOR_SIZE_OK"
-                self.displayMixer.show(image)
+                self.displayMixer.showDontMove(image)
             else:
                 if self.roiFinder.faceFound:
                     self.addText(image, "Please look at the machine for a temperature scan.", (255, 0, 0))
-                    self.displayMixer.show(image)
+                    self.displayMixer.showDontMove(image)
                 else:
                     self.displayMixer.hide()
 
@@ -104,11 +104,11 @@ class StateMachine(object):
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
                 if not self.checkFaceSize(image, self.roiFinder.getTcROIWidth(), self.faceSizeLowerLimit, self.faceSizeUpperLimit):
                     self.state = "WAIT_FOR_SIZE_OK"
-                    self.displayMixer.show(image)
+                    self.displayMixer.showDontMove(image)
                 else:
                     self.state = "RUN_FFC"
                     self.addText(image, "Measuring temperature...", (255, 0, 0))
-                    self.displayMixer.show(image)
+                    self.displayMixer.showMeasuring(image)
             else:
                 self.state = "IDLE"
                 self.displayMixer.hide()
@@ -165,9 +165,19 @@ class StateMachine(object):
                 #print("Total pixels: ")
                 #print(w*h)
 
-
                 self.setThRoiOnLepton(thRoi)            
                 self.values = l.GetROIValues()
+
+                color = None
+
+                if temp > settings.threshold.value:
+                    color = settings.alarmColor
+                    self.displayMixer.showTemperatureNok(image)
+                else:
+                    color = settings.okColor
+                    self.displayMixer.showTemperatureOk(image)
+
+                self.ledDriver.output(color.red, color.green, color.blue, 100)  
                 #print("TH ROI from Lepton:")
                 #print(str(l.GetROI()))
                 #print(str(self.values))                
@@ -180,21 +190,8 @@ class StateMachine(object):
         elif self.state == "WAIT_FOR_NO_FACE":
             self.roiFinder.getTcContours(image, settings.showFoundFace.value)
             if self.roiFinder.faceFound:
-                self.state = "WAIT_FOR_NO_FACE"
-                temp = self.values[1]
-                print("Temp: " + str(temp) + "DegC")                
-
-                color = None
-
-                if temp > settings.threshold.value:
-                    color = settings.alarmColor                    
-                    self.addText(image, "Not ok, please repeat or leave.", (255, 0, 0))
-                else:
-                    color = settings.okColor
-                    self.addText(image, "Ok, you can enter.", (0, 255, 0))
-
-                self.displayMixer.show(image);
-                self.ledDriver.output(color.red, color.green, color.blue, 100)                
+                print("Temp: " + str(self.values[1]) + "DegC")    
+                #self.displayMixer.show(image);                              
             else:
                 self.writeLog()
                 self.state = "IDLE"
