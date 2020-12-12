@@ -20,7 +20,23 @@ class DisplayMixer(object):
         self.shm = ipc.SharedMemory(key, 0, 0)
         self.shm.attach()
 
-    def show(self, image, slideName):     
+        self.measuring = cv.imread("Slides/SAC_MEASURING.jpg")
+        self.measuring = cv.cvtColor(self.measuring, cv.COLOR_RGB2RGBA)
+        self.measuring = cv.flip(self.measuring, 0)
+
+        self.tempOk = cv.imread("Slides/SAC_TEMPOK.jpg")
+        self.tempOk = cv.cvtColor(self.tempOk, cv.COLOR_RGB2RGBA)
+        self.tempOk = cv.flip(self.tempOk, 0)
+
+        self.tempNok = cv.imread("Slides/SAC_TEMPNOK.jpg")
+        self.tempNok = cv.cvtColor(self.tempNok, cv.COLOR_RGB2RGBA)
+        self.tempNok = cv.flip(self.tempNok, 0)
+
+        self.dontMove = cv.imread("Slides/SAC_DONTMOVE.jpg")
+        self.dontMove = cv.cvtColor(self.dontMove, cv.COLOR_RGB2RGBA)
+        self.dontMove = cv.flip(self.dontMove, 0)
+
+    def show(self, image, slide):     
         # image = 480(h)*640(w)
         #start = int(round(time.time() * 1000))
         resizeFactor = 1.6875
@@ -32,15 +48,15 @@ class DisplayMixer(object):
         alpha_channel = np.ones(b_channel.shape, dtype=b_channel.dtype) * 255 #creating a dummy alpha channel image.
         img_RGBA = cv.merge((r_channel, g_channel, b_channel, alpha_channel))
 
-        start = int(round(time.time() * 1000))
-        slide = cv.imread(slideName)
-        print("read from disk: " + str(int(round(time.time() * 1000)) - start) + "ms")
-        start = int(round(time.time() * 1000))
-        slide = cv.cvtColor(slide, cv.COLOR_RGB2RGBA)        
-        print("cvt color: " + str(int(round(time.time() * 1000)) - start) + "ms")
-        start = int(round(time.time() * 1000))
-        slide = cv.flip(slide, 0) # maybe flipped on disk instead of doing it codewise???? because these slides are hardcoded so...
-        print("flip took: " + str(int(round(time.time() * 1000)) - start) + "ms")
+        #start = int(round(time.time() * 1000))
+        #slide = cv.imread(slideName)
+        #print("read from disk: " + str(int(round(time.time() * 1000)) - start) + "ms")
+        #start = int(round(time.time() * 1000))
+        #slide = cv.cvtColor(slide, cv.COLOR_RGB2RGBA)        
+        #print("cvt color: " + str(int(round(time.time() * 1000)) - start) + "ms")
+        #start = int(round(time.time() * 1000))
+        #slide = cv.flip(slide, 0) # maybe flipped on disk instead of doing it codewise???? because these slides are hardcoded so...
+        #print("flip took: " + str(int(round(time.time() * 1000)) - start) + "ms")
         #reclame = np.zeros([1110, 1080, 4], dtype=np.uint8)
         #reclame[:] = (0, 0, 255, 255)
         print("slide size: " + str(slide.shape))
@@ -49,16 +65,16 @@ class DisplayMixer(object):
         print("Show took: " + str(int(round(time.time() * 1000)) - start) + "ms")
 
     def showMeasuring(self, image):
-        self.show(image, "Slides/SAC_MEASURING.jpg")
+        self.show(image, self.measuring)
 
     def showTemperatureOk(self, image):
-        self.show(image, "Slides/SAC_TEMPOK.jpg")
+        self.show(image, self.tempOk)
 
     def showTemperatureNok(self, image):
-        self.show(image, "Slides/SAC_TEMPNOK.jpg")
+        self.show(image, self.tempNok)
 
     def showDontMove(self, image):
-        self.show(image, "Slides/SAC_DONTMOVE.jpg")
+        self.show(image, self.dontMove)
 
     def hide(self):
         start = int(round(time.time() * 1000))
