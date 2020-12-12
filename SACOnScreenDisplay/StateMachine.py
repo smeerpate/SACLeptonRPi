@@ -124,7 +124,7 @@ class StateMachine(object):
                 self.addText(image, "Initialising...", (255, 0, 0))
                 self.displayMixer.showDontMove(image)
                 self.runFfc()    
-                # maybe add a delay here
+                # maybe add a delay here 
                 self.state = "SET_FLUX_LINEAR_PARAMS"                
             else:
                 self.state = "IDLE"
