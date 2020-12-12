@@ -35,7 +35,7 @@ camera = PiCamera()
 camera.resolution = (640, 480)
 rawCapture = PiRGBArray(camera, size=(640, 480))
 camera.meter_mode = 'spot'
-camera.framerate = 10
+camera.framerate = 30
 time.sleep(0.5)
 
 for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=True):
