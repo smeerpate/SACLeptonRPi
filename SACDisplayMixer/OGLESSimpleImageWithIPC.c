@@ -63,7 +63,7 @@ char* initSharedMemory(int iNumBytes)
 {
     char* pSegStart;
     key_t key;
-    key = ftok("/home/pi/SACLeptonRPi", 'k');
+    key = ftok("/home/pi/SACLeptonRPi", 'l');
     int iSegId = ipcOpenSegment(key, iNumBytes);
     pSegStart = ipcAttachToSegment(iSegId);
     return pSegStart;
