@@ -107,8 +107,8 @@ class StateMachine(object):
                     self.displayMixer.showDontMove(image)
                 else:
                     self.state = "RUN_FFC"
-                    self.addText(image, "Measuring temperature...", (255, 0, 0))
-                    self.displayMixer.showMeasuring(image)
+                    self.addText(image, "Initialising...", (255, 0, 0))
+                    self.displayMixer.showDontMove(image)
             else:
                 self.state = "IDLE"
                 self.displayMixer.hide()
@@ -117,6 +117,8 @@ class StateMachine(object):
         elif self.state == "RUN_FFC":
             start = int(round(time.time() * 1000))
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
+                self.addText(image, "Initialising...", (255, 0, 0))
+                self.displayMixer.showDontMove(image)
                 self.runFfc()                
                 self.state = "SET_FLUX_LINEAR_PARAMS"                
             else:
@@ -127,6 +129,8 @@ class StateMachine(object):
         elif self.state == "SET_FLUX_LINEAR_PARAMS":
             start = int(round(time.time() * 1000))
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
+                self.addText(image, "Measuring...", (255, 0, 0))
+                self.displayMixer.showMeasuring(image)
                 self.setFluxLinearParams()
                 self.state = "GET_TEMPERATURE"                
             else:
