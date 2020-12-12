@@ -137,7 +137,7 @@ class StateMachine(object):
         elif self.state == "GET_TEMPERATURE":
             startTime = int(round(time.time() * 1000))
             # todo implement retries
-            if self.roiFinder.getTcContours(image, settings.showFoundFace.value):  
+            if self.roiFinder.getTcContours(image, False):  
                 thRoiContours = self.roiFinder.getThContours() # LT, RT, LB, RB
 
                 #thRect_x, thRect_y, thRect_w, thRect_h = cv.boundingRect(thRoi)
