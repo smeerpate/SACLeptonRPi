@@ -83,6 +83,7 @@ class StateMachine(object):
         # 7) Else -> inform the user that we are going to measure again
 
         if self.state == "IDLE":
+            start = int(round(time.time() * 1000))
             color = settings.idleColor
             self.ledDriver.output(color.red, color.green, color.blue, 100)
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value): #Face + eyes found -> forehead ok
@@ -95,7 +96,8 @@ class StateMachine(object):
                 else:
                     self.displayMixer.hide()
 
-                self.state = "IDLE"                
+                self.state = "IDLE"   
+            print("Idle took: " + str(int(round(time.time() * 1000)) - start) + "ms")
 
         elif self.state == "WAIT_FOR_SIZE_OK":
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
