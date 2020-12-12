@@ -36,6 +36,8 @@ class DisplayMixer(object):
         self.dontMove = cv.cvtColor(self.dontMove, cv.COLOR_RGB2RGBA)
         self.dontMove = cv.flip(self.dontMove, 0)
 
+        self.transparent = np.full([1920, 1080, 4], 0, dtype=np.uint8)
+
     def show(self, image, slide):     
         # image = 480(h)*640(w)
         #start = int(round(time.time() * 1000))
@@ -78,10 +80,7 @@ class DisplayMixer(object):
 
     def hide(self):
         start = int(round(time.time() * 1000))
-        transparent = np.full([1920, 1080, 4], 0, dtype=np.uint8)
-        print("Creating transparent: " + str(int(round(time.time() * 1000)) - start) + "ms")
-        start = int(round(time.time() * 1000))
-        self.shm.write(transparent)
+        self.shm.write(self.transparent)
         print("writing transparent: " + str(int(round(time.time() * 1000)) - start) + "ms")
 
     def stop(self):
