@@ -22,6 +22,7 @@ class DisplayMixer(object):
 
     def show(self, image):     
         # image = 480(h)*640(w)
+        start = int(round(time.time()))
         resizeFactor = 1.6875
         image = cv.flip(image, 0)
         print("img size: " + str(image.shape))
@@ -36,6 +37,7 @@ class DisplayMixer(object):
         print("reclame size: " + str(reclame.shape))
 
         self.shm.write(np.vstack((reclame, img_RGBA)))
+        print("Show took: " + str(int(round(time.time())) - start))
 
     def hide(self):
         transparent = np.zeros([1920, 1080, 4], dtype=np.uint8)
