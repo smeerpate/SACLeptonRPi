@@ -34,6 +34,7 @@ class DisplayMixer(object):
 
         slide = cv.imread("Slides/SAC_MEASURING.jpg")
         slide = cv.cvtColor(slide, cv.COLOR_RGB2RGBA)
+        slide = cv.flip(slide, 0) # maybe flipped on disk instead of doing it codewise???? because these slides are hardcoded so...
         #reclame = np.zeros([1110, 1080, 4], dtype=np.uint8)
         #reclame[:] = (0, 0, 255, 255)
         print("slide size: " + str(slide.shape))
