@@ -24,27 +24,21 @@ class StateMachine(object):
 
         self.values = (0, 0, 0, 0)
         self.thRoi = (0, 0), (0, 0)
-        #self.roiFinder = FaceFinder()
         self.roiFinder = ForeheadFinder()
         self.thSensorWidth = 80
         self.thSensorHeight = 60
         self.faceSizeUpperLimit = 280
         self.faceSizeLowerLimit = 220
-        #Affine 1
         self.transformMatrix = self.settingsManager.getSettings().affineTransform.value
         print("Affine transform:")
         print(self.transformMatrix)
-        #self.transformMatrix = np.array([[1.70100612e-1, 4.91086300e-4, -2.62737066e+1],[5.51191729e-3, 1.75597084e-1, -2.09686199e+1]])
         self.roiFinder.setTransformMatrix(self.transformMatrix)
 
         # Globals for logging
         self.currentTime = int(round(time.time()))
-        self.lastLogTime = 0
-        self.logInterval = 2 # seconds
 
         # Globals for FFC timing
         self.lastFFCTime = 0
-        self.needsFFC = False
         self.maxFFCInterval = 20 # seconds.
 
     def addText(self, image, sMessage, color):
@@ -87,10 +81,6 @@ class StateMachine(object):
         # 5) Get RIO data (can be repeated x amount of times to be sure)
         # 6) If temp < threshold -> ok
         # 7) Else -> inform the user that we are going to measure again
-
-        currentTime = int(round(time.time()))
-        alreadyLogged = False
-        
 
         if self.state == "IDLE":
             color = settings.idleColor
@@ -166,19 +156,6 @@ class StateMachine(object):
                 #print("Total pixels: ")
                 #print(w*h)
 
-                #if settings.showFoundFace.value:
-                    #raw,_ = self.lepton.capture()
-                    #cv.normalize(raw, raw, 0, 65535, cv.NORM_MINMAX)
-                    #np.right_shift(raw, 8, raw)
-                    #thImage = np.uint8(raw) # 80x60
-
-                    #self.addRectangle(thImage, thRoi, (255, 255, 255))
-                    #self.addRectangle(thImage, thCorrected, (255, 0, 0))
-                    #self.roiFinder.getTcContours(image, settings.showFoundFace.value)
-                    #x_offset=y_offset=0
-                    #image[y_offset:y_offset+thImage.shape[0], x_offset:x_offset+thImage.shape[1]] = thImage
-                    #imageName = "Forehead " + str(int(round(time.time())))
-                    #cv.imwrite('/home/pi/SACLeptonRPi/' + imageName +'.jpg', image)
 
                 self.setThRoiOnLepton(thRoi)            
                 self.values = l.GetROIValues()
@@ -229,7 +206,7 @@ class StateMachine(object):
         #print("TH ROI Contours")
         #print(str(thRoiContours))
 
-        thRoi = self.getRoiFromContours(thRoiContours)
+        self.thRoi = self.getRoiFromContours(thRoiContours)
 
         # Flip thRoi vertically
         #start, end = thRoi
@@ -268,6 +245,7 @@ class StateMachine(object):
         self.state = "WAIT_FOR_NO_FACE"
 
     def runFfc(self):
+        currentTime = int(round(time.time()))
         if self.currentTime > (self.lastFFCTime + self.maxFFCInterval):
             l.RunRadFfc()
             self.lastFFCTime = self.currentTime
@@ -305,6 +283,21 @@ class StateMachine(object):
         #leftSide = (5, 5),(35,55)
         #rightSide = (45, 5), (75, 55)
         return (xstart, ystart), (xend, yend)
+
+    def showThermalImage(self):
+        #raw,_ = self.lepton.capture()
+        #cv.normalize(raw, raw, 0, 65535, cv.NORM_MINMAX)
+        #np.right_shift(raw, 8, raw)
+        #thImage = np.uint8(raw) # 80x60
+
+        #self.addRectangle(thImage, thRoi, (255, 255, 255))
+        #self.addRectangle(thImage, thCorrected, (255, 0, 0))
+        #self.roiFinder.getTcContours(image, settings.showFoundFace.value)
+        #x_offset=y_offset=0
+        #image[y_offset:y_offset+thImage.shape[0], x_offset:x_offset+thImage.shape[1]] = thImage
+        #imageName = "Forehead " + str(int(round(time.time())))
+        #cv.imwrite('/home/pi/SACLeptonRPi/' + imageName +'.jpg', image)
+        return
 
     def reset(self):
         print("Resetting state machine")
