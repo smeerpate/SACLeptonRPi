@@ -191,7 +191,11 @@ class StateMachine(object):
             self.roiFinder.getTcContours(image, settings.showFoundFace.value)
             if self.roiFinder.faceFound:
                 print("Temp: " + str(self.values[1]) + "DegC")    
-                #self.displayMixer.show(image);                              
+
+                if self.values[1] > settings.threshold.value:
+                    self.displayMixer.showTemperatureNok(image)
+                else:
+                    self.displayMixer.showTemperatureOk(image)                       
             else:
                 self.writeLog()
                 self.state = "IDLE"
