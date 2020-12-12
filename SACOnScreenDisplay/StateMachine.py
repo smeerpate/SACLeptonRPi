@@ -100,6 +100,7 @@ class StateMachine(object):
             print("Idle took: " + str(int(round(time.time() * 1000)) - start) + "ms")
 
         elif self.state == "WAIT_FOR_SIZE_OK":
+            start = int(round(time.time() * 1000))
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
                 if not self.checkFaceSize(image, self.roiFinder.getTcROIWidth(), self.faceSizeLowerLimit, self.faceSizeUpperLimit):
                     self.state = "WAIT_FOR_SIZE_OK"
@@ -111,24 +112,30 @@ class StateMachine(object):
             else:
                 self.state = "IDLE"
                 self.displayMixer.hide()
+            print("Wait for size took: " + str(int(round(time.time() * 1000)) - start) + "ms")
 
         elif self.state == "RUN_FFC":
+            start = int(round(time.time() * 1000))
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
                 self.runFfc()                
                 self.state = "SET_FLUX_LINEAR_PARAMS"                
             else:
                 self.state = "IDLE"
                 self.displayMixer.hide()
+            print("Run FFC took: " + str(int(round(time.time() * 1000)) - start) + "ms")
 
         elif self.state == "SET_FLUX_LINEAR_PARAMS":
+            start = int(round(time.time() * 1000))
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
                 self.setFluxLinearParams()
                 self.state = "GET_TEMPERATURE"                
             else:
                 self.state = "IDLE"
                 self.displayMixer.hide()
+            print("Set flux linear params took: " + str(int(round(time.time() * 1000)) - start) + "ms")
 
         elif self.state == "GET_TEMPERATURE":
+            start = int(round(time.time() * 1000))
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):  
                 thRoiContours = self.roiFinder.getThContours() # LT, RT, LB, RB
 
@@ -168,6 +175,7 @@ class StateMachine(object):
             else:
                 self.state = "IDLE"
                 self.displayMixer.hide()
+            print("Get temp took: " + str(int(round(time.time() * 1000)) - start) + "ms")
 
         elif self.state == "WAIT_FOR_NO_FACE":
             self.roiFinder.getTcContours(image, settings.showFoundFace.value)
