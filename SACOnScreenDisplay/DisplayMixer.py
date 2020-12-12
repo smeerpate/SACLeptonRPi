@@ -40,9 +40,9 @@ class DisplayMixer(object):
         #reclame = np.zeros([1110, 1080, 4], dtype=np.uint8)
         #reclame[:] = (0, 0, 255, 255)
         print("slide size: " + str(slide.shape))
-
+        start = int(round(time.time() * 1000))
         self.shm.write(np.vstack((slide, img_RGBA)))
-        #print("Show took: " + str(int(round(time.time() * 1000)) - start) + "ms")
+        print("Show took: " + str(int(round(time.time() * 1000)) - start) + "ms")
 
     def showMeasuring(self, image):
         self.show(image, "Slides/SAC_MEASURING.jpg")
