@@ -36,8 +36,12 @@ class ForeheadFinder(RectangleOfInterestFinder):
     # Fills out the true color ROI.
     ####################################################
     def getTcContours(self, image, showRois):
+        start = int(round(time.time() * 1000))
         gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        print("Gray took: " + str(int(round(time.time() * 1000)) - start) + "ms")
+        start = int(round(time.time() * 1000))
         rects = self.faceDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
+        print("Detect took: " + str(int(round(time.time() * 1000)) - start) + "ms")
       
         if len(rects) == 1 and rects[0][0] > 220 and (rects[0][0] + rects[0][2]) < 420:
             # only consider first face found.

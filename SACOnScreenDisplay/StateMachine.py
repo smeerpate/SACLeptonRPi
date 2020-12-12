@@ -85,7 +85,7 @@ class StateMachine(object):
         if self.state == "IDLE":
             start = int(round(time.time() * 1000))
             color = settings.idleColor
-            #self.ledDriver.output(color.red, color.green, color.blue, 100)
+            self.ledDriver.output(color.red, color.green, color.blue, 100)
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value): #Face + eyes found -> forehead ok
                 self.state = "WAIT_FOR_SIZE_OK"
                 self.displayMixer.show(image)
