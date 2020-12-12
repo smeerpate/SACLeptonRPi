@@ -136,6 +136,7 @@ class StateMachine(object):
 
         elif self.state == "GET_TEMPERATURE":
             startTime = int(round(time.time() * 1000))
+            # todo implement retries
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):  
                 thRoiContours = self.roiFinder.getThContours() # LT, RT, LB, RB
 
@@ -188,7 +189,8 @@ class StateMachine(object):
             print("Get temp took: " + str(int(round(time.time() * 1000)) - startTime) + "ms")
 
         elif self.state == "WAIT_FOR_NO_FACE":
-            self.roiFinder.getTcContours(image, settings.showFoundFace.value)
+            self.roiFinder.detectEyes = False
+            self.roiFinder.getTcContours(image, False) # only looks for the head now
             if self.roiFinder.faceFound:
                 print("Temp: " + str(self.values[1]) + "DegC")    
 
@@ -198,6 +200,7 @@ class StateMachine(object):
                     self.displayMixer.showTemperatureOk(image)                       
             else:
                 self.writeLog()
+                self.roiFinder.detectEyes = True
                 self.state = "IDLE"
                 self.displayMixer.hide();
 
