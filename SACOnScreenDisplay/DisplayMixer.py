@@ -24,13 +24,16 @@ class DisplayMixer(object):
         # image = 480(h)*640(w)
         resizeFactor = 1.6875
         image = cv.flip(image, 0)
+        print("img size: " + image.shape)
         image = cv.resize(image, (810, 1080))
+        print("img size: " + image.shape)
         r_channel, g_channel, b_channel = cv.split(image)
         alpha_channel = np.ones(b_channel.shape, dtype=b_channel.dtype) * 255 #creating a dummy alpha channel image.
         img_RGBA = cv.merge((r_channel, g_channel, b_channel, alpha_channel))
 
         reclame = np.zeros([1080, 1110, 4], dtype=np.uint8)
         reclame[:] = (0, 0, 255, 255)
+        print("reclame size: " + reclame.shape)
 
         self.shm.write(np.hstack((img_RGBA, reclame)))
 
