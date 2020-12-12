@@ -23,6 +23,7 @@ class StateMachine(object):
         self.displayMixer = displayMixer
 
         self.values = (0, 0, 0, 0)
+        self.thRoi = (0, 0), (0, 0)
         #self.roiFinder = FaceFinder()
         self.roiFinder = ForeheadFinder()
         self.thSensorWidth = 80
@@ -58,8 +59,8 @@ class StateMachine(object):
         startPoint, endPoint = roi
         cv.rectangle(image, startPoint, endPoint, color, 1)
 
-    def writeLog(self, thRoiSet):
-        line = str(int(round(time.time()))) + ";" + str(self.roiFinder.name) + ";" + str(l.GetAuxTemp()) + ";" + str(l.GetFpaTemp()) + ";" + str(l.GetROIValues()) + ";" + str(l.GetROI()) + ";" + str(thRoiSet) + ";" + str(int(round(self.lastFFCTime))) + "\n"
+    def writeLog(self):
+        line = str(int(round(time.time()))) + ";" + str(self.roiFinder.name) + ";" + str(l.GetAuxTemp()) + ";" + str(l.GetFpaTemp()) + ";" + str(l.GetROIValues()) + ";" + str(l.GetROI()) + ";" + str(self.thRoi) + ";" + str(int(round(self.lastFFCTime))) + "\n"
         self.logFile.write(line)
 
     def checkFaceSize(self, image, currWidth, minWidth, maxWidth):
@@ -121,8 +122,6 @@ class StateMachine(object):
 
         elif self.state == "RUN_FFC":
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
-                #self.addText(image, "Measuring temperature...", (255, 0, 0))
-                #self.displayMixer.show(image)
                 self.runFfc()                
                 self.state = "SET_FLUX_LINEAR_PARAMS"                
             else:
@@ -131,8 +130,6 @@ class StateMachine(object):
 
         elif self.state == "SET_FLUX_LINEAR_PARAMS":
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
-                #self.addText(image, "Measuring temperature...", (255, 0, 0))
-                #self.displayMixer.show(image)
                 self.setFluxLinearParams()
                 self.state = "GET_TEMPERATURE"                
             else:
@@ -141,8 +138,6 @@ class StateMachine(object):
 
         elif self.state == "GET_TEMPERATURE":
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):  
-                #self.addText(image, "Measuring temperature...", (255, 0, 0))
-                #self.displayMixer.show(image);
                 thRoiContours = self.roiFinder.getThContours() # LT, RT, LB, RB
 
                 #thRect_x, thRect_y, thRect_w, thRect_h = cv.boundingRect(thRoi)
@@ -185,13 +180,11 @@ class StateMachine(object):
                     #imageName = "Forehead " + str(int(round(time.time())))
                     #cv.imwrite('/home/pi/SACLeptonRPi/' + imageName +'.jpg', image)
 
-                self.setThRoiOnLepton(thRoi)
-            
+                self.setThRoiOnLepton(thRoi)            
                 self.values = l.GetROIValues()
                 #print("TH ROI from Lepton:")
                 #print(str(l.GetROI()))
-                #print(str(self.values))
-                #self.writeLog(thRoi)
+                #print(str(self.values))                
                 self.state = "WAIT_FOR_NO_FACE"
             else:
                 self.state = "IDLE"
@@ -216,6 +209,7 @@ class StateMachine(object):
                 self.displayMixer.show(image);
                 self.ledDriver.output(color.red, color.green, color.blue, 100)                
             else:
+                self.writeLog()
                 self.state = "IDLE"
                 self.displayMixer.hide();
 
