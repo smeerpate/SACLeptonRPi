@@ -8,7 +8,7 @@ import cv2
 ########################################################
 class EyesFinder:
 
-    def __init__(self, imageSize = (640,480), minFaceSize = (250,40)):
+    def __init__(self, imageSize = (640,480), minFaceSize = (200,40)):
         self.imageSize = imageSize
         self.minFaceSize = minFaceSize
         # load frontal face  classifier
