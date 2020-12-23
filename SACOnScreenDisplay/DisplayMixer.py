@@ -47,7 +47,7 @@ class DisplayMixer(object):
         image = cv.flip(image, 0)        
         #print("img size: " + str(image.shape))
         image = cv.resize(image, (1080, 810))
-        image = cv.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        image = cv.rotate(image, cv.ROTATE_90_COUNTERCLOCKWISE)
         #print("img size: " + str(image.shape))
         r_channel, g_channel, b_channel = cv.split(image)
         alpha_channel = np.ones(b_channel.shape, dtype=b_channel.dtype) * 255 #creating a dummy alpha channel image.
