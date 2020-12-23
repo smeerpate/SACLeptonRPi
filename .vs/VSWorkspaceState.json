@@ -2,10 +2,9 @@
   "ExpandedNodes": [
     "",
     "\\SACDisplayMixer",
-    "\\SACDisplayMixer\\Common",
     "\\SACOnScreenDisplay",
     "\\SACTempMeasure"
   ],
-  "SelectedNode": "\\SACOnScreenDisplay\\DisplayMixer.py",
+  "SelectedNode": "\\SACOnScreenDisplay\\StateMachine.py",
   "PreviewInSolutionExplorer": false
 }
