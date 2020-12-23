@@ -36,7 +36,7 @@ class DisplayMixer(object):
         self.dontMove = cv.cvtColor(self.dontMove, cv.COLOR_RGB2RGBA)
         self.dontMove = cv.flip(self.dontMove, 0)
 
-        self.transparent = np.full([1920, 1080, 4], 100, dtype=np.uint8)
+        self.transparent = np.full([1080, 1920, 4], 100, dtype=np.uint8)
 
     def show(self, image, slide):     
         # image = 480(h)*640(w)
