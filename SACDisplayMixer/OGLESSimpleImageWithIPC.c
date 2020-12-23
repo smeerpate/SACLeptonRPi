@@ -63,7 +63,7 @@ char* initSharedMemory(int iNumBytes)
 {
     char* pSegStart;
     key_t key;
-    key = ftok("/home/pi/SACLeptonRPi", 'm');
+    key = ftok("/home/pi/SACLeptonRPi", 'n');
     int iSegId = ipcOpenSegment(key, iNumBytes);
     pSegStart = ipcAttachToSegment(iSegId);
     return pSegStart;
@@ -211,8 +211,8 @@ int main ( int argc, char *argv[] ) {
    GLubyte *image;
 
    // The size of our image. If needed bigger change display width/height in esUtil as well.
-   width = 1920;
-   height = 1080;
+   width = 1080;
+   height = 1920;
 
    pSharedMemory = initSharedMemory(width * height * 4);
    image = pSharedMemory;
