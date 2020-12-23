@@ -38,7 +38,7 @@ class DisplayMixer(object):
         #1080x1920
         #self.transparent = np.full([1000, 1080, 4], 150, dtype=np.uint8)
         #self.transparent = np.vstack((self.transparent, np.full([920, 1080, 4], 240, dtype=np.uint8)))
-        self.transparent = np.full([1080, 1920, 4], 150, dtype=np.unit8)
+        self.transparent = np.full([1080, 1920, 4], 150, dtype=np.uint8)
 
     def show(self, image, slide):     
         # image = 480(h)*640(w)
