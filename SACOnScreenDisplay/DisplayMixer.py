@@ -37,7 +37,7 @@ class DisplayMixer(object):
         self.dontMove = cv.flip(self.dontMove, 0)
         #Display is 1920 (width) x 1080 (height) -> np array is 1080 (rows) x 1920 (cols)
         self.transparent = np.full([1080, 1000, 4], 150, dtype=np.uint8)
-        self.transparent = np.vstack((self.transparent, np.full([1080, 920, 4], 240, dtype=np.uint8)))
+        self.transparent = np.hstack((self.transparent, np.full([1080, 920, 4], 240, dtype=np.uint8)))
         #self.transparent = np.full([1080, 1920, 4], 150, dtype=np.uint8)
 
     def show(self, image, slide):     
