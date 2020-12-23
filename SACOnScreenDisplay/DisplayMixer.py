@@ -44,7 +44,7 @@ class DisplayMixer(object):
         # image = 480(h)*640(w)
         #start = int(round(time.time() * 1000))
         resizeFactor = 1.6875
-        #image = cv.flip(image, 0)        
+        image = cv.flip(image, 0)        
         #print("img size: " + str(image.shape))
         image = cv.resize(image, (1080, 810))
         image = cv.rotate(image, cv.ROTATE_90_COUNTERCLOCKWISE)
