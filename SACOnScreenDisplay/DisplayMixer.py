@@ -56,7 +56,7 @@ class DisplayMixer(object):
         #print("slide size: " + str(slide.shape))
         slide = np.full([1080, 1110, 4], 200, dtype=np.uint8)
         start = int(round(time.time() * 1000))
-        self.shm.write(np.hstack((slide, img_RGBA)))
+        self.shm.write(np.hstack((img_RGBA, slide)))
         print("Show took: " + str(int(round(time.time() * 1000)) - start) + "ms")
 
     def showMeasuring(self, image):
