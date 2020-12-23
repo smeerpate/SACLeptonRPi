@@ -44,17 +44,19 @@ class DisplayMixer(object):
         # image = 480(h)*640(w)
         #start = int(round(time.time() * 1000))
         resizeFactor = 1.6875
-        image = cv.flip(image, 0)
+        image = cv.flip(image, 0)        
         #print("img size: " + str(image.shape))
         image = cv.resize(image, (1080, 810))
+        image = cv.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
         #print("img size: " + str(image.shape))
         r_channel, g_channel, b_channel = cv.split(image)
         alpha_channel = np.ones(b_channel.shape, dtype=b_channel.dtype) * 255 #creating a dummy alpha channel image.
         img_RGBA = cv.merge((r_channel, g_channel, b_channel, alpha_channel))
 
         #print("slide size: " + str(slide.shape))
+        slide = np.full([1080, 1110, 4], 200, dtype=np.uint8)
         start = int(round(time.time() * 1000))
-        self.shm.write(np.vstack((slide, img_RGBA)))
+        self.shm.write(np.hstack((slide, img_RGBA)))
         print("Show took: " + str(int(round(time.time() * 1000)) - start) + "ms")
 
     def showMeasuring(self, image):
