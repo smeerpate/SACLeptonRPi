@@ -54,7 +54,7 @@ class DisplayMixer(object):
         img_RGBA = cv.merge((r_channel, g_channel, b_channel, alpha_channel))
 
         #print("slide size: " + str(slide.shape))
-        slide = np.full([1080, 1110, 4], 200, dtype=np.uint8)
+        #slide = np.full([1080, 1110, 4], 200, dtype=np.uint8)
         start = int(round(time.time() * 1000))
         self.shm.write(np.hstack((img_RGBA, slide)))
         print("Show took: " + str(int(round(time.time() * 1000)) - start) + "ms")
