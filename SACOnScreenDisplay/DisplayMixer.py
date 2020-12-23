@@ -16,7 +16,7 @@ class DisplayMixer(object):
         self.mixerThread.start()
         time.sleep(1)
             
-        key = ipc.ftok("/home/pi/SACLeptonRPi", ord('o'))
+        key = ipc.ftok("/home/pi/SACLeptonRPi", ord('p'))
         self.shm = ipc.SharedMemory(key, 0, 0)
         self.shm.attach()
 
