@@ -15,8 +15,12 @@ class ForeheadFinder(RectangleOfInterestFinder):
         self.minFaceSize = minFaceSize
         self.minEyesSize = minEyesSize
         # load frontal face  classifier
-        self.faceDet = cv2.CascadeClassifier("/home/pi/SACLeptonRPi/haarcascade_frontalface_default.xml")
-        self.eyesDet = cv2.CascadeClassifier("/home/pi/SACLeptonRPi/haarcascade_frontaleyes.xml")
+        #self.faceDet = cv2.CascadeClassifier("/home/pi/SACLeptonRPi/haarcascade_frontalface_default.xml")
+        #self.eyesDet = cv2.CascadeClassifier("/home/pi/SACLeptonRPi/haarcascade_frontaleyes.xml")
+        net = cv.dnn.readNet('face-detection-adas-0001.xml', 'face-detection-adas-0001.bin')
+        print("Read net completed")
+        net.setPreferableTarget(cv.dnn.DNN_TARGET_MYRIAD)
+        print("Target set")
         self.name = "Forehead"
         self.faceFound = False
         self.detectEyes = True
@@ -38,13 +42,36 @@ class ForeheadFinder(RectangleOfInterestFinder):
     # Fills out the true color ROI.
     ####################################################
     def getTcContours(self, image, showRois):
-        start = int(round(time.time() * 1000))
-        gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-        print("Gray took: " + str(int(round(time.time() * 1000)) - start) + "ms")
-        start = int(round(time.time() * 1000))
-        rects = self.faceDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
-        print("Detect took: " + str(int(round(time.time() * 1000)) - start) + "ms")
-      
+        #start = int(round(time.time() * 1000))
+        #gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        #print("Gray took: " + str(int(round(time.time() * 1000)) - start) + "ms")
+        #start = int(round(time.time() * 1000))
+        #rects = self.faceDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
+        #print("Detect took: " + str(int(round(time.time() * 1000)) - start) + "ms")
+        start = time.time()
+        blob = cv.dnn.blobFromImage(image, size=(640,480), ddepth=cv.CV_8U)
+        print("blob created from image")
+        net.setInput(blob)
+        print("set input")
+        out = net.forward()
+        print("forwarded")
+
+        for detection in out.reshape(-1, 7):
+            confidence = float(detection[2])
+            if confidence > 0.5:
+                xmin = int(detection[3] * frame.shape[1])
+                ymin = int(detection[4] * frame.shape[0])
+                xmax = int(detection[5] * frame.shape[1])
+                ymax = int(detection[6] * frame.shape[0])
+
+		        #print("xmin: " + str(xmin))
+
+                cv2.rectangle(image, (xmin, ymin), (xmax, ymax), color=(255,0,0))
+            cv2.putText(image, "Confidence: " + str(confidence), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 1)
+        timespan = (time.time() - start) * 1000
+        print("Time to detect (all-in)(ms): " + str(timespan))
+        return False
+        """
         if len(rects) == 1 and rects[0][0] > 220 and (rects[0][0] + rects[0][2]) < 420:
             # only consider first face found.
             # rect comes in a tuple (x,y,w,h).
@@ -87,7 +114,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
             self.tcROI = (-1,-1,-1,-1)
             self.faceFound = False
             return False
-
+        """
     def showRect(self, image, rect, color):
         x, y, w, h = rect
         cv2.rectangle(image,(x,y),(x + w,y + h), color, 2)
