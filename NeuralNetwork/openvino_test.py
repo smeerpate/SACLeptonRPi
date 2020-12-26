@@ -44,8 +44,8 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
 		cv.putText(frame, "Confidence: " + str(confidence), (50, 50), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 1)
 	timespan = (time.time() - start) * 1000
 	print("Time to detect (all-in)(ms): " + str(timespan))
-	cv.imshow('Image', frame)
-	cv.waitKey(20)
+	#cv.imshow('Image', frame)
+	#cv.waitKey(20)
 	rawCapture.truncate(0)
 cv.waitKey(0)
 cv.destroyAllWindows()
