@@ -66,9 +66,9 @@ class ForeheadFinder(RectangleOfInterestFinder):
                 print(str(detection[4]))
                 print(str(detection[5]))
                 print(str(detection[6]))
-                xmin = int(detection[3] * 260)
+                xmin = int(detection[3] * 260) + 220
                 ymin = int(detection[4] * image.shape[0])
-                xmax = int(detection[5] * 260)
+                xmax = int(detection[5] * 260) + 220
                 ymax = int(detection[6] * image.shape[0])
                 faceFound = True
 		        #print("xmin: " + str(xmin))
