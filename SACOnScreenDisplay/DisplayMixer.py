@@ -57,7 +57,7 @@ class DisplayMixer(object):
         #slide = np.full([1080, 1110, 4], 200, dtype=np.uint8)
         start = int(round(time.time() * 1000))
         self.shm.write(np.hstack((img_RGBA, slide)))
-        print("Show took: " + str(int(round(time.time() * 1000)) - start) + "ms")
+        #print("Show took: " + str(int(round(time.time() * 1000)) - start) + "ms")
 
     def showMeasuring(self, image):
         self.show(image, self.measuring)
@@ -74,7 +74,7 @@ class DisplayMixer(object):
     def hide(self):
         start = int(round(time.time() * 1000))
         self.shm.write(self.transparent)
-        print("writing transparent: " + str(int(round(time.time() * 1000)) - start) + "ms")
+        #print("writing transparent: " + str(int(round(time.time() * 1000)) - start) + "ms")
 
     def stop(self):
         print("Stopping...")

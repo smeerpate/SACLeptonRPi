@@ -45,6 +45,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
         self.net.setInput(blob)
         out = self.net.forward()
         self.faceFound = False
+        self.tcROI = (-1,-1,-1,-1)
 
         detections = []
 
@@ -85,8 +86,8 @@ class ForeheadFinder(RectangleOfInterestFinder):
                 cv2.rectangle(image,(x,y),(x + w,y + h), (255, 255, 0), 1)            
 
         timespan = (time.time() - start) * 1000
-        print("Time to detect (all-in)(ms): " + str(timespan))
-        self.tcROI = (-1,-1,-1,-1)
+        #print("Time to detect (all-in)(ms): " + str(timespan))
+        
         return self.faceFound
 
     def getTcForeheadROIWidth(self):
