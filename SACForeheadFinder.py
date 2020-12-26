@@ -56,6 +56,8 @@ class ForeheadFinder(RectangleOfInterestFinder):
         out = self.net.forward()
         print("forwarded")
 
+        faceFound = False
+
         for detection in out.reshape(-1, 7):
             confidence = float(detection[2])
             if confidence > 0.5:
@@ -63,14 +65,15 @@ class ForeheadFinder(RectangleOfInterestFinder):
                 ymin = int(detection[4] * image.shape[0])
                 xmax = int(detection[5] * image.shape[1])
                 ymax = int(detection[6] * image.shape[0])
-
+                faceFound = True
 		        #print("xmin: " + str(xmin))
-
-                cv2.rectangle(image, (xmin, ymin), (xmax, ymax), color=(255,0,0))
-            cv2.putText(image, "Confidence: " + str(confidence), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 1)
+                if showRois:
+                    cv2.rectangle(image, (xmin, ymin), (xmax, ymax), color=(255,0,0))
+                    cv2.putText(image, "Confidence: " + str(confidence), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 1)
         timespan = (time.time() - start) * 1000
         print("Time to detect (all-in)(ms): " + str(timespan))
-        return True
+        self.tcROI = (-1,-1,-1,-1)
+        return faceFound
         """
         if len(rects) == 1 and rects[0][0] > 220 and (rects[0][0] + rects[0][2]) < 420:
             # only consider first face found.
