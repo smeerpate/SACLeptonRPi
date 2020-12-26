@@ -11,7 +11,6 @@ from RectangleOfInterestFinder import RectangleOfInterestFinder
 class ForeheadFinder(RectangleOfInterestFinder):
 
     def __init__(self, imageSize = (640,480), minFaceSize = (180,180), minEyesSize = (250,40)):
-        self.imageSize = imageSize
         self.minFaceSize = minFaceSize
         self.minEyesSize = minEyesSize
         # load frontal face  classifier
@@ -51,7 +50,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
         start = time.time()
         print(str(image.shape))
         middle = image[0:image.shape[0],220:480]
-        blob = cv2.dnn.blobFromImage(image, size=(640,480), ddepth=cv2.CV_8U)
+        blob = cv2.dnn.blobFromImage(middle, size=(480,260), ddepth=cv2.CV_8U)
         print("blob created from image")
         self.net.setInput(blob)
         print("set input")
@@ -63,9 +62,9 @@ class ForeheadFinder(RectangleOfInterestFinder):
         for detection in out.reshape(-1, 7):
             confidence = float(detection[2])
             if confidence > 0.5:
-                xmin = int(detection[3] * image.shape[1])
+                xmin = int(detection[3] * image.shape[1]) + 220
                 ymin = int(detection[4] * image.shape[0])
-                xmax = int(detection[5] * image.shape[1])
+                xmax = int(detection[5] * image.shape[1]) + 220
                 ymax = int(detection[6] * image.shape[0])
                 faceFound = True
 		        #print("xmin: " + str(xmin))
