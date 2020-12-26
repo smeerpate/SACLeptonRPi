@@ -17,9 +17,9 @@ class ForeheadFinder(RectangleOfInterestFinder):
         # load frontal face  classifier
         #self.faceDet = cv2.CascadeClassifier("/home/pi/SACLeptonRPi/haarcascade_frontalface_default.xml")
         #self.eyesDet = cv2.CascadeClassifier("/home/pi/SACLeptonRPi/haarcascade_frontaleyes.xml")
-        net = cv.dnn.readNet('face-detection-adas-0001.xml', 'face-detection-adas-0001.bin')
+        net = cv2.dnn.readNet('face-detection-adas-0001.xml', 'face-detection-adas-0001.bin')
         print("Read net completed")
-        net.setPreferableTarget(cv.dnn.DNN_TARGET_MYRIAD)
+        net.setPreferableTarget(cv2.dnn.DNN_TARGET_MYRIAD)
         print("Target set")
         self.name = "Forehead"
         self.faceFound = False
@@ -49,7 +49,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
         #rects = self.faceDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
         #print("Detect took: " + str(int(round(time.time() * 1000)) - start) + "ms")
         start = time.time()
-        blob = cv.dnn.blobFromImage(image, size=(640,480), ddepth=cv.CV_8U)
+        blob = cv2.dnn.blobFromImage(image, size=(640,480), ddepth=cv.CV_8U)
         print("blob created from image")
         net.setInput(blob)
         print("set input")
