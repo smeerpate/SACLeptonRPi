@@ -49,7 +49,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
         #rects = self.faceDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
         #print("Detect took: " + str(int(round(time.time() * 1000)) - start) + "ms")
         start = time.time()
-        print(str(image.shape()))
+        print(str(image.shape))
         middle = image[0:image.shape[0],220:480]
         blob = cv2.dnn.blobFromImage(image, size=(640,480), ddepth=cv2.CV_8U)
         print("blob created from image")
