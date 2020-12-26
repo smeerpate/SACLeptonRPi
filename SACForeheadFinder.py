@@ -55,7 +55,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
 
         for detection in out.reshape(-1, 7):
             confidence = float(detection[2])
-            if confidence > 0.5:
+            if confidence > 0.7:
                 print(str(detection[3]))
                 print(str(detection[4]))
                 print(str(detection[5]))
