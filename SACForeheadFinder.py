@@ -70,7 +70,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
             cv2.putText(image, "Confidence: " + str(confidence), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 1)
         timespan = (time.time() - start) * 1000
         print("Time to detect (all-in)(ms): " + str(timespan))
-        return False
+        return True
         """
         if len(rects) == 1 and rects[0][0] > 220 and (rects[0][0] + rects[0][2]) < 420:
             # only consider first face found.
