@@ -50,7 +50,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
         out = out.reshape(-1, 7)
 
         if len(out) != 1:
-            return this.faceFound
+            return self.faceFound
 
         for detection in out:
             confidence = float(detection[2])
