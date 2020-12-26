@@ -50,7 +50,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
         start = time.time()
         print(str(image.shape))
         middle = image[0:image.shape[0],220:480]
-        blob = cv2.dnn.blobFromImage(middle, size=(480,260), ddepth=cv2.CV_8U)
+        blob = cv2.dnn.blobFromImage(middle, size=(260,480), ddepth=cv2.CV_8U)
         print("blob created from image")
         self.net.setInput(blob)
         print("set input")
