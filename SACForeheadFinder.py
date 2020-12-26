@@ -42,13 +42,9 @@ class ForeheadFinder(RectangleOfInterestFinder):
     ####################################################
     def getTcContours(self, image, showRois):
         start = time.time()
-        print(str(image.shape))
         blob = cv2.dnn.blobFromImage(image, size=(480,640), ddepth=cv2.CV_8U)
-        print("blob created from image")
         self.net.setInput(blob)
-        print("set input")
         out = self.net.forward()
-        print("forwarded")
 
         faceFound = False
 
@@ -61,12 +57,11 @@ class ForeheadFinder(RectangleOfInterestFinder):
                 ymax = int(detection[6] * image.shape[0])
 
                 faceWidth = xmax - xmin
-                faceHeight = ymax - ymin
-
-                print(str(faceHeight) + "x" + str(faceWidth))
+                faceHeight = ymax - ymin                
 
                 if xmin > 220 and xmax < 420 and faceWidth < 150 and faceWidth > 50 and faceHeight < 150 and faceHeight > 50:
                     faceFound = True
+                    print(str(faceHeight) + "x" + str(faceWidth))
                     if showRois:
                         cv2.rectangle(image, (xmin, ymin), (xmax, ymax), color=(255,0,0))
                         cv2.putText(image, "Confidence: " + str(confidence), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 1)
