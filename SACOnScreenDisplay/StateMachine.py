@@ -86,12 +86,11 @@ class StateMachine(object):
             start = int(round(time.time() * 1000))
             color = settings.idleColor
             self.ledDriver.output(color.red, color.green, color.blue, 100)
-            if self.roiFinder.getTcContours(image, settings.showFoundFace.value): #Face + eyes found -> forehead ok
+            if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
                 self.state = "WAIT_FOR_SIZE_OK"
                 self.displayMixer.showDontMove(image)
             else:
                 if self.roiFinder.faceFound:
-                    #self.addText(image, "Please look at the machine for a temperature scan.", (255, 0, 0))
                     self.displayMixer.showDontMove(image)
                 else:
                     self.displayMixer.hide()
@@ -111,7 +110,6 @@ class StateMachine(object):
                         self.state = "RUN_FFC"                        
                     else:
                         self.state = "SET_FLUX_LINEAR_PARAMS"
-                    #self.addText(image, "Initialising...", (255, 0, 0))
                     self.displayMixer.showDontMove(image)
             else:
                 self.state = "IDLE"
@@ -121,7 +119,6 @@ class StateMachine(object):
         elif self.state == "RUN_FFC":
             start = int(round(time.time() * 1000))
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
-                #self.addText(image, "Initialising...", (255, 0, 0))
                 self.displayMixer.showDontMove(image)
                 self.runFfc()    
                 # maybe add a delay here 
@@ -134,7 +131,6 @@ class StateMachine(object):
         elif self.state == "SET_FLUX_LINEAR_PARAMS":
             start = int(round(time.time() * 1000))
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
-                #self.addText(image, "Measuring...", (255, 0, 0))
                 self.displayMixer.showMeasuring(image)
                 self.setFluxLinearParams()
                 self.state = "GET_TEMPERATURE"                
@@ -198,7 +194,6 @@ class StateMachine(object):
             print("Get temp took: " + str(int(round(time.time() * 1000)) - startTime) + "ms")
 
         elif self.state == "WAIT_FOR_NO_FACE":
-            self.roiFinder.detectEyes = False
             self.roiFinder.getTcContours(image, False) # only looks for the head now
             if self.roiFinder.faceFound:
                 print("Temp: " + str(self.values[1]) + "DegC")    
@@ -209,7 +204,6 @@ class StateMachine(object):
                     self.displayMixer.showTemperatureOk(image)                       
             else:
                 self.writeLog()
-                self.roiFinder.detectEyes = True
                 self.state = "IDLE"
                 self.displayMixer.hide();
 
