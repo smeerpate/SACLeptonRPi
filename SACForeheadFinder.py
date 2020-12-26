@@ -47,34 +47,32 @@ class ForeheadFinder(RectangleOfInterestFinder):
         out = self.net.forward()
         self.faceFound = False
 
-        out = out.reshape(-1, 7)
-
-        if len(out) != 1:
-            return self.faceFound
-
         detections = []
 
-        for detection in out:
+        for detection in out.reshape(-1, 7):
             confidence = float(detection[2])
             if confidence > 0.5:
-                detections.append(detection)
+                xmin = int(detection[3] * image.shape[1])
+                ymin = int(detection[4] * image.shape[0])
+                xmax = int(detection[5] * image.shape[1])
+                ymax = int(detection[6] * image.shape[0])
 
+                faceWidth = xmax - xmin
+                faceHeight = ymax - ymin                
+
+                if xmin > 220 and xmax < 420 and faceWidth < 200 and faceWidth > 50 and faceHeight < 200 and faceHeight > 50:
+                    detections.append((xmin, ymin), (xmax, ymax))
+
+        # We only want 1 face
         if len(detections) == 1:
-            detection = detections[0]
-            xmin = int(detection[3] * image.shape[1])
-            ymin = int(detection[4] * image.shape[0])
-            xmax = int(detection[5] * image.shape[1])
-            ymax = int(detection[6] * image.shape[0])
+            detection = detections[0]            
+            self.faceFound = True
 
-            faceWidth = xmax - xmin
-            faceHeight = ymax - ymin                
-
-            if xmin > 220 and xmax < 420 and faceWidth < 200 and faceWidth > 50 and faceHeight < 200 and faceHeight > 50:
-                self.faceFound = True
-                print(str(faceHeight) + "x" + str(faceWidth))
-                if showRois:
-                    cv2.rectangle(image, (xmin, ymin), (xmax, ymax), color=(255,0,0))
-                    cv2.putText(image, "Confidence: " + str(confidence), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 1)
+            if showRois:
+                (xmin, ymin) = detection[0]
+                (xmax, ymax) = detection[1]
+                cv2.rectangle(image, (xmin, ymin), (xmax, ymax), color=(255,0,0))
+                cv2.putText(image, "Confidence: " + str(confidence), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 1)
 
         timespan = (time.time() - start) * 1000
         print("Time to detect (all-in)(ms): " + str(timespan))
