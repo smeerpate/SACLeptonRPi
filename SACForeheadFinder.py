@@ -43,7 +43,6 @@ class ForeheadFinder(RectangleOfInterestFinder):
     def getTcContours(self, image, showRois):
         start = time.time()
         print(str(image.shape))
-        #middle = image[0:image.shape[0],220:480]
         blob = cv2.dnn.blobFromImage(image, size=(480,640), ddepth=cv2.CV_8U)
         print("blob created from image")
         self.net.setInput(blob)
@@ -56,17 +55,19 @@ class ForeheadFinder(RectangleOfInterestFinder):
         for detection in out.reshape(-1, 7):
             confidence = float(detection[2])
             if confidence > 0.5:
-                #xmin = int(detection[3] * 260) + 220
                 xmin = int(detection[3] * image.shape[1])
                 ymin = int(detection[4] * image.shape[0])
-                #xmax = int(detection[5] * 260) + 220
                 xmax = int(detection[5] * image.shape[1])
                 ymax = int(detection[6] * image.shape[0])
-                faceFound = True
-		        #print("xmin: " + str(xmin))
-                if showRois:
-                    cv2.rectangle(image, (xmin, ymin), (xmax, ymax), color=(255,0,0))
-                    cv2.putText(image, "Confidence: " + str(confidence), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 1)
+
+                faceWidth = xmax - xmin
+                faceHeight = ymax - ymin
+
+                if xmin > 220 and xmax < 420 and faceWidth < 100 and faceWidth > 50 and faceHeight < 100 and faceHeight > 50:
+                    faceFound = True
+                    if showRois:
+                        cv2.rectangle(image, (xmin, ymin), (xmax, ymax), color=(255,0,0))
+                        cv2.putText(image, "Confidence: " + str(confidence), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 1)
         timespan = (time.time() - start) * 1000
         print("Time to detect (all-in)(ms): " + str(timespan))
         self.tcROI = (-1,-1,-1,-1)
