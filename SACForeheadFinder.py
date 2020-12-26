@@ -61,7 +61,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
                 faceHeight = ymax - ymin                
 
                 if xmin > 220 and xmax < 420 and faceWidth < 200 and faceWidth > 50 and faceHeight < 200 and faceHeight > 50:
-                    detections.append(((xmin, ymin), (xmax, ymax)))
+                    detections.append((confidence, (xmin, ymin), (xmax, ymax)))
 
         # We only want 1 face
         if len(detections) == 1:
@@ -69,10 +69,10 @@ class ForeheadFinder(RectangleOfInterestFinder):
             self.faceFound = True
 
             if showRois:
-                (xmin, ymin) = detection[0]
-                (xmax, ymax) = detection[1]
+                (xmin, ymin) = detection[1]
+                (xmax, ymax) = detection[2]
                 cv2.rectangle(image, (xmin, ymin), (xmax, ymax), color=(255,0,0))
-                cv2.putText(image, "Confidence: " + str(confidence), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 1)
+                cv2.putText(image, "Confidence: " + str(detection[0]), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 1)
 
         timespan = (time.time() - start) * 1000
         print("Time to detect (all-in)(ms): " + str(timespan))
