@@ -63,7 +63,9 @@ class ForeheadFinder(RectangleOfInterestFinder):
                 faceWidth = xmax - xmin
                 faceHeight = ymax - ymin
 
-                if xmin > 220 and xmax < 420 and faceWidth < 100 and faceWidth > 50 and faceHeight < 100 and faceHeight > 50:
+                print(str(faceHeight) + "x" + str(faceWidth))
+
+                if xmin > 220 and xmax < 420 and faceWidth < 150 and faceWidth > 50 and faceHeight < 150 and faceHeight > 50:
                     faceFound = True
                     if showRois:
                         cv2.rectangle(image, (xmin, ymin), (xmax, ymax), color=(255,0,0))
