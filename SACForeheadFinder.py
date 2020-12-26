@@ -82,7 +82,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
             w = xmax - xmin - spacing
             h = int((ymax - ymin) / 3)
 
-            cv2.rectangle(image,(x,y),(x + w,y + h), color, 2)
+            cv2.rectangle(image,(x,y),(x + w,y + h), (255, 255, 0), 1)
 
             self.tcROI = (x, y, w, h)
 
