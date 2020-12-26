@@ -47,7 +47,12 @@ class ForeheadFinder(RectangleOfInterestFinder):
         out = self.net.forward()
         self.faceFound = False
 
-        for detection in out.reshape(-1, 7):
+        out = out.reshape(-1, 7)
+
+        if len(out) != 1:
+            return this.faceFound
+
+        for detection in out:
             confidence = float(detection[2])
             if confidence > 0.5:
                 xmin = int(detection[3] * image.shape[1])
