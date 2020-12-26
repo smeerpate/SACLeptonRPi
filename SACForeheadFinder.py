@@ -22,7 +22,6 @@ class ForeheadFinder(RectangleOfInterestFinder):
         print("Target set")
         self.name = "Forehead"
         self.faceFound = False
-        self.detectEyes = True
 
     ####################################################
     # Sets the the transformation matrix (M) for mapping
@@ -67,64 +66,30 @@ class ForeheadFinder(RectangleOfInterestFinder):
         if len(detections) == 1:
             detection = detections[0]            
             self.faceFound = True
+            (xmin, ymin) = detection[1]
+            (xmax, ymax) = detection[2]
 
-            if showRois:
-                (xmin, ymin) = detection[1]
-                (xmax, ymax) = detection[2]
+            if showRois:                
                 cv2.rectangle(image, (xmin, ymin), (xmax, ymax), color=(255,0,0))
                 cv2.putText(image, "Confidence: " + str(detection[0]), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 1)
+
+
+
+            spacing = int((xmax - xmin) * 0.1)           
+
+            x = xmin + spacing
+            y = ymin
+            w = xmax - xmin - spacing
+            h = int((ymax - ymin) / 3)
+
+            cv2.rectangle(image,(x,y),(x + w,y + h), color, 2)
+
+            self.tcROI = (x, y, w, h)
 
         timespan = (time.time() - start) * 1000
         print("Time to detect (all-in)(ms): " + str(timespan))
         self.tcROI = (-1,-1,-1,-1)
         return self.faceFound
-        """
-        if len(rects) == 1 and rects[0][0] > 220 and (rects[0][0] + rects[0][2]) < 420:
-            # only consider first face found.
-            # rect comes in a tuple (x,y,w,h).
-            # todo: check for biggest bounding box.
-            # todo: check if face is in the middle!
-
-            faceRect = rects[0]
-
-            if showRois:
-                self.showRect(image, faceRect, (200,255,150))
-                self.faceFound = True
-
-            if not self.detectEyes:
-                self.tcRoi = (-1, -1, -1, -1)
-                return False
-
-            eyesRects = self.eyesDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
-            if len(eyesRects) > 0:
-                # Determine forehead                
-                eyesRect = eyesRects[0]
-
-                if showRois:
-                    self.showRect(image, eyesRect, (255, 150, 200))
-
-                x = eyesRect[0]
-                y = faceRect[1]
-                w = eyesRect[2]
-                h = eyesRect[1] - faceRect[1]
-
-                self.tcROI = (x, y, w, h)
-
-                if showRois:
-                    self.showRect(image, self.tcROI, (150, 255, 200))
-                return True
-            else:
-                self.tcROI = (-1,-1,-1,-1)
-                return False
-        else:
-            # no faces found
-            self.tcROI = (-1,-1,-1,-1)
-            self.faceFound = False
-            return False
-        """
-    def showRect(self, image, rect, color):
-        x, y, w, h = rect
-        cv2.rectangle(image,(x,y),(x + w,y + h), color, 2)
 
     def getTcForeheadROIWidth(self):
         return self.tcROI[2]
