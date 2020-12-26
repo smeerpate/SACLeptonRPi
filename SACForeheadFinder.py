@@ -45,6 +45,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
         blob = cv2.dnn.blobFromImage(image, size=(640,480), ddepth=cv2.CV_8U)
         self.net.setInput(blob)
         out = self.net.forward()
+        self.faceFound = False
 
         for detection in out.reshape(-1, 7):
             confidence = float(detection[2])
