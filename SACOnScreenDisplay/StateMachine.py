@@ -96,7 +96,7 @@ class StateMachine(object):
                     self.displayMixer.hide()
 
                 self.state = "IDLE"   
-            print("Idle took: " + str(int(round(time.time() * 1000)) - start) + "ms")
+            #print("Idle took: " + str(int(round(time.time() * 1000)) - start) + "ms")
 
         elif self.state == "WAIT_FOR_SIZE_OK":
             start = int(round(time.time() * 1000))
@@ -114,7 +114,7 @@ class StateMachine(object):
             else:
                 self.state = "IDLE"
                 self.displayMixer.hide()
-            print("Wait for size took: " + str(int(round(time.time() * 1000)) - start) + "ms")
+            #print("Wait for size took: " + str(int(round(time.time() * 1000)) - start) + "ms")
 
         elif self.state == "RUN_FFC":
             start = int(round(time.time() * 1000))
@@ -137,7 +137,7 @@ class StateMachine(object):
             else:
                 self.state = "IDLE"
                 self.displayMixer.hide()
-            print("Set flux linear params took: " + str(int(round(time.time() * 1000)) - start) + "ms")
+            #print("Set flux linear params took: " + str(int(round(time.time() * 1000)) - start) + "ms")
 
         elif self.state == "GET_TEMPERATURE":
             startTime = int(round(time.time() * 1000))
@@ -191,7 +191,7 @@ class StateMachine(object):
             else:
                 self.state = "IDLE"
                 self.displayMixer.hide()
-            print("Get temp took: " + str(int(round(time.time() * 1000)) - startTime) + "ms")
+            #print("Get temp took: " + str(int(round(time.time() * 1000)) - startTime) + "ms")
 
         elif self.state == "WAIT_FOR_NO_FACE":
             self.roiFinder.getTcContours(image, False) # only looks for the head now
@@ -281,8 +281,8 @@ class StateMachine(object):
        
     def setThRoiOnLepton(self, thRoi):
         # TH ROI: tuple (start point, end point)
-        #print("Setting ROI on Lepton:")
-        #print(str(thRoi))
+        print("Setting ROI on Lepton:")
+        print(str(thRoi))
 
         startPoint, endPoint = thRoi
 
