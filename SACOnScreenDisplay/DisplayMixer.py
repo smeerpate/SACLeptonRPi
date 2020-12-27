@@ -20,19 +20,19 @@ class DisplayMixer(object):
         self.shm = ipc.SharedMemory(key, 0, 0)
         self.shm.attach()
 
-        self.measuring = cv.imread("~/windmaster/Slides/SAC_MEASURING.jpg")
+        self.measuring = cv.imread("/home/pi/windmaster/Slides/SAC_MEASURING.jpg")
         self.measuring = cv.cvtColor(self.measuring, cv.COLOR_RGB2RGBA)
         self.measuring = cv.flip(self.measuring, 0)
 
-        self.tempOk = cv.imread("~/windmaster/Slides/SAC_TEMPOK.jpg")
+        self.tempOk = cv.imread("/home/pi/windmaster/Slides/SAC_TEMPOK.jpg")
         self.tempOk = cv.cvtColor(self.tempOk, cv.COLOR_RGB2RGBA)
         self.tempOk = cv.flip(self.tempOk, 0)
 
-        self.tempNok = cv.imread("~/windmaster/Slides/SAC_TEMPNOK.jpg")
+        self.tempNok = cv.imread("/home/pi/windmaster/Slides/SAC_TEMPNOK.jpg")
         self.tempNok = cv.cvtColor(self.tempNok, cv.COLOR_RGB2RGBA)
         self.tempNok = cv.flip(self.tempNok, 0)
 
-        self.dontMove = cv.imread("~/windmaster/Slides/SAC_DONTMOVE.jpg")
+        self.dontMove = cv.imread("/home/pi/windmaster/Slides/SAC_DONTMOVE.jpg")
         self.dontMove = cv.cvtColor(self.dontMove, cv.COLOR_RGB2RGBA)
         self.dontMove = cv.flip(self.dontMove, 0)
         #Display is 1920 (width) x 1080 (height) -> np array is 1080 (rows) x 1920 (cols)
