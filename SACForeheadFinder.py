@@ -13,9 +13,6 @@ class ForeheadFinder(RectangleOfInterestFinder):
     def __init__(self, imageSize = (640,480), minFaceSize = (180,180), minEyesSize = (250,40)):
         self.minFaceSize = minFaceSize
         self.minEyesSize = minEyesSize
-        # load frontal face  classifier
-        #self.faceDet = cv2.CascadeClassifier("/home/pi/SACLeptonRPi/haarcascade_frontalface_default.xml")
-        #self.eyesDet = cv2.CascadeClassifier("/home/pi/SACLeptonRPi/haarcascade_frontaleyes.xml")
         self.net = cv2.dnn.readNet('/home/pi/SACLeptonRPi/face-detection-adas-0001.xml', '/home/pi/SACLeptonRPi/face-detection-adas-0001.bin')
         print("Read net completed")
         self.net.setPreferableTarget(cv2.dnn.DNN_TARGET_MYRIAD)
@@ -72,7 +69,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
 
             if showRois:                
                 cv2.rectangle(image, (xmin, ymin), (xmax, ymax), color=(255,0,0))
-                cv2.putText(image, "Confidence: " + str(detection[0]), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 1)
+                #cv2.putText(image, "Confidence: " + str(detection[0]), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 1)
 
             spacing = int((xmax - xmin) * 0.1)           
 
