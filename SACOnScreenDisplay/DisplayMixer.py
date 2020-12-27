@@ -6,7 +6,7 @@ import cv2 as cv
 import numpy as np
 
 def startDisplay():
-        call(["./SACDisplayMixer/OGLESSimpleImageWithIPC"])
+        call(["/home/pi/SACLeptonRPi/SACDisplayMixer/OGLESSimpleImageWithIPC"])
 
 class DisplayMixer(object):
     """description of class"""
