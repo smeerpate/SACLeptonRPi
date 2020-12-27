@@ -16,7 +16,7 @@ displayMixer = DisplayMixer()
 settingsManager = SettingsManager()
 inputManager = InputManager(5, 6, 13)
 ledDriver = LedDriver(17, 27, 22)
-f = open("Logging/SAC Temp Log.csv", "a")
+f = open("/home/pi/SACLeptonRPi/Logging/SAC Temp Log.csv", "a")
 stateMachine = StateMachine(settingsManager, ledDriver, f, displayMixer)
 osd = OSD(inputManager, settingsManager, displayMixer)
 
