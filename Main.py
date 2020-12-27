@@ -58,8 +58,9 @@ try:
     cap.release()
     cv.destroyAllWindows()
     
-except:
+except Exception as Argument:
     # When everything done, release the capture
+    print(str(Argument))
     ledDriver.stop()
     displayMixer.stop()
     f.close()
