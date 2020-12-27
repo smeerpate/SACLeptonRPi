@@ -16,7 +16,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
         # load frontal face  classifier
         #self.faceDet = cv2.CascadeClassifier("/home/pi/SACLeptonRPi/haarcascade_frontalface_default.xml")
         #self.eyesDet = cv2.CascadeClassifier("/home/pi/SACLeptonRPi/haarcascade_frontaleyes.xml")
-        self.net = cv2.dnn.readNet('face-detection-adas-0001.xml', 'face-detection-adas-0001.bin')
+        self.net = cv2.dnn.readNet('/home/pi/SACLeptonRPi/face-detection-adas-0001.xml', '/home/pi/SACLeptonRPi/face-detection-adas-0001.bin')
         print("Read net completed")
         self.net.setPreferableTarget(cv2.dnn.DNN_TARGET_MYRIAD)
         print("Target set")
