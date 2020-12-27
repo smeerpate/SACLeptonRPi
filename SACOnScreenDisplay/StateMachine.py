@@ -22,8 +22,9 @@ class StateMachine(object):
         self.logFile = file
         self.displayMixer = displayMixer
 
-        self.values = (0, 0, 0, 0)
         self.thRoi = (0, 0), (0, 0)
+        self.temperatures = []
+        self.temperature = 0
         self.roiFinder = ForeheadFinder()
         self.thSensorWidth = 80
         self.thSensorHeight = 60
@@ -113,6 +114,7 @@ class StateMachine(object):
                     self.displayMixer.showDontMove(image)
             else:
                 self.state = "IDLE"
+                self.temperatures = []
                 self.displayMixer.hide()
             #print("Wait for size took: " + str(int(round(time.time() * 1000)) - start) + "ms")
 
@@ -125,6 +127,7 @@ class StateMachine(object):
                 self.state = "SET_FLUX_LINEAR_PARAMS"                
             else:
                 self.state = "IDLE"
+                self.temperatures = []
                 self.displayMixer.hide()
             print("Run FFC took: " + str(int(round(time.time() * 1000)) - start) + "ms")
 
@@ -136,6 +139,7 @@ class StateMachine(object):
                 self.state = "GET_TEMPERATURE"                
             else:
                 self.state = "IDLE"
+                self.temperatures = []
                 self.displayMixer.hide()
             #print("Set flux linear params took: " + str(int(round(time.time() * 1000)) - start) + "ms")
 
@@ -171,40 +175,47 @@ class StateMachine(object):
                 #print("Total pixels: ")
                 #print(w*h)
 
-                self.setThRoiOnLepton(thRoi)            
-                self.values = l.GetROIValues()
+                self.setThRoiOnLepton(thRoi)                    
+                values = l.GetROIValues()
+                self.temperatures.append(values[1])
 
-                color = None
-
-                if self.values[1] > settings.threshold.value:
-                    color = settings.alarmColor
-                    self.displayMixer.showTemperatureNok(image)
+                if len(self.temperatures) < settings.measurementsPerMean.value:
+                    self.state = "GET_TEMPERATURE"
                 else:
-                    color = settings.okColor
-                    self.displayMixer.showTemperatureOk(image)
+                    color = None
+                    self.temperature = np.max(self.temperatures)
 
-                self.ledDriver.output(color.red, color.green, color.blue, 100)  
-                #print("TH ROI from Lepton:")
-                #print(str(l.GetROI()))
-                #print(str(self.values))                
-                self.state = "WAIT_FOR_NO_FACE"
+                    if self.temperature > settings.threshold.value:
+                        color = settings.alarmColor
+                        self.displayMixer.showTemperatureNok(image)
+                    else:
+                        color = settings.okColor
+                        self.displayMixer.showTemperatureOk(image)
+
+                    self.ledDriver.output(color.red, color.green, color.blue, 100)  
+                    #print("TH ROI from Lepton:")
+                    #print(str(l.GetROI()))
+                    #print(str(self.values))                
+                    self.state = "WAIT_FOR_NO_FACE"
             else:
                 self.state = "IDLE"
+                self.temperatures = []
                 self.displayMixer.hide()
             #print("Get temp took: " + str(int(round(time.time() * 1000)) - startTime) + "ms")
 
         elif self.state == "WAIT_FOR_NO_FACE":
             self.roiFinder.getTcContours(image, False) # only looks for the head now
             if self.roiFinder.faceFound:
-                print("Temp: " + str(self.values[1]) + "DegC")    
+                print("Temp: " + str(self.temperature) + " DegC" + "... " + ', '.join(str(e) for e in self.temperatures))    
 
-                if self.values[1] > settings.threshold.value:
+                if self.temperature > settings.threshold.value:
                     self.displayMixer.showTemperatureNok(image)
                 else:
                     self.displayMixer.showTemperatureOk(image)                       
             else:
                 self.writeLog()
                 self.state = "IDLE"
+                self.temperatures = []
                 self.displayMixer.hide();
 
     def measureTemp(self):
