@@ -21,17 +21,6 @@ try:
     stateMachine = StateMachine(settingsManager, ledDriver, displayMixer)
     osd = OSD(inputManager, settingsManager, displayMixer)
 
-    # Target screen is 12", 1024x768 or 768x1024 in portrait mode
-    screenWidth = 768
-    screenHeight = 1024
-    # Sensor size is 80x60
-    sensorWidth = 80
-    sensorHeight = 60
-    # Lepton offset in degC
-    corrVal = 0
-    maxVal = 0
-    feverThresh = 35.4
-
     camera = PiCamera()
     camera.resolution = (640, 480)
     rawCapture = PiRGBArray(camera, size=(640, 480))
