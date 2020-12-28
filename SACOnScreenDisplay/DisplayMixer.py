@@ -20,8 +20,8 @@ class DisplayMixer(object):
         self.shm = ipc.SharedMemory(key, 0, 0)
         self.shm.attach()
 
-        self.measuring = cv.imread("/home/pi/windmaster/Slides/SAC_MEASURING.jpg")
-        self.measuring = cv.cvtColor(self.measuring, cv.COLOR_RGB2RGBA)
+        self.measuring = cv.imread("/home/pi/windmaster/Slides/SAC_MEASURING.jpg")        
+        self.measuring = cv.cvtColor(self.measuring, cv.COLOR_BGR2RGBA)
         self.measuring = cv.flip(self.measuring, 0)
 
         self.tempOk = cv.imread("/home/pi/windmaster/Slides/SAC_TEMPOK.jpg")
