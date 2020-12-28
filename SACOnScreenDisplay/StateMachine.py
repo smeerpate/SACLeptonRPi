@@ -14,12 +14,12 @@ from .DisplayMixer import DisplayMixer
 class StateMachine(object):
     """description of class"""
 
-    def __init__(self, settingsManager, ledDriver, file, displayMixer):
+    def __init__(self, settingsManager, ledDriver, displayMixer):
         self.state = "IDLE"
         self.settingsManager = settingsManager
         self.ledDriver = ledDriver
         self.lepton = Lepton()
-        self.logFile = file
+        #self.logFile = file
         self.displayMixer = displayMixer
 
         self.thRoi = (0, 0), (0, 0)
@@ -56,7 +56,8 @@ class StateMachine(object):
 
     def writeLog(self):
         line = str(int(round(time.time()))) + ";" + str(self.roiFinder.name) + ";" + str(l.GetAuxTemp()) + ";" + str(l.GetFpaTemp()) + ";" + str(l.GetROIValues()) + ";" + str(l.GetROI()) + ";" + str(self.thRoi) + ";" + str(int(round(self.lastFFCTime))) + "\n"
-        self.logFile.write(line)
+        print("SAC_TEMPLOG: " + line)
+        #self.logFile.write(line)
 
     def checkFaceSize(self, image, currWidth, minWidth, maxWidth):
         return True

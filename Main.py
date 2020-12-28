@@ -17,8 +17,8 @@ try:
     settingsManager = SettingsManager()
     inputManager = InputManager(5, 6, 13)
     ledDriver = LedDriver(17, 27, 22)
-    f = open("/home/pi/SACLeptonRPi/Logging/SAC Temp Log.csv", "a")
-    stateMachine = StateMachine(settingsManager, ledDriver, f, displayMixer)
+    #f = open("/home/pi/SACLeptonRPi/Logging/SAC Temp Log.csv", "a")
+    stateMachine = StateMachine(settingsManager, ledDriver, displayMixer)
     osd = OSD(inputManager, settingsManager, displayMixer)
 
     # Target screen is 12", 1024x768 or 768x1024 in portrait mode
