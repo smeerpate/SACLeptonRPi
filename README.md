@@ -8,11 +8,17 @@ NSC2 installation: https://www.pyimagesearch.com/2019/04/08/openvino-opencv-and-
 sudo addgroup users
 
 Service creation:
+
 cd /lib/systemd/system
+
 sudo nano SACLeptonRPi.service
 
 To test if it works: sudo systemctl start SACLeptonRPi.service
+
 If so:
+
 sudo systemctl daemon-reload
+
 sudo systemctl stop SACLeptonRPi.service
+
 sudo systemctl enable SACLeptonRPi.service
