@@ -25,15 +25,15 @@ class DisplayMixer(object):
         self.measuring = cv.flip(self.measuring, 0)
 
         self.tempOk = cv.imread("/home/pi/windmaster/Slides/SAC_TEMPOK.jpg")
-        self.tempOk = cv.cvtColor(self.tempOk, cv.COLOR_RGB2RGBA)
+        self.tempOk = cv.cvtColor(self.tempOk, cv.COLOR_BGR2RGBA)
         self.tempOk = cv.flip(self.tempOk, 0)
 
         self.tempNok = cv.imread("/home/pi/windmaster/Slides/SAC_TEMPNOK.jpg")
-        self.tempNok = cv.cvtColor(self.tempNok, cv.COLOR_RGB2RGBA)
+        self.tempNok = cv.cvtColor(self.tempNok, cv.COLOR_BGR2RGBA)
         self.tempNok = cv.flip(self.tempNok, 0)
 
         self.dontMove = cv.imread("/home/pi/windmaster/Slides/SAC_DONTMOVE.jpg")
-        self.dontMove = cv.cvtColor(self.dontMove, cv.COLOR_RGB2RGBA)
+        self.dontMove = cv.cvtColor(self.dontMove, cv.COLOR_BGR2RGBA)
         self.dontMove = cv.flip(self.dontMove, 0)
         #Display is 1920 (width) x 1080 (height) -> np array is 1080 (rows) x 1920 (cols)
         #self.transparent = np.full([1080, 200, 4], 150, dtype=np.uint8)
