@@ -47,8 +47,6 @@ try:
             osd.run(frame)        
         else:
             stateMachine.run(frame)
-
-                
         rawCapture.truncate(0)   
 
     # When everything done, release the capture
