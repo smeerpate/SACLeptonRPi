@@ -1,0 +1,14 @@
+[Unit]
+Description=SACLeptonRPi
+After=multi-user.target
+
+[Service]
+Type=idle
+ExecStart=/bin/bash  /home/pi/SACLeptonRPi/SACLeptonRPi.sh
+User=pi
+StandardOutput=inherit
+StandardError=inherit
+SyslogIdentifier=SACLeptonRPi
+
+[Install]
+WantedBy=multi-user.target
