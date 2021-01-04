@@ -70,6 +70,8 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
     cv.normalize(raw, raw, 0, 65535, cv.NORM_MINMAX)
     np.right_shift(raw, 8, raw)
     thImage = np.uint8(raw) # 80x60
+    maxTemp = np.amax(thImage)
+    print('max temp = ' + str((float(maxTemp/100.0)-273.15)))
 
     if roiFinder.getTcContours(image, settings.showFoundFace.value):
         thRoiContours = roiFinder.getThContours() # LT, RT, LB, RB
@@ -81,9 +83,9 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
         
     x_offset=y_offset=0
     image[y_offset:y_offset+thImage.shape[0], x_offset:x_offset+thImage.shape[1]] = thImage
-    imageName = "ThermalAndTrueColor " + str(int(round(time.time())))
+    imageName = "ThermalAndTrueColor"
     cv.imwrite('/home/pi/SACLeptonRPi/' + imageName +'.jpg', image)
     rawCapture.truncate(0)
     break;
 
-cap.release()
+rawCapture.release()
