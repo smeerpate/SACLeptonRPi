@@ -68,13 +68,18 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
     setFluxLinearParams()
     time.sleep(0.2)
     print(str(l.SetROI((37, 10, 47, 16))))
-    values = l.GetROIValues()
-    print('With ROI: ' + str(values[1]))
 
     raw,_ = lepton.capture()    
     maxTemp = np.amax(raw)
     print('max temp = ' + str(maxTemp))
     print('max temp = ' + str((float(maxTemp/100.0)-273.15)))
+
+
+
+    values = l.GetROIValues()
+    print('With ROI: ' + str(values[1]))
+
+    
 
     if roiFinder.getTcContours(image, settings.showFoundFace.value):
         thRoiContours = roiFinder.getThContours() # LT, RT, LB, RB
