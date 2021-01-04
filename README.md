@@ -22,3 +22,9 @@ sudo systemctl daemon-reload
 sudo systemctl stop SACLeptonRPi.service
 
 sudo systemctl enable SACLeptonRPi.service
+
+## Mechanics
+* `/home/pi/SACLeptonRPi/SACLeptonRPi.sh`
+  1. runs openVINO setupvars script (under `~/openvino/bin/setupvars.sh`)
+  1. starts `~/SACLeptonRPi/Main.py`
+* `~/SACLeptonRPi/Main.py` starts openGLes display thread `/home/pi/SACLeptonRPi/SACDisplayMixer/OGLESSimpleImageWithIPC`
