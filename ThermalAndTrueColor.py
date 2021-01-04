@@ -84,7 +84,7 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
         thRoi = (start[0] + xTrans, start[1]), (end[0] + xTrans, end[1]) 
         addRectangle(thImage, thRoi, (255, 255, 255))
     
-    #cv.normalize(raw, raw, 0, 65535, cv.NORM_MINMAX)
+    cv.normalize(raw, raw, 0, 65535, cv.NORM_MINMAX)
     np.right_shift(raw, 8, raw)
     thImage = np.uint8(raw) # 80x60
     x_offset=y_offset=0
