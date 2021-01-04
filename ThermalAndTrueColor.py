@@ -71,10 +71,7 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
     values = l.GetROIValues()
     print('With ROI: ' + str(values[1]))
 
-    raw,_ = lepton.capture()
-    cv.normalize(raw, raw, 0, 65535, cv.NORM_MINMAX)
-    #np.right_shift(raw, 8, raw)
-    thImage = np.uint8(raw) # 80x60
+    raw,_ = lepton.capture()    
     maxTemp = np.amax(raw)
     print('max temp = ' + str(maxTemp))
     print('max temp = ' + str((float(maxTemp/100.0)-273.15)))
@@ -86,7 +83,10 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
         xTrans = 10
         thRoi = (start[0] + xTrans, start[1]), (end[0] + xTrans, end[1]) 
         addRectangle(thImage, thRoi, (255, 255, 255))
-        
+    
+    cv.normalize(raw, raw, 0, 65535, cv.NORM_MINMAX)
+    np.right_shift(raw, 8, raw)
+    thImage = np.uint8(raw) # 80x60
     x_offset=y_offset=0
     image[y_offset:y_offset+thImage.shape[0], x_offset:x_offset+thImage.shape[1]] = thImage
     imageName = "ThermalAndTrueColor"
