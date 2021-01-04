@@ -63,9 +63,9 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
     frame = data.array
     image = frame.copy()
 
-    runFfc()
+    #runFfc()
     #time.sleep(0.2)
-    setFluxLinearParams()
+    #setFluxLinearParams()
     time.sleep(0.2)
     print(str(l.SetROI((37, 10, 47, 16))))
     values = l.GetROIValues()
