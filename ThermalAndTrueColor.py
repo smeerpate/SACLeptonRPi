@@ -73,7 +73,7 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
 
     raw,_ = lepton.capture()
     cv.normalize(raw, raw, 0, 65535, cv.NORM_MINMAX)
-    np.right_shift(raw, 8, raw)
+    #np.right_shift(raw, 8, raw)
     thImage = np.uint8(raw) # 80x60
     maxTemp = np.amax(raw)
     print('max temp = ' + str(maxTemp))
