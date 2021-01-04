@@ -48,8 +48,8 @@ roiFinder = ForeheadFinder()
 settings = settingsManager.getSettings()
 transformMatrix = settings.affineTransform.value
 print("Affine transform:")
-print(self.transformMatrix)
-roiFinder.setTransformMatrix(self.transformMatrix)
+print(transformMatrix)
+roiFinder.setTransformMatrix(transformMatrix)
 lepton = Lepton()
 
 camera = PiCamera()
