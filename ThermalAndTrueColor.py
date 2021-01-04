@@ -5,7 +5,7 @@ import time
 import sys
 import LeptonCCI as l
 from Lepton import Lepton
-from .SettingsManager import SettingsManager
+from SACOnScreenDisplay.SettingsManager import SettingsManager
 from SACForeheadFinder import ForeheadFinder
 from picamera.array import PiRGBArray
 from picamera import PiCamera
