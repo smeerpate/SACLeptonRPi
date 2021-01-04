@@ -48,6 +48,21 @@ class StateMachine(object):
         fontScale = 1
         thickness = 2
         cv.putText(image, sMessage, org, font, fontScale, color, thickness, cv.LINE_AA)
+    
+    ###########################################
+    # Adds a capture from the lepton to the
+    # image. The thermal image is normalized.
+    ###########################################
+    def addThermalImage(self, image):
+        # Capture image from Lepton.
+        thRaw,_ = self.lepton.capture()
+        cv.normalize(thRaw, thRaw, 0, 65535, cv.NORM_MINMAX) # extend contrast
+        np.right_shift(thRaw, 8, thRaw) # fit raw data into 8 bit
+        # make uint8 image
+        thermal = np.uint8(thRaw)
+        # convert grayscale to BGR
+        thermal = cv.cvtColor(thermal, cv.COLOR_GRAY2BGR)
+        image[10:91, 10:71] = thermal # TODO: make offset adjustable and use width and height from Lepton library
 
     def addRectangle(self, image, roi, color):
         # ROI: tuple (start point, end point)
