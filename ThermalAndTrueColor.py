@@ -71,6 +71,7 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
     np.right_shift(raw, 8, raw)
     thImage = np.uint8(raw) # 80x60
     maxTemp = np.amax(thImage)
+    print('max temp = ' + str(maxTemp))
     print('max temp = ' + str((float(maxTemp/100.0)-273.15)))
 
     if roiFinder.getTcContours(image, settings.showFoundFace.value):
