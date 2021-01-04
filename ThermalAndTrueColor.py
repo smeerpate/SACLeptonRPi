@@ -65,7 +65,7 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
 
     runFfc()
     setFluxLinearParams()
-    l.SetROI((37, 10, 47, 16)))
+    l.SetROI((37, 10, 47, 16))
     values = l.GetROIValues()
     print('With ROI: ' + str(values[1]))
 
