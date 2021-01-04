@@ -41,6 +41,9 @@ class StateMachine(object):
         # Globals for FFC timing
         self.lastFFCTime = 0
         self.maxFFCInterval = 20 # seconds.
+        
+        # Need to show thermal image?
+        self.showThermalImage = False
 
     def addText(self, image, sMessage, color):
         font = cv.FONT_HERSHEY_SIMPLEX
@@ -111,7 +114,6 @@ class StateMachine(object):
                     self.displayMixer.showDontMove(image)
                 else:
                     self.displayMixer.hide()
-
                 self.state = "IDLE"   
             #print("Idle took: " + str(int(round(time.time() * 1000)) - start) + "ms")
 
@@ -120,6 +122,8 @@ class StateMachine(object):
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
                 if not self.checkFaceSize(image, self.roiFinder.getTcROIWidth(), self.faceSizeLowerLimit, self.faceSizeUpperLimit):
                     self.state = "WAIT_FOR_SIZE_OK"
+                    if self.showThermalImage:
+                        addThermalImage(image)
                     self.displayMixer.showDontMove(image)
                 else:
                     self.currentTime = int(round(time.time()))
