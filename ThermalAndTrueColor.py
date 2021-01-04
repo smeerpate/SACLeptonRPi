@@ -63,8 +63,11 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
     frame = data.array
     image = frame.copy()
 
-    #runFfc()
-    #setFluxLinearParams()
+    runFfc()
+    setFluxLinearParams()
+    l.SetROI((37, 10, 47, 16)))
+    values = l.GetROIValues()
+    print('With ROI: ' + str(values[1]))
 
     raw,_ = lepton.capture()
     cv.normalize(raw, raw, 0, 65535, cv.NORM_MINMAX)
