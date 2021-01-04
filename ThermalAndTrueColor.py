@@ -63,8 +63,8 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
     frame = data.array
     image = frame.copy()
 
-    runFfc()
-    setFluxLinearParams()
+    #runFfc()
+    #setFluxLinearParams()
 
     raw,_ = lepton.capture()
     cv.normalize(raw, raw, 0, 65535, cv.NORM_MINMAX)
