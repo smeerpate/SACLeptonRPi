@@ -63,9 +63,9 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
     frame = data.array
     image = frame.copy()
 
-    #runFfc()
-    #time.sleep(0.2)
-    #setFluxLinearParams()
+    runFfc()
+    time.sleep(0.2)
+    setFluxLinearParams()
     time.sleep(0.2)
     print(str(l.SetROI((37, 10, 47, 16))))
     values = l.GetROIValues()
@@ -75,7 +75,7 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
     cv.normalize(raw, raw, 0, 65535, cv.NORM_MINMAX)
     np.right_shift(raw, 8, raw)
     thImage = np.uint8(raw) # 80x60
-    maxTemp = np.amax(thImage)
+    maxTemp = np.amax(raw)
     print('max temp = ' + str(maxTemp))
     print('max temp = ' + str((float(maxTemp/100.0)-273.15)))
 
