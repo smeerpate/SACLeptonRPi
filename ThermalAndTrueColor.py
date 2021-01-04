@@ -13,7 +13,7 @@ from picamera import PiCamera
 def runFfc(self):
     l.RunRadFfc()
 
-def setFluxLinearParams(self):
+def setFluxLinearParams():
     sensorTemp = l.GetAuxTemp()
     sceneEmissivity = 0.98
     TBkg = sensorTemp
@@ -27,7 +27,7 @@ def setFluxLinearParams(self):
     print(str(FLParams))
     l.SetFluxLinearParams(FLParams)
 
-def getRoiFromContours(self, roiContours):
+def getRoiFromContours(roiContours):
     # ROI Contours: LT, RT, LB, RB
     # Returns a tuple (start point, end point)
     xstart = int(roiContours[0][0])
@@ -38,7 +38,7 @@ def getRoiFromContours(self, roiContours):
     #rightSide = (45, 5), (75, 55)
     return (xstart, ystart), (xend, yend)
 
-def addRectangle(self, image, roi, color):
+def addRectangle(image, roi, color):
     # ROI: tuple (start point, end point)
     startPoint, endPoint = roi
     cv.rectangle(image, startPoint, endPoint, color, 1)
