@@ -43,3 +43,11 @@ An estimation of the test person's core temperature is done by measuring the for
   * Read back temperatures from the Thermal imaging sensor via the CCI
   * Wait to go back to idle state until detected face is gone
   * The maximum temperature is taken as the temperature of the forehead
+  
+  ### Results
+  115 Measurements on different healthy persons resulted in:
+  
+  Average forehead temperature (degC) | Stddev | Coefficient of variation (CV%) 
+  ----------------------------------- | ------ | ------------------------------
+  33.324 | 0.560 |1.680
+  
