@@ -10,7 +10,7 @@ from SACForeheadFinder import ForeheadFinder
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 
-def runFfc(self):
+def runFfc():
     l.RunRadFfc()
 
 def setFluxLinearParams():
