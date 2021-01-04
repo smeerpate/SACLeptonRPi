@@ -4,8 +4,7 @@ import numpy as np
 import time
 import sys
 import LeptonCCI as l
-from .Lepton import Lepton
-from .LedDriver import LedDriver
+from Lepton import Lepton
 from .SettingsManager import SettingsManager
 from SACForeheadFinder import ForeheadFinder
 from picamera.array import PiRGBArray
