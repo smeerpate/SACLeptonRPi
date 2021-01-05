@@ -113,7 +113,7 @@ class StateMachine(object):
                 self.state = "WAIT_FOR_SIZE_OK"
                 self.displayMixer.showDontMove(image)
                 cts = self.getRadTLinearEnableState()
-                self.setRadTLinearEnableState(0)
+                self.setRadTLinearEnableState(1)
                 #if cts > 0:
                 #    self.setRadTLinearEnableState(0)
                 #else:
