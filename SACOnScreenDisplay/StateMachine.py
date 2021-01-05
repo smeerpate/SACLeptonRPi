@@ -313,8 +313,8 @@ class StateMachine(object):
        
     def setThRoiOnLepton(self, thRoi):
         # TH ROI: tuple (start point, end point)
-        print("Setting ROI on Lepton:")
-        print(str(thRoi))
+        #print("Setting ROI on Lepton:")
+        #print(str(thRoi))
 
         startPoint, endPoint = thRoi
 
