@@ -333,7 +333,7 @@ class StateMachine(object):
         #rightSide = (45, 5), (75, 55)
         return (xstart, ystart), (xend, yend)
     
-    def getRadTLinearEnableState(self)
+    def getRadTLinearEnableState(self):
         tlState = l.GetRadTLinearEnableState()
         print("[INFO] Current TLinear state is: " + str(tlState))
 
