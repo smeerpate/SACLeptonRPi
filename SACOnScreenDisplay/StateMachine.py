@@ -40,7 +40,7 @@ class StateMachine(object):
 
         # Globals for FFC timing
         self.lastFFCTime = 0
-        self.maxFFCInterval = 600 # seconds.
+        self.maxFFCInterval = 120 # seconds.
         
         self.lastFPATempTime = 0
         self.maxFPATempInterval = 30 # seconds.
@@ -112,8 +112,11 @@ class StateMachine(object):
             if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
                 self.state = "WAIT_FOR_SIZE_OK"
                 self.displayMixer.showDontMove(image)
-                self.getRadTLinearEnableState()
-                self.setRadTLinearEnableState(0)
+                cts = self.getRadTLinearEnableState()
+                if cts > 0:
+                    self.setRadTLinearEnableState(0)
+                else
+                    self.setRadTLinearEnableState(1)
             else:
                 if self.roiFinder.faceFound:
                     self.displayMixer.showDontMove(image)
