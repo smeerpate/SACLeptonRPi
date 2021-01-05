@@ -11,7 +11,7 @@ from picamera.array import PiRGBArray
 from picamera import PiCamera
 
 
-onlyMeasureWhenFaceFound = True
+onlyMeasureWhenFaceFound = False
 
 def runFfc():
     l.RunSysFFCNormalization()
@@ -97,7 +97,8 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
             print('With ROI: ' + str(values))
             addRectangle(thImage, thRoi, (255, 255, 255))
     else:
-        l.SetROI((1, 1, 79, 59))
+        thRoi = (1, 1), (79, 59)
+        l.SetROI((thRoi[0][0], thRoi[0][1], thRoi[1][0], thRoi[1][1]))
         values = l.GetROIValues()
         print('With ROI: ' + str(values))
         addRectangle(thImage, thRoi, (255, 255, 255))    
