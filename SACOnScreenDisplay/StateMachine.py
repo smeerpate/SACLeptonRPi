@@ -115,7 +115,7 @@ class StateMachine(object):
                 cts = self.getRadTLinearEnableState()
                 if cts > 0:
                     self.setRadTLinearEnableState(0)
-                else
+                else:
                     self.setRadTLinearEnableState(1)
             else:
                 if self.roiFinder.faceFound:
