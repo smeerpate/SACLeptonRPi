@@ -122,7 +122,7 @@ class StateMachine(object):
                 self.state = "IDLE"
                 self.currentTime = int(round(time.time()))
                 if self.currentTime > (self.lastFPATempTime + self.maxFPATempInterval):
-                    getFpaTemp()
+                    self.getFpaTemp()
                     self.lastFPATempTime = self.currentTime
             #print("Idle took: " + str(int(round(time.time() * 1000)) - start) + "ms")
 
