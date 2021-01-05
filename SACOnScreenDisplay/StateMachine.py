@@ -293,7 +293,8 @@ class StateMachine(object):
         self.state = "WAIT_FOR_NO_FACE"
 
     def runFfc(self):
-        l.RunRadFfc()
+        #l.RunRadFfc()
+        l.RunSysFFCNormalization()
         self.lastFFCTime = self.currentTime
 
     def setFluxLinearParams(self):
