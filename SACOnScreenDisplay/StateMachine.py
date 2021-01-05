@@ -195,7 +195,8 @@ class StateMachine(object):
                 #print("Total pixels: ")
                 #print(w*h)
 
-                self.setThRoiOnLepton(thRoi)                    
+                self.setThRoiOnLepton(thRoi)
+                self.writeLog()
                 values = l.GetROIValues()
                 self.temperatures.append(values[1])
 
@@ -233,7 +234,6 @@ class StateMachine(object):
                 else:
                     self.displayMixer.showTemperatureOk(image)                       
             else:
-                self.writeLog()
                 self.state = "IDLE"
                 self.temperatures = []
                 self.displayMixer.hide();
