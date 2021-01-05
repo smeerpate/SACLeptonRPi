@@ -10,6 +10,9 @@ from SACForeheadFinder import ForeheadFinder
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 
+
+onlyMeasureWhenFaceFound = True
+
 def runFfc():
     l.RunSysFFCNormalization()
 
@@ -81,17 +84,23 @@ for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=T
     cv.normalize(raw, raw, 0, 65535, cv.NORM_MINMAX)
     np.right_shift(raw, 8, raw)
     thImage = np.uint8(raw) # 80x60
-
-    if roiFinder.getTcContours(image, settings.showFoundFace.value):
-        thRoiContours = roiFinder.getThContours() # LT, RT, LB, RB
-        thRoi = getRoiFromContours(thRoiContours)
-        start, end = thRoi
-        xTrans = 10
-        thRoi = (start[0] + xTrans, start[1]), (end[0] + xTrans, end[1])
-        l.SetROI((thRoi[0][0], thRoi[0][1], thRoi[1][0], thRoi[1][1]))
+    
+    if onlyMeasureWhenFaceFound:
+        if roiFinder.getTcContours(image, settings.showFoundFace.value):
+            thRoiContours = roiFinder.getThContours() # LT, RT, LB, RB
+            thRoi = getRoiFromContours(thRoiContours)
+            start, end = thRoi
+            xTrans = 10
+            thRoi = (start[0] + xTrans, start[1]), (end[0] + xTrans, end[1])
+            l.SetROI((thRoi[0][0], thRoi[0][1], thRoi[1][0], thRoi[1][1]))
+            values = l.GetROIValues()
+            print('With ROI: ' + str(values))
+            addRectangle(thImage, thRoi, (255, 255, 255))
+    else:
+        l.SetROI((1, 1, 79, 59))
         values = l.GetROIValues()
         print('With ROI: ' + str(values))
-        addRectangle(thImage, thRoi, (255, 255, 255))
+        addRectangle(thImage, thRoi, (255, 255, 255))    
      
     x_offset=y_offset=0
     image[y_offset:y_offset+thImage.shape[0], x_offset:x_offset+thImage.shape[1]] = thImage
