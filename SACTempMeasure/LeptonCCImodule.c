@@ -383,7 +383,7 @@ static PyObject* LeptonCCI_GetFpaTemp(PyObject* self) {
 // ml_doc:  Contents of this method's docstring
 static PyMethodDef LeptonCCI_methods[] = {
     {"RunRadFfc", (PyCFunction)LeptonCCI_RunRadFfc, METH_NOARGS, NULL},
-    {"LeptonCCI_RunSysFFCNormalization", (PyCFunction)LeptonCCI_RunSysFFCNormalization, METH_NOARGS, NULL},
+    {"RunSysFFCNormalization", (PyCFunction)LeptonCCI_RunSysFFCNormalization, METH_NOARGS, NULL},
     {"GetROI", (PyCFunction)LeptonCCI_GetROI, METH_NOARGS, NULL},
     {"SetROI", (PyCFunction)LeptonCCI_SetROI, METH_VARARGS, NULL},
     {"GetROIValues", (PyCFunction)LeptonCCI_GetROIValues, METH_NOARGS, NULL},
