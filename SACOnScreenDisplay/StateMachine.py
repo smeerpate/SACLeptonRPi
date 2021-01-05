@@ -149,7 +149,7 @@ class StateMachine(object):
                 self.state = "IDLE"
                 self.temperatures = []
                 self.displayMixer.hide()
-            print("Run FFC took: " + str(int(round(time.time() * 1000)) - start) + "ms")
+            print("[INFO] Run FFC took: " + str(int(round(time.time() * 1000)) - start) + "ms")
 
         elif self.state == "SET_FLUX_LINEAR_PARAMS":
             start = int(round(time.time() * 1000))
@@ -227,7 +227,7 @@ class StateMachine(object):
         elif self.state == "WAIT_FOR_NO_FACE":
             self.roiFinder.getTcContours(image, False) # only looks for the head now
             if self.roiFinder.faceFound:
-                print("Temp: " + str(self.temperature) + " DegC" + "... " + ', '.join(str(e) for e in self.temperatures))    
+                print("[INFO] Max temp of all measurements: " + str(self.temperature) + " DegC" + ". (" + ', '.join(str(e) for e in self.temperatures) + ")")    
 
                 if self.temperature > settings.threshold.value:
                     self.displayMixer.showTemperatureNok(image)
@@ -308,7 +308,7 @@ class StateMachine(object):
         reflWindow = 0.0
         TRefl = sensorTemp
         FLParams = (sceneEmissivity,TBkg,tauWindow,TWindow,tauAtm,TAtm,reflWindow,TRefl)
-        print(str(FLParams))
+        print("[INFO] FL Params: " + str(FLParams))
         l.SetFluxLinearParams(FLParams)
        
     def setThRoiOnLepton(self, thRoi):
@@ -318,7 +318,8 @@ class StateMachine(object):
 
         startPoint, endPoint = thRoi
 
-        print(str(l.SetROI((startPoint[0], startPoint[1], endPoint[0], endPoint[1]))))
+        #print(str(l.SetROI((startPoint[0], startPoint[1], endPoint[0], endPoint[1]))))
+        l.SetROI((startPoint[0], startPoint[1], endPoint[0], endPoint[1]))
 
     def getRoiFromContours(self, roiContours):
         # ROI Contours: LT, RT, LB, RB
@@ -347,7 +348,7 @@ class StateMachine(object):
         return
 
     def reset(self):
-        print("Resetting state machine")
+        print("[INFO] Resetting state machine...")
         self.state = "IDLE"
 
 
