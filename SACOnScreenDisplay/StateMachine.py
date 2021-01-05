@@ -42,6 +42,9 @@ class StateMachine(object):
         self.lastFFCTime = 0
         self.maxFFCInterval = 600 # seconds.
         
+        self.lastFPATempTime = 0
+        self.maxFPATempInterval = 30 # seconds.
+        
         # Need to show thermal image?
         self.showThermalImage = False
 
@@ -116,7 +119,11 @@ class StateMachine(object):
                     self.displayMixer.showDontMove(image)
                 else:
                     self.displayMixer.hide()
-                self.state = "IDLE"   
+                self.state = "IDLE"
+                self.currentTime = int(round(time.time()))
+                if self.currentTime > (self.lastFPATempTime + self.maxFPATempInterval):
+                    getFpaTemp()
+                    self.lastFPATempTime = self.currentTime
             #print("Idle took: " + str(int(round(time.time() * 1000)) - start) + "ms")
 
         elif self.state == "WAIT_FOR_SIZE_OK":
@@ -335,12 +342,18 @@ class StateMachine(object):
         return (xstart, ystart), (xend, yend)
     
     def getRadTLinearEnableState(self):
-        tlState = l.GetRadTLinearEnableState()
-        print("[INFO] Current TLinear state is: " + str(tlState))
+        tlStateG = l.GetRadTLinearEnableState()
+        print("[INFO] Current TLinear state is: " + str(tlStateG))
+        return tlStateG
         
     def setRadTLinearEnableState(self, tlState):
         l.SetRadTLinearEnableState(tlState)
         print("[INFO] Set TLinear state to: " + str(tlState))
+        
+    def getFpaTemp(self):
+        fpaTempG = l.GetFpaTemp()
+        print("[INFO] Current FPA temperature is: " + str(fpaTempG))
+        return fpaTempG
 
     def showThermalImage(self):
         #raw,_ = self.lepton.capture()
