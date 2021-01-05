@@ -59,6 +59,38 @@ static PyObject* LeptonCCI_RunRadFfc(PyObject* self) {
 }
 
 ///////////////////////////////////////////////////
+// LeptonCCI_RunSysFFCNormalization is a Function without
+// arguments. Triggers an FFC Normalization.
+///////////////////////////////////////////////////
+static PyObject* LeptonCCI_RunSysFFCNormalization(PyObject* self) {
+    LEP_RESULT sResult;
+
+    sResult = LEP_OpenPort(1, LEP_CCI_TWI, 400, &i2cPort);
+    if(LEP_COMM_OK != sResult)
+    {
+        sprintf(sError, "LeptonCCI_RunRadFfc: Unable to open i2c port. SDK error code %i.", (int)sResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
+    }
+    sResult = LEP_RunSysFFCNormalization(&i2cPort);
+    if(LEP_OK != sResult)
+    {
+        sprintf(sError, "LeptonCCI_RunRadFfc: Unable to run RAD FFC. SDK error code %i.", (int)sResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
+    }
+    sResult = LEP_ClosePort(&i2cPort);
+    if(LEP_OK != sResult)
+    {
+        sprintf(sError, "LeptonCCI_RunRadFfc: Unable to close i2c port. SDK error code %i.", (int)sResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
+    }
+
+    Py_RETURN_NONE;
+}
+
+///////////////////////////////////////////////////
 // LeptonCCI_GetROI is a Function without
 // arguments. Returns a tuple:
 // (startRow,startCol,endRow,endCol)
@@ -351,6 +383,7 @@ static PyObject* LeptonCCI_GetFpaTemp(PyObject* self) {
 // ml_doc:  Contents of this method's docstring
 static PyMethodDef LeptonCCI_methods[] = {
     {"RunRadFfc", (PyCFunction)LeptonCCI_RunRadFfc, METH_NOARGS, NULL},
+    {"RunSysFFCNormalization", (PyCFunction)LeptonCCI_RunSysFFCNormalization, METH_NOARGS, NULL},
     {"GetROI", (PyCFunction)LeptonCCI_GetROI, METH_NOARGS, NULL},
     {"SetROI", (PyCFunction)LeptonCCI_SetROI, METH_VARARGS, NULL},
     {"GetROIValues", (PyCFunction)LeptonCCI_GetROIValues, METH_NOARGS, NULL},
