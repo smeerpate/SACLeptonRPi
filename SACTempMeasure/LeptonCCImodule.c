@@ -423,7 +423,7 @@ static PyObject* LeptonCCI_GetRadTLinearEnableState(PyObject* self) {
         PyErr_SetString(LeptonCCIError, sError);
         return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
-    sResult = LEP_GetRadTLinearEnableState(&i2cPort, &enableState);
+    sResult = LEP_GetRadTLinearEnableState(&i2cPort, (LEP_RAD_ENABLE_E_PTR)&enableState);
     if(LEP_OK != sResult)
     {
         sprintf(sError, "LeptonCCI_GetRadTLinearEnableState: Unable to get TLinear Enable state. SDK error code %i.", (int)sResult);
