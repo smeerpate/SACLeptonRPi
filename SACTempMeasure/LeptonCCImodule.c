@@ -372,6 +372,74 @@ static PyObject* LeptonCCI_GetFpaTemp(PyObject* self) {
     return Py_BuildValue("f", (float)sFpaTemp);
 }
 
+///////////////////////////////////////////////////
+// LeptonCCI_SetRadTLinearEnableState
+///////////////////////////////////////////////////
+static PyObject* LeptonCCI_SetRadTLinearEnableState(PyObject* self, PyObject* args) {
+  LEP_RESULT sResult;
+  int enableState;
+
+  if (!PyArg_ParseTuple(args, "i", &enableState)){
+      sprintf(sError, "LeptonCCI_SetRadTLinearEnableState: Unable to parese arguments. args: (%i).", enableState);
+      return Py_BuildValue("s", sError);
+  }
+  
+  sResult = LEP_OpenPort(1, LEP_CCI_TWI, 400, &i2cPort);
+  if(LEP_COMM_OK != sResult)
+  {
+      sprintf(sError, "LeptonCCI_SetRadTLinearEnableState: Unable to open i2c port. SDK error code %i.", (int)sResult);
+      PyErr_SetString(LeptonCCIError, sError);
+      return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
+  }
+  sResult = LEP_SetRadTLinearEnableState(&i2cPort, enableState);
+  if(LEP_OK != sResult)
+  {
+      sprintf(sError, "LeptonCCI_SetRadTLinearEnableState: Unable to set TLinear Enable state. SDK error code %i.", (int)sResult);
+      PyErr_SetString(LeptonCCIError, sError);
+      return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
+  }
+  sResult = LEP_ClosePort(&i2cPort);
+  if(LEP_OK != sResult)
+  {
+      sprintf(sError, "LeptonCCI_SetRadTLinearEnableState: Unable to close i2c port. SDK error code %i.", (int)sResult);
+      PyErr_SetString(LeptonCCIError, sError);
+      return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
+  }
+
+  Py_RETURN_NONE;
+}
+
+///////////////////////////////////////////////////
+// LeptonCCI_GetRadTLinearEnableState
+///////////////////////////////////////////////////
+static PyObject* LeptonCCI_GetRadTLinearEnableState(PyObject* self) {
+    LEP_RESULT sResult;
+    int enableState;
+
+    sResult = LEP_OpenPort(1, LEP_CCI_TWI, 400, &i2cPort);
+    if(LEP_COMM_OK != sResult)
+    {
+        sprintf(sError, "LeptonCCI_GetRadTLinearEnableState: Unable to open i2c port. SDK error code %i.", (int)sResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
+    }
+    sResult = LEP_GetRadTLinearEnableState(&i2cPort, &enableState);
+    if(LEP_OK != sResult)
+    {
+        sprintf(sError, "LeptonCCI_GetRadTLinearEnableState: Unable to get TLinear Enable state. SDK error code %i.", (int)sResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
+    }
+    sResult = LEP_ClosePort(&i2cPort);
+    if(LEP_OK != sResult)
+    {
+        sprintf(sError, "LeptonCCI_GetRadTLinearEnableState: Unable to close i2c port. SDK error code %i.", (int)sResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
+    }
+
+    return Py_BuildValue("i", enableState);
+}
 
 // Method mapping table
 // Method definition object for this extension, these argumens mean:
@@ -391,6 +459,8 @@ static PyMethodDef LeptonCCI_methods[] = {
     {"GetFluxLinearParams", (PyCFunction)LeptonCCI_GetFluxLinearParams, METH_NOARGS, NULL},
     {"GetAuxTemp", (PyCFunction)LeptonCCI_GetAuxTemp, METH_NOARGS, NULL},
     {"GetFpaTemp", (PyCFunction)LeptonCCI_GetFpaTemp, METH_NOARGS, NULL},
+    {"SetRadTLinearEnableState", (PyCFunction)LeptonCCI_SetRadTLinearEnableState, METH_VARARGS, NULL},
+    {"GetRadTLinearEnableState", (PyCFunction)LeptonCCI_GetRadTLinearEnableState, METH_NOARGS, NULL},
     {NULL, NULL, 0, NULL}
 };
 
