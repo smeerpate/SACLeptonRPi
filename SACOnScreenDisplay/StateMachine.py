@@ -110,6 +110,7 @@ class StateMachine(object):
                 self.state = "WAIT_FOR_SIZE_OK"
                 self.displayMixer.showDontMove(image)
                 self.getRadTLinearEnableState()
+                self.setRadTLinearEnableState(0)
             else:
                 if self.roiFinder.faceFound:
                     self.displayMixer.showDontMove(image)
@@ -336,6 +337,10 @@ class StateMachine(object):
     def getRadTLinearEnableState(self):
         tlState = l.GetRadTLinearEnableState()
         print("[INFO] Current TLinear state is: " + str(tlState))
+        
+    def setRadTLinearEnableState(self, tlState):
+        l.SetRadTLinearEnableState(tlState)
+        print("[INFO] Set TLinear state to: " + str(tlState))
 
     def showThermalImage(self):
         #raw,_ = self.lepton.capture()
