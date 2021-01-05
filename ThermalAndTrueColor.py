@@ -11,7 +11,7 @@ from picamera.array import PiRGBArray
 from picamera import PiCamera
 
 def runFfc():
-    l.RunRadFfc()
+    l.RunSysFFCNormalization()
 
 def setFluxLinearParams():
     sensorTemp = l.GetAuxTemp()
