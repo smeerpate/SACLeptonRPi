@@ -40,7 +40,7 @@ class StateMachine(object):
 
         # Globals for FFC timing
         self.lastFFCTime = 0
-        self.maxFFCInterval = 20 # seconds.
+        self.maxFFCInterval = 600 # seconds.
         
         # Need to show thermal image?
         self.showThermalImage = False
