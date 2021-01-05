@@ -113,10 +113,11 @@ class StateMachine(object):
                 self.state = "WAIT_FOR_SIZE_OK"
                 self.displayMixer.showDontMove(image)
                 cts = self.getRadTLinearEnableState()
-                if cts > 0:
-                    self.setRadTLinearEnableState(0)
-                else:
-                    self.setRadTLinearEnableState(1)
+                self.setRadTLinearEnableState(0)
+                #if cts > 0:
+                #    self.setRadTLinearEnableState(0)
+                #else:
+                #    self.setRadTLinearEnableState(1)
             else:
                 if self.roiFinder.faceFound:
                     self.displayMixer.showDontMove(image)
