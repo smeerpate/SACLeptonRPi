@@ -10,6 +10,15 @@
 #include <LEPTON_Types.h>
 #include <LEPTON_RAD.h>
 
+#include "SPI.h"
+
+#define SPI_PACKET_SIZE 164
+#define SPI_PACKET_SIZE_UINT16 (SPI_PACKET_SIZE/2)
+#define SPI_PACKETS_PER_FRAME 60
+#define SPI_FRAME_SIZE_UINT16 (SPI_PACKET_SIZE_UINT16 * SPI_PACKETS_PER_FRAME)
+
+#define LEPTON_WIDTH 80
+#define LEPTON_HEIGHT 60
 
 // Value clamping macro
 #define CLAMP(x, low, high) ({\
@@ -19,11 +28,17 @@
   __x > __high ? __high : (__x < __low ? __low : __x);\
   })
 
-
-
 PyObject* LeptonCCIError;
 LEP_CAMERA_PORT_DESC_T i2cPort;
 char sError[128];
+
+int miSpiFd = 0;
+uint8_t result[PACKET_SIZE*PACKETS_PER_FRAME];
+uint16_t *frameBuffer;
+
+static int SpiOpenPort (char *sPort);
+static int SpiClosePort();
+
 
 // Functions
 ///////////////////////////////////////////////////
@@ -441,6 +456,223 @@ static PyObject* LeptonCCI_GetRadTLinearEnableState(PyObject* self) {
     return Py_BuildValue("i", enableState);
 }
 
+
+///////////////////////////////////////////////////
+// LeptonCCI_GetFrameBuffer
+// Not really a CCI function but rather uses SPI.
+// SPI port is e.g. "/dev/spidev0.0"
+///////////////////////////////////////////////////
+static PyObject* LeptonCCI_GetFrameBuffer(PyObject* self, PyObject* args) {
+    char sSpiPort[64] = {0};
+    PyObject *pyFbList, *item;
+    int i, k = 0;
+    int resets = 0;
+    int iResult = 0;
+    
+    if (!PyArg_Parse(args, "s", sSpiPort))
+    {
+        sprintf(sError, "LeptonCCI_GetFrameBuffer: Unable to parse arguments.");
+        PyErr_SetString(LeptonCCIError, sError);
+        return Py_BuildValue("s", sError);
+    }
+    
+    iResult = SpiOpenPort(sSpiPort);
+    if (iResult < 0)
+    {
+        // failed to open SPI port, terminate.
+        sprintf(sError, "LeptonCCI_GetFrameBuffer: Unable to open SPI port. Error code %i.", iResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpreter.
+    }
+    
+    for(int j=0;j<PACKETS_PER_FRAME;j++)
+    {
+        //if it's a drop packet, reset j to 0, set to -1 so he'll be at 0 again loop
+        read(miSpiFd, result+sizeof(uint8_t)*PACKET_SIZE*j, sizeof(uint8_t)*PACKET_SIZE);
+        int packetNumber = result[j*PACKET_SIZE+1];
+        if(packetNumber != j)
+        {
+            j = -1;
+            resets += 1;
+            usleep(1000);
+            //Note: we've selected 750 resets as an arbitrary limit, since there should never be 750 "null" packets between two valid transmissions at the current poll rate
+            //By polling faster, developers may easily exceed this count, and the down period between frames may then be flagged as a loss of sync
+            if(resets == 750)
+            {
+                SpiClosePort(0);
+                usleep(750000);
+                SpiOpenPort(0);
+            }
+        }
+    }
+    if(resets >= 30) {
+        //printf("[INFO] Got more than 30 resets, done reading.\n");
+    }
+    
+    iResult = SpiClosePort();
+    if (iResult < 0)
+    {
+        // failed to close SPI port
+        sprintf(sError, "LeptonCCI_GetFrameBuffer: Unable to close SPI port. Error code %i.", iResult);
+        PyErr_SetString(LeptonCCIError, sError);
+    }
+
+    // Parse the received data
+    frameBuffer = (uint16_t *)result;
+    int row, column;
+    uint16_t value;
+    uint16_t minValue = 65535;
+    uint16_t maxValue = 0;
+
+    uint32_t totalCounts = 0;
+    
+    pyFbList = PyList_New(LEPTON_WIDTH * LEPTON_HEIGHT * sizeof(int));
+
+    for(int i=0;i<FRAME_SIZE_UINT16;i++) 
+    {
+        //skip the first 2 uint16_t's of every packet, they're 4 header bytes
+        if(i % PACKET_SIZE_UINT16 < 2)
+        {
+            continue;
+        }
+        //flip the MSB and LSB at the last second
+        int temp = result[i*2];
+        result[i*2] = result[i*2+1];
+        result[i*2+1] = temp;
+
+        value = frameBuffer[i];
+        totalCounts += value;
+        if(value > maxValue)
+        {
+            maxValue = value;
+        }
+        if(value < minValue)
+        {
+            minValue = value;
+        }
+        column = i % PACKET_SIZE_UINT16 - 2;
+        row = i / PACKET_SIZE_UINT16 ;
+        
+        item = PyInt_FromLong((long)frameBuffer[i]);
+        PyList_SetItem(pyFbList, k, item);
+        k += 1;
+    }
+    
+    return pyFbList;
+}
+
+
+///////////////////////////////////////////////////
+// Helper function for SPI -- SpiOpenPort
+// Error return values:
+// -1: Error - Could not open SPI device
+// -2: Could not set SPIMode (WR)...ioctl fail
+// -3: Could not set SPIMode (RD)...ioctl fail
+// -4: Could not set SPI bitsPerWord (WR)...ioctl fail
+// -5: Could not set SPI bitsPerWord(RD)...ioctl fail
+// -6: Could not set SPI speed (WR)...ioctl fail
+// -7: Could not set SPI speed (RD)...ioctl fail
+///////////////////////////////////////////////////
+static int SpiOpenPort (char *sPort)
+{
+	int status_value = -1;
+
+	//----- SET SPI MODE -----
+	//SPI_MODE_0 (0,0)  CPOL=0 (Clock Idle low level), CPHA=0 (SDO transmit/change edge active to idle)
+	//SPI_MODE_1 (0,1)  CPOL=0 (Clock Idle low level), CPHA=1 (SDO transmit/change edge idle to active)
+	//SPI_MODE_2 (1,0)  CPOL=1 (Clock Idle high level), CPHA=0 (SDO transmit/change edge active to idle)
+	//SPI_MODE_3 (1,1)  CPOL=1 (Clock Idle high level), CPHA=1 (SDO transmit/change edge idle to active)
+	unsigned char spi_mode = SPI_MODE_3;
+
+	//----- SET BITS PER WORD -----
+	unsigned char spi_bitsPerWord = 8;
+
+	//----- SET SPI BUS SPEED -----
+	unsigned int spi_speed = 24000000;				//24000000 = 24MHz (1uS per bit)
+    
+	miSpiFd = open(sPort, O_RDWR | O_NONBLOCK);
+	if (miSpiFd < 0)
+	{
+		//printf("Error - Could not open SPI device %s", sPortName);
+		//exit(1);
+        return -1;
+	}
+
+	status_value = ioctl(miSpiFd, SPI_IOC_WR_MODE, &spi_mode);
+	if(status_value < 0)
+	{
+		//printf("Could not set SPIMode (WR)...ioctl fail");
+		//exit(1);
+        return -2;
+	}
+
+	status_value = ioctl(miSpiFd, SPI_IOC_RD_MODE, &spi_mode);
+	if(status_value < 0)
+	{
+		//printf("Could not set SPIMode (RD)...ioctl fail");
+		//exit(1);
+        return -3;
+	}
+
+	status_value = ioctl(miSpiFd, SPI_IOC_WR_BITS_PER_WORD, &spi_bitsPerWord);
+	if(status_value < 0)
+	{
+		//printf("Could not set SPI bitsPerWord (WR)...ioctl fail");
+		//exit(1);
+        return -4;
+	}
+
+	status_value = ioctl(miSpiFd, SPI_IOC_RD_BITS_PER_WORD, &spi_bitsPerWord);
+	if(status_value < 0)
+	{
+		//printf("Could not set SPI bitsPerWord(RD)...ioctl fail");
+		//exit(1);
+        return -5;
+	}
+
+	status_value = ioctl(miSpiFd, SPI_IOC_WR_MAX_SPEED_HZ, &spi_speed);
+	if(status_value < 0)
+	{
+		//printf("Could not set SPI speed (WR)...ioctl fail");
+		//exit(1);
+        return -6;
+	}
+
+	status_value = ioctl(miSpiFd, SPI_IOC_RD_MAX_SPEED_HZ, &spi_speed);
+	if(status_value < 0)
+	{
+		//printf("Could not set SPI speed (RD)...ioctl fail");
+		//exit(1);
+        return -7;
+	}
+	return(status_value);
+}
+
+///////////////////////////////////////////////////
+// Helper function for SPI -- SpiClosePort
+// Error return values:
+// -1: Error - Could not close SPI device
+///////////////////////////////////////////////////
+static int SpiClosePort()
+{
+	int status_value = -1;
+    
+    if (miSpiFd > 0)
+	    status_value = close(miSpiFd);
+    else
+        status_value = 100;
+    
+	if(status_value < 0)
+	{
+		//printf("Error - Could not close SPI device");
+		//exit(1);
+        return -1;
+	}
+	return(status_value);
+}
+///////////////////////////////////////////////////
+
+
 // Method mapping table
 // Method definition object for this extension, these argumens mean:
 // ml_name: The name of the method
@@ -461,6 +693,7 @@ static PyMethodDef LeptonCCI_methods[] = {
     {"GetFpaTemp", (PyCFunction)LeptonCCI_GetFpaTemp, METH_NOARGS, NULL},
     {"SetRadTLinearEnableState", (PyCFunction)LeptonCCI_SetRadTLinearEnableState, METH_VARARGS, NULL},
     {"GetRadTLinearEnableState", (PyCFunction)LeptonCCI_GetRadTLinearEnableState, METH_NOARGS, NULL},
+    {"GetFrameBuffer", (PyCFunction)LeptonCCI_GetFrameBuffer, METH_VARARGS, NULL},
     {NULL, NULL, 0, NULL}
 };
 
