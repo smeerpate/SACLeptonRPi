@@ -11,6 +11,9 @@ from SACFaceFinder import FaceFinder
 from SACForeheadFinder import ForeheadFinder
 from .DisplayMixer import DisplayMixer
 
+mbiAutoTrigger = False;
+mlAutoTriggerInterval = 5; # seconds
+
 class StateMachine(object):
     """description of class"""
 

@@ -38,6 +38,8 @@ char sError[128];
 int miSpiFd = 0;
 uint8_t result[SPI_PACKET_SIZE*SPI_PACKETS_PER_FRAME];
 uint16_t *frameBuffer;
+long mlFbMaxValue;
+long mlFbMinValue;
 
 static int SpiOpenPort (char *sPort);
 static int SpiClosePort();
@@ -466,13 +468,14 @@ static PyObject* LeptonCCI_GetRadTLinearEnableState(PyObject* self) {
 // SPI port is e.g. "/dev/spidev0.0"
 ///////////////////////////////////////////////////
 static PyObject* LeptonCCI_GetFrameBuffer(PyObject* self, PyObject* args) {
-    char sSpiPort[64] = {0};
+    char sSpiPort[16] = "/dev/spidev0.0";
+    char sDummy[16];
     PyObject *pyFbList, *item;
     int k = 0;
     int resets = 0;
     int iResult = 0;
     
-    if (!PyArg_Parse(args, "s", sSpiPort))
+    if (!PyArg_ParseTuple(args, "s", sDummy))
     {
         sprintf(sError, "LeptonCCI_GetFrameBuffer: Unable to parse arguments.");
         PyErr_SetString(LeptonCCIError, sError);
@@ -483,7 +486,7 @@ static PyObject* LeptonCCI_GetFrameBuffer(PyObject* self, PyObject* args) {
     if (iResult < 0)
     {
         // failed to open SPI port, terminate.
-        sprintf(sError, "LeptonCCI_GetFrameBuffer: Unable to open SPI port. Error code %i.", iResult);
+        sprintf(sError, "LeptonCCI_GetFrameBuffer: Unable to open SPI port %s. Error code %i.", sSpiPort, iResult);
         PyErr_SetString(LeptonCCIError, sError);
         return Py_BuildValue("s", sError); // Propagate the error to the Python interpreter.
     }
@@ -536,7 +539,7 @@ static PyObject* LeptonCCI_GetFrameBuffer(PyObject* self, PyObject* args) {
 
     uint32_t totalCounts = 0;
     
-    pyFbList = PyList_New(LEPTON_WIDTH * LEPTON_HEIGHT * sizeof(int));
+    pyFbList = PyList_New(LEPTON_WIDTH * LEPTON_HEIGHT);
 
     for(int i=0;i<SPI_FRAME_SIZE_UINT16;i++) 
     {
@@ -567,6 +570,9 @@ static PyObject* LeptonCCI_GetFrameBuffer(PyObject* self, PyObject* args) {
         PyList_SetItem(pyFbList, k, item);
         k += 1;
     }
+    
+    mlFbMaxValue = maxValue;
+    mlFbMinValue = minValue;
     
     return pyFbList;
 }
