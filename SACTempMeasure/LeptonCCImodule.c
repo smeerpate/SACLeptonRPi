@@ -10,7 +10,10 @@
 #include <LEPTON_Types.h>
 #include <LEPTON_RAD.h>
 
-#include "SPI.h"
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <linux/types.h>
+#include <linux/spi/spidev.h>
 
 #define SPI_PACKET_SIZE 164
 #define SPI_PACKET_SIZE_UINT16 (SPI_PACKET_SIZE/2)
@@ -33,7 +36,7 @@ LEP_CAMERA_PORT_DESC_T i2cPort;
 char sError[128];
 
 int miSpiFd = 0;
-uint8_t result[PACKET_SIZE*PACKETS_PER_FRAME];
+uint8_t result[SPI_PACKET_SIZE*SPI_PACKETS_PER_FRAME];
 uint16_t *frameBuffer;
 
 static int SpiOpenPort (char *sPort);
@@ -465,7 +468,7 @@ static PyObject* LeptonCCI_GetRadTLinearEnableState(PyObject* self) {
 static PyObject* LeptonCCI_GetFrameBuffer(PyObject* self, PyObject* args) {
     char sSpiPort[64] = {0};
     PyObject *pyFbList, *item;
-    int i, k = 0;
+    int k = 0;
     int resets = 0;
     int iResult = 0;
     
@@ -485,11 +488,18 @@ static PyObject* LeptonCCI_GetFrameBuffer(PyObject* self, PyObject* args) {
         return Py_BuildValue("s", sError); // Propagate the error to the Python interpreter.
     }
     
-    for(int j=0;j<PACKETS_PER_FRAME;j++)
+    for(int j=0;j<SPI_PACKETS_PER_FRAME;j++)
     {
         //if it's a drop packet, reset j to 0, set to -1 so he'll be at 0 again loop
-        read(miSpiFd, result+sizeof(uint8_t)*PACKET_SIZE*j, sizeof(uint8_t)*PACKET_SIZE);
-        int packetNumber = result[j*PACKET_SIZE+1];
+        iResult = read(miSpiFd, result+sizeof(uint8_t)*SPI_PACKET_SIZE*j, sizeof(uint8_t)*SPI_PACKET_SIZE);
+        if (iResult < 0)
+        {
+            // failed to open SPI port, terminate.
+            sprintf(sError, "LeptonCCI_GetFrameBuffer: Unable to read from SPI port. Error code %i.", iResult);
+            PyErr_SetString(LeptonCCIError, sError);
+            return Py_BuildValue("s", sError); // Propagate the error to the Python interpreter.
+        }
+        int packetNumber = result[j*SPI_PACKET_SIZE+1];
         if(packetNumber != j)
         {
             j = -1;
@@ -519,7 +529,7 @@ static PyObject* LeptonCCI_GetFrameBuffer(PyObject* self, PyObject* args) {
 
     // Parse the received data
     frameBuffer = (uint16_t *)result;
-    int row, column;
+    //int row, column;
     uint16_t value;
     uint16_t minValue = 65535;
     uint16_t maxValue = 0;
@@ -528,10 +538,10 @@ static PyObject* LeptonCCI_GetFrameBuffer(PyObject* self, PyObject* args) {
     
     pyFbList = PyList_New(LEPTON_WIDTH * LEPTON_HEIGHT * sizeof(int));
 
-    for(int i=0;i<FRAME_SIZE_UINT16;i++) 
+    for(int i=0;i<SPI_FRAME_SIZE_UINT16;i++) 
     {
         //skip the first 2 uint16_t's of every packet, they're 4 header bytes
-        if(i % PACKET_SIZE_UINT16 < 2)
+        if(i % SPI_PACKET_SIZE_UINT16 < 2)
         {
             continue;
         }
@@ -550,10 +560,10 @@ static PyObject* LeptonCCI_GetFrameBuffer(PyObject* self, PyObject* args) {
         {
             minValue = value;
         }
-        column = i % PACKET_SIZE_UINT16 - 2;
-        row = i / PACKET_SIZE_UINT16 ;
+        //column = i % SPI_PACKET_SIZE_UINT16 - 2;
+        //row = i / SPI_PACKET_SIZE_UINT16 ;
         
-        item = PyInt_FromLong((long)frameBuffer[i]);
+        item = PyLong_FromLong((long)frameBuffer[i]);
         PyList_SetItem(pyFbList, k, item);
         k += 1;
     }
@@ -658,16 +668,14 @@ static int SpiClosePort()
 	int status_value = -1;
     
     if (miSpiFd > 0)
-	    status_value = close(miSpiFd);
+    {
+        status_value = close(miSpiFd);
+    }
     else
+    {
         status_value = 100;
-    
-	if(status_value < 0)
-	{
-		//printf("Error - Could not close SPI device");
-		//exit(1);
-        return -1;
-	}
+    }
+
 	return(status_value);
 }
 ///////////////////////////////////////////////////
