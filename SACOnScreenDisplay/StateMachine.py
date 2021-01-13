@@ -4,6 +4,10 @@ import numpy as np
 import time
 import sys
 import LeptonCCI as l
+import paho.mqtt.client as mqtt
+import struct
+import random
+
 from Lepton import Lepton
 from .LedDriver import LedDriver
 from .SettingsManager import SettingsManager
@@ -32,7 +36,10 @@ class StateMachine(object):
         self.faceSizeUpperLimit = 280
         self.faceSizeLowerLimit = 220
         self.autoTrigger = True # Automatically trigger a measurement every mlAutoTriggerInterval seconds (ignoring Face ROI)
-        self.autoTriggerInterval = 10 # seconds
+        self.autoTriggerInterval = 10 # seconds 
+        self.autoTriggerAtRandomIntervals = True # Requires autoTrigger to be true. Triggers at random intervals
+        self.autoTriggerRndIntervalMin = 10 # seconds
+        self.autoTriggerRndIntervalMax = 50 # seconds
         self.waitAfterAutotriggerMeas = 2 # seconds, the time to stay in the WAIT FOR NO FACE state
         self.measurementInterval = 1 # seconds
         self.measurementIterations = 4 # times, number of measuremnts per head. 
@@ -72,6 +79,13 @@ class StateMachine(object):
         self.lastFFCTime = 0
         self.lastFPATempTime = 0
         
+        # mqtt
+        self.mqttBrokerAddress = "192.168.0.138"
+        self.mqttBrokerPort = 1883
+        self.mqttc = mqtt.Client()
+        self.mqttc.connect(self.mqttBrokerAddress, self.mqttBrokerPort, 60)
+        print("[INFO] Connected to MQTT broker: " + self.mqttBrokerAddress)
+
 
     def addText(self, image, sMessage, color):
         font = cv.FONT_HERSHEY_SIMPLEX
@@ -160,8 +174,8 @@ class StateMachine(object):
                     else:
                         self.displayMixer.hide()
                     self.state = "IDLE"
-                    self.currentTime = int(round(time.time()))
-                    if self.currentTime > (self.lastFPATempTime + self.maxFPATempInterval):
+                    self.currentTime = int(round(time.time() * 1000))
+                    if self.currentTime > (self.lastFPATempTime + (self.maxFPATempInterval * 1000)):
                         self.getFpaTemp()
                         self.lastFPATempTime = self.currentTime
                 #print("Idle took: " + str(int(round(time.time() * 1000)) - smEntryTimeMs) + "ms")
@@ -343,11 +357,13 @@ class StateMachine(object):
 
         elif self.state == "WAIT_FOR_NO_FACE":
             if self.autoTrigger:
-                time.sleep(2) # seconds
+                time.sleep(self.waitAfterAutotriggerMeas)
                 self.state = "IDLE"
                 self.temperatureSamples = []
                 self.displayMixer.hide()
-                
+                if self.autoTriggerAtRandomIntervals:
+                    self.autoTriggerInterval = random.randint(self.autoTriggerRndIntervalMin, self.autoTriggerRndIntervalMax)
+                    print("[INFO] Random intervals set, next measurement in " + str(self.autoTriggerInterval) + " seconds.")
             else:
                 self.roiFinder.getTcContours(image, False) # only looks for the head now
                 if self.roiFinder.faceFound:
@@ -365,59 +381,19 @@ class StateMachine(object):
         self.prevState = self.state
 
     def measureTemp(self):
+        # Get FPA and AUX temp an put it in a csv line like this:
+        # "Current time;AUX Temp;FPA Temp;Last FFC time;"
+        sMQTTMessage = str(int(round(time.time() * 1000))) + ';' + str(l.GetAuxTemp()) + ';' + str(l.GetFpaTemp()) + ';' + str(self.lastFFCTime) + ';'
+        sMQTTMessage.replace('.',',')
+        self.mqttc.publish("TempCx100", sMQTTMessage)
+        time.sleep(0.02)
         thFrame = l.GetFrameBuffer("/dev/spidev0.0")
+        if 0:
+            print("[INFO] Framebuffer length is: " + str(len(thFrame)))
+        # publish the frame
+        self.mqttc.publish("FrameBuffer", struct.pack('%sH' %len(thFrame), *thFrame))
         return (max(thFrame)/100) - 273.15
 
-        #thRoiContours = self.roiFinder.getThContours() # LT, RT, LB, RB
-
-        #thRect_x, thRect_y, thRect_w, thRect_h = cv.boundingRect(thRoi)
-        # x and y should not be negativeor lager then the FPA. Clip the values.
-        #thRect_x = max(0, min(thRect_x, self.thSensorWidth-2))
-        #thRect_y = max(0, min(thRect_y, self.thSensorHeight-2))
-        #thRect_w = max(0, min(thRect_x + thRect_w, self.thSensorWidth-1))
-        #thRect_h = max(0, min(thRect_y + thRect_w, self.thSensorHeight-1))
-        #thCorrected = (thRect_x, thRect_y, thRect_w, thRect_h)
-
-        #print("TH ROI Contours")
-        #print(str(thRoiContours))
-
-        #self.thRoi = self.getRoiFromContours(thRoiContours)
-
-        # Flip thRoi vertically
-        #start, end = thRoi
-        #w = end[0] - start[0]
-        #thRoi = (80 - start[0] - w, start[1]), (80 - start[0], end[1])
-
-        # Translate a bit to the right
-        #start, end = thRoi
-        #xTrans = 10
-        #thRoi = (start[0] + xTrans, start[1]), (end[0] + xTrans, end[1])
-            
-        #print("Total pixels: ")
-        #print(w*h)
-
-        #if settings.showFoundFace.value:
-            #raw,_ = self.lepton.capture()
-            #cv.normalize(raw, raw, 0, 65535, cv.NORM_MINMAX)
-            #np.right_shift(raw, 8, raw)
-            #thImage = np.uint8(raw) # 80x60
-
-            #self.addRectangle(thImage, thRoi, (255, 255, 255))
-            #self.addRectangle(thImage, thCorrected, (255, 0, 0))
-            #self.roiFinder.getTcContours(image, settings.showFoundFace.value)
-            #x_offset=y_offset=0
-            #image[y_offset:y_offset+thImage.shape[0], x_offset:x_offset+thImage.shape[1]] = thImage
-            #imageName = "Forehead " + str(int(round(time.time())))
-            #cv.imwrite('/home/pi/SACLeptonRPi/' + imageName +'.jpg', image)
-
-        #self.setThRoiOnLepton(thRoi)
-            
-        #self.values = l.GetROIValues()
-        #print("TH ROI from Lepton:")
-        #print(str(l.GetROI()))
-        #print(str(self.values))
-        #self.writeLog(thRoi)
-        #self.state = "WAIT_FOR_NO_FACE"
 
     def runFfc(self):
         #l.RunRadFfc()

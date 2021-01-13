@@ -479,7 +479,7 @@ static PyObject* LeptonCCI_GetFrameBuffer(PyObject* self, PyObject* args) {
     {
         sprintf(sError, "LeptonCCI_GetFrameBuffer: Unable to parse arguments.");
         PyErr_SetString(LeptonCCIError, sError);
-        return Py_BuildValue("s", sError);
+        //return Py_BuildValue("s", sError);
     }
     
     iResult = SpiOpenPort(sSpiPort);
@@ -488,7 +488,7 @@ static PyObject* LeptonCCI_GetFrameBuffer(PyObject* self, PyObject* args) {
         // failed to open SPI port, terminate.
         sprintf(sError, "LeptonCCI_GetFrameBuffer: Unable to open SPI port %s. Error code %i.", sSpiPort, iResult);
         PyErr_SetString(LeptonCCIError, sError);
-        return Py_BuildValue("s", sError); // Propagate the error to the Python interpreter.
+        //return Py_BuildValue("s", sError); // Propagate the error to the Python interpreter.
     }
     
     for(int j=0;j<SPI_PACKETS_PER_FRAME;j++)
@@ -500,7 +500,7 @@ static PyObject* LeptonCCI_GetFrameBuffer(PyObject* self, PyObject* args) {
             // failed to open SPI port, terminate.
             sprintf(sError, "LeptonCCI_GetFrameBuffer: Unable to read from SPI port. Error code %i.", iResult);
             PyErr_SetString(LeptonCCIError, sError);
-            return Py_BuildValue("s", sError); // Propagate the error to the Python interpreter.
+            //return Py_BuildValue("s", sError); // Propagate the error to the Python interpreter.
         }
         int packetNumber = result[j*SPI_PACKET_SIZE+1];
         if(packetNumber != j)
@@ -539,7 +539,8 @@ static PyObject* LeptonCCI_GetFrameBuffer(PyObject* self, PyObject* args) {
 
     uint32_t totalCounts = 0;
     
-    pyFbList = PyList_New(LEPTON_WIDTH * LEPTON_HEIGHT);
+    //pyFbList = PyList_New(SPI_PACKET_SIZE_UINT16 * SPI_PACKETS_PER_FRAME);
+    pyFbList = PyList_New(LEPTON_WIDTH * SPI_PACKETS_PER_FRAME);
 
     for(int i=0;i<SPI_FRAME_SIZE_UINT16;i++) 
     {
