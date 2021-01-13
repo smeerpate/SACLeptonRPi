@@ -384,7 +384,7 @@ class StateMachine(object):
         # Get FPA and AUX temp an put it in a csv line like this:
         # "Current time;AUX Temp;FPA Temp;Last FFC time;"
         sMQTTMessage = str(int(round(time.time() * 1000))) + ';' + str(l.GetAuxTemp()) + ';' + str(l.GetFpaTemp()) + ';' + str(self.lastFFCTime) + ';'
-        sMQTTMessage.replace('.',',')
+        sMQTTMessage = sMQTTMessage.replace('.',',')
         self.mqttc.publish("TempCx100", sMQTTMessage)
         time.sleep(0.02)
         thFrame = l.GetFrameBuffer("/dev/spidev0.0")
