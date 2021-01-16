@@ -30,14 +30,15 @@ try:
 
     for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=True):
         frame = data.array
-        frame = frame.copy()
+        #frame = frame.copy()
         #if osd.isRunning() or inputManager.hasInput():
         #    stateMachine.reset()
         #    osd.run(frame)        
         #else:
-        #    stateMachine.run(frame)
+        #    stateMachine.run(frame) 
+        rawCapture.truncate()
+        rawCapture.seek(0)
         stateMachine.run(frame)
-        rawCapture.truncate(0)   
 
     # When everything done, release the capture
     ledDriver.stop()

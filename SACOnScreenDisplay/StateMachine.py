@@ -7,6 +7,7 @@ import LeptonCCI as l
 import paho.mqtt.client as mqtt
 import struct
 import random
+import datetime
 
 from Lepton import Lepton
 from .LedDriver import LedDriver
@@ -24,8 +25,8 @@ class StateMachine(object):
     """description of class"""
 
     def __init__(self, settingsManager, ledDriver, displayMixer):
-        self.state = "IDLE"
-        self.prevState = "IDLE"
+        self.state = "SET_INITIAL_PARAMETERS"
+        self.prevState = "SET_INITIAL_PARAMETERS"
         self.settingsManager = settingsManager
         self.ledDriver = ledDriver
         self.lepton = Lepton()
@@ -36,10 +37,10 @@ class StateMachine(object):
         self.faceSizeUpperLimit = 280
         self.faceSizeLowerLimit = 220
         self.autoTrigger = True # Automatically trigger a measurement every mlAutoTriggerInterval seconds (ignoring Face ROI)
-        self.autoTriggerInterval = 10 # seconds 
+        self.autoTriggerInterval = 20 # seconds 
         self.autoTriggerAtRandomIntervals = True # Requires autoTrigger to be true. Triggers at random intervals
-        self.autoTriggerRndIntervalMin = 10 # seconds
-        self.autoTriggerRndIntervalMax = 50 # seconds
+        self.autoTriggerRndIntervalMin = 20 # seconds
+        self.autoTriggerRndIntervalMax = 70 # seconds
         self.waitAfterAutotriggerMeas = 2 # seconds, the time to stay in the WAIT FOR NO FACE state
         self.measurementInterval = 1 # seconds
         self.measurementIterations = 4 # times, number of measuremnts per head. 
@@ -48,6 +49,9 @@ class StateMachine(object):
         self.showThermalImage = False # Need to show thermal image?
         self.retriesOnResultNOK = 1 #
         self.minTempForValidMeasurement = 31 # minimum temperature for a valid measurement
+        self.settleAfterFFCInterval = 0 # seconds to settle after FFC
+        self.publishMQTT = True
+        self.printTemperatureOnScreen = True
         ##################################
         
         self.lastAutotriggerEvent = 0
@@ -55,6 +59,8 @@ class StateMachine(object):
         self.lastGetTemperatureEntry = 0
         self.measurementIterCnt = 0
         self.NOKRetryCnt = 0
+        self.doSetFLParameters = False
+        self.initialParametersAreSet = False
             
         self.temperatureSamples = []
         self.temperature = 0
@@ -80,11 +86,12 @@ class StateMachine(object):
         self.lastFPATempTime = 0
         
         # mqtt
-        self.mqttBrokerAddress = "192.168.0.138"
-        self.mqttBrokerPort = 1883
-        self.mqttc = mqtt.Client()
-        self.mqttc.connect(self.mqttBrokerAddress, self.mqttBrokerPort, 60)
-        print("[INFO] Connected to MQTT broker: " + self.mqttBrokerAddress)
+        if self.publishMQTT:
+            self.mqttBrokerAddress = "192.168.1.60" #"192.168.0.138"
+            self.mqttBrokerPort = 1883
+            self.mqttc = mqtt.Client()
+            self.mqttc.connect(self.mqttBrokerAddress, self.mqttBrokerPort, 60)
+            print("[INFO] Connected to MQTT broker: " + self.mqttBrokerAddress)
 
 
     def addText(self, image, sMessage, color):
@@ -133,272 +140,301 @@ class StateMachine(object):
             return True
 
     def run(self, image):
-        # Update settings
-        settings = self.settingsManager.getSettings()
-        # Get current time
-        smEntryTimeMs = int(round(time.time() * 1000))
-        
-        # Steps:
-        # 1) Find a face
-        # 2) Check if face size is good
-        # 3) If face size == good -> calibration of Lepton (FFC) + measure amb temp (currently this will be done via the lepton, later on we will use an external temp sensor)
-        # 4) Get Affine coords + set ROI
-        # 5) Get RIO data (can be repeated x amount of times to be sure)
-        # 6) If temp < threshold -> ok
-        # 7) Else -> inform the user that we are going to measure again
+        # save last state
+        self.prevState = self.state
+        try:
+            # Update settings
+            settings = self.settingsManager.getSettings()
+            # Get current time
+            smEntryTimeMs = int(round(time.time() * 1000))
+            
+            # Steps:
+            # 1) Find a face
+            # 2) Check if face size is good
+            # 3) If face size == good -> calibration of Lepton (FFC) + measure amb temp (currently this will be done via the lepton, later on we will use an external temp sensor)
+            # 4) Get Affine coords + set ROI
+            # 5) Get RIO data (can be repeated x amount of times to be sure)
+            # 6) If temp < threshold -> ok
+            # 7) Else -> inform the user that we are going to measure again
 
-        if self.state == "IDLE":
-            color = settings.idleColor
-            self.ledDriver.output(color.red, color.green, color.blue, 100)
-            if self.autoTrigger:
-                if smEntryTimeMs > (self.lastAutotriggerEvent + (self.autoTriggerInterval * 1000)):
-                    # Do Auto trigger trigger
-                    self.state = "RUN_FFC"
-                    self.lastAutotriggerEvent = smEntryTimeMs
-                    print("[INFO] Autotriggering measurement ...")
+            if self.state == "IDLE":
+                color = settings.idleColor
+                self.ledDriver.output(color.red, color.green, color.blue, 100)
+                if self.autoTrigger:
+                    if smEntryTimeMs > (self.lastAutotriggerEvent + (self.autoTriggerInterval * 1000)):
+                        # Do Auto trigger trigger
+                        self.state = "RUN_FFC"
+                        self.lastAutotriggerEvent = smEntryTimeMs
+                        dateValue = datetime.datetime.fromtimestamp(time.time())
+                        print("[INFO] Autotriggering measurement. (Timestamp = " + dateValue.strftime('%Y-%m-%d %H:%M:%S') + ")")
+                    else:
+                        # did we already set the initial parameters?
+                        if self.initialParametersAreSet:
+                            self.state = "IDLE"
+                        else:
+                            self.state = "SET_INITIAL_PARAMETERS"
                 else:
-                   self.state = "IDLE" 
-            else:
+                    if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
+                        self.state = "WAIT_FOR_SIZE_OK"
+                        self.displayMixer.showDontMove(image)
+                        dateValue = datetime.datetime.fromtimestamp(time.time())
+                        print("[INFO] Found a face. (Timestamp = " + dateValue.strftime('%Y-%m-%d %H:%M:%S') + ")")
+                    else:
+                       # if self.roiFinder.faceFound:
+                       #     self.displayMixer.showDontMove(image)
+                       # else:
+                       #     self.displayMixer.hide()
+                        self.displayMixer.hide()
+                        # did we already set the initial parameters?
+                        if self.initialParametersAreSet:
+                            self.state = "IDLE"
+                        else:
+                            self.state = "SET_INITIAL_PARAMETERS"
+                            
+                        self.currentTime = int(round(time.time() * 1000))
+                        if self.currentTime > (self.lastFPATempTime + (self.maxFPATempInterval * 1000)):
+                            self.getFpaTemp()
+                            self.lastFPATempTime = self.currentTime
+                    #print("Idle took: " + str(int(round(time.time() * 1000)) - smEntryTimeMs) + "ms")
+
+     
+            elif self.state == "SET_INITIAL_PARAMETERS":
+                self.setFluxLinearParams()
+                self.setRadTLinearEnableState(1)
+                self.setFfcShutterModeAuto(0)
+                self.initialParametersAreSet = True
+                print("[INFO] Initial parametars are set.")
+                self.state = "IDLE"
+                
+                
+            elif self.state == "WAIT_FOR_SIZE_OK":
+                #start = int(round(time.time() * 1000))
                 if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
-                    self.state = "WAIT_FOR_SIZE_OK"
-                    self.displayMixer.showDontMove(image)
-                    cts = self.getRadTLinearEnableState()
-                    self.setRadTLinearEnableState(1)
-                    #if cts > 0:
-                    #    self.setRadTLinearEnableState(0)
-                    #else:
-                    #    self.setRadTLinearEnableState(1)
-                else:
-                    if self.roiFinder.faceFound:
+                    if not self.checkFaceSize(image, self.roiFinder.getTcROIWidth(), self.faceSizeLowerLimit, self.faceSizeUpperLimit):
+                        self.state = "WAIT_FOR_SIZE_OK"
+                        if self.showThermalImage:
+                            addThermalImage(image)
                         self.displayMixer.showDontMove(image)
                     else:
-                        self.displayMixer.hide()
-                    self.state = "IDLE"
-                    self.currentTime = int(round(time.time() * 1000))
-                    if self.currentTime > (self.lastFPATempTime + (self.maxFPATempInterval * 1000)):
-                        self.getFpaTemp()
-                        self.lastFPATempTime = self.currentTime
-                #print("Idle took: " + str(int(round(time.time() * 1000)) - smEntryTimeMs) + "ms")
-
-        elif self.state == "WAIT_FOR_SIZE_OK":
-            #start = int(round(time.time() * 1000))
-            if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
-                if not self.checkFaceSize(image, self.roiFinder.getTcROIWidth(), self.faceSizeLowerLimit, self.faceSizeUpperLimit):
-                    self.state = "WAIT_FOR_SIZE_OK"
-                    if self.showThermalImage:
-                        addThermalImage(image)
-                    self.displayMixer.showDontMove(image)
-                else:
-                    self.currentTime = int(round(time.time()))
-                    if self.currentTime > (self.lastFFCTime + self.maxFFCInterval):
-                        self.state = "RUN_FFC"                        
-                    else:
-                        self.state = "SET_FLUX_LINEAR_PARAMS"
-                    self.displayMixer.showDontMove(image)
-            else:
-                self.state = "IDLE"
-                self.temperatureSamples = []
-                self.displayMixer.hide()
-            #print("Wait for size took: " + str(int(round(time.time() * 1000)) - smEntryTimeMs) + "ms")
-
-        elif self.state == "RUN_FFC":
-            #start = int(round(time.time() * 1000))
-            if self.autoTrigger:
-                self.displayMixer.showDontMove(image)
-                self.runFfc()    
-                self.state = "SET_FLUX_LINEAR_PARAMS" 
-            else:    
-                if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
-                    self.displayMixer.showDontMove(image)
-                    self.runFfc()    
-                    # maybe add a delay here 
-                    self.state = "SET_FLUX_LINEAR_PARAMS"                
-                else:
-                    self.state = "IDLE"
-                    self.temperatureSamples = []
-                    self.displayMixer.hide()
-            print("[INFO] Run FFC took: " + str(int(round(time.time() * 1000)) - smEntryTimeMs) + "ms")
-
-
-        elif self.state == "SET_FLUX_LINEAR_PARAMS":
-            #start = int(round(time.time() * 1000))
-            if self.autoTrigger:
-                self.displayMixer.showMeasuring(image)
-                self.setFluxLinearParams()    
-                self.state = "GET_TEMPERATURE"
-            else:
-                if self.roiFinder.getTcContours(image, settings.showFoundFace.value) or self.autoTrigger:
-                    self.displayMixer.showMeasuring(image)
-                    self.setFluxLinearParams()
-                    self.state = "GET_TEMPERATURE"                
-                else:
-                    self.state = "IDLE"
-                    self.temperatureSamples = []
-                    self.displayMixer.hide()
-            #print("Set flux linear params took: " + str(int(round(time.time() * 1000)) - smEntryTimeMs) + "ms")
-            self.NOKRetryCnt = 0 # reset the measurement retry counter
-            self.measurementIterCnt = 0 # reset iteration counter
-
-
-        elif self.state == "GET_TEMPERATURE":
-            if self.autoTrigger:
-                self.temperatureSamples.append(self.measureTemp())
-            else:
-            # todo implement retries
-                if self.roiFinder.getTcContours(image, settings.showFoundFace.value):  
-                    thRoiContours = self.roiFinder.getThContours() # LT, RT, LB, RB
-
-                    #thRect_x, thRect_y, thRect_w, thRect_h = cv.boundingRect(thRoi)
-                    # x and y should not be negativeor lager then the FPA. Clip the values.
-                    #thRect_x = max(0, min(thRect_x, self.thSensorWidth-2))
-                    #thRect_y = max(0, min(thRect_y, self.thSensorHeight-2))
-                    #thRect_w = max(0, min(thRect_x + thRect_w, self.thSensorWidth-1))
-                    #thRect_h = max(0, min(thRect_y + thRect_w, self.thSensorHeight-1))
-                    #thCorrected = (thRect_x, thRect_y, thRect_w, thRect_h)
-
-                    #print("TH ROI Contours")
-                    #print(str(thRoiContours))
-
-                    thRoi = self.getRoiFromContours(thRoiContours)
-
-                    # Flip thRoi vertically
-                    #start, end = thRoi
-                    #w = end[0] - start[0]
-                    #thRoi = (80 - start[0] - w, start[1]), (80 - start[0], end[1])
-
-                    # Translate a bit to the right
-                    start, end = thRoi
-                    xTrans = 10
-                    thRoi = (start[0] + xTrans, start[1]), (end[0] + xTrans, end[1])
-                
-                    #print("Total pixels: ")
-                    #print(w*h)
-
-                    self.setThRoiOnLepton(thRoi)
-                    self.writeLog()
-                    values = l.GetROIValues()
-                    self.temperatureSamples.append(values[1])
-
-                    if len(self.temperatureSamples) < settings.measurementsPerMean.value:
-                        self.state = "GET_TEMPERATURE"
-                    else:
-                        color = None
-                        self.temperature = np.max(self.temperatureSamples)
-
-                        if self.temperature > settings.threshold.value:
-                            color = settings.alarmColor
-                            self.displayMixer.showTemperatureNok(image)
+                        self.currentTime = int(round(time.time()))
+                        if self.currentTime > (self.lastFFCTime + self.maxFFCInterval):
+                            self.state = "RUN_FFC"                        
                         else:
-                            color = settings.okColor
-                            self.displayMixer.showTemperatureOk(image)
+                            self.state = "SET_FLUX_LINEAR_PARAMS"
+                        self.displayMixer.showDontMove(image)
+                else:
+                    self.state = "IDLE"
+                    self.temperatureSamples = []
+                    self.displayMixer.hide()
+                #print("Wait for size took: " + str(int(round(time.time() * 1000)) - smEntryTimeMs) + "ms")
 
-                        self.ledDriver.output(color.red, color.green, color.blue, 100)  
-                        #print("TH ROI from Lepton:")
-                        #print(str(l.GetROI()))
-                        #print(str(self.values))                
+            elif self.state == "RUN_FFC":
+                #start = int(round(time.time() * 1000))
+                if self.autoTrigger:
+                    self.displayMixer.showDontMove(image)
+                    self.runFfc()   
+                    self.state = "SET_FLUX_LINEAR_PARAMS" 
+                else:    
+                    if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
+                        self.displayMixer.showDontMove(image)
+                        self.runFfc()    
+                        # maybe add a delay here 
+                        self.state = "SET_FLUX_LINEAR_PARAMS"                
+                    else:
+                        self.state = "IDLE"
+                        self.temperatureSamples = []
+                        self.displayMixer.hide()
+                print("[INFO] Run FFC took: " + str(int(round(time.time() * 1000)) - smEntryTimeMs) + "ms")
+                print("[INFO] Settling " + str(self.settleAfterFFCInterval) + " seconds before measuring.")
+
+
+            elif self.state == "SET_FLUX_LINEAR_PARAMS":   
+                #start = int(round(time.time() * 1000))
+                if self.autoTrigger:
+                    self.displayMixer.showMeasuring(image)
+                    if self.doSetFLParameters:
+                        self.setFluxLinearParams()
+                    if self.settleAfterFFCInterval != 0:
+                        self.state = "SETTLTE_AFTER_FFC"
+                    else:
+                        self.state = "GET_TEMPERATURE"
+                else:
+                    if self.roiFinder.getTcContours(image, settings.showFoundFace.value) or self.autoTrigger:
+                        self.displayMixer.showMeasuring(image)
+                        if self.doSetFLParameters:
+                            self.setFluxLinearParams()
+                        if self.settleAfterFFCInterval != 0:
+                            self.state = "SETTLTE_AFTER_FFC"
+                        else:
+                            self.state = "GET_TEMPERATURE"               
+                    else:
+                        self.state = "IDLE"
+                        self.temperatureSamples = []
+                        self.displayMixer.hide()
+                #print("Set flux linear params took: " + str(int(round(time.time() * 1000)) - smEntryTimeMs) + "ms")
+                self.NOKRetryCnt = 0 # reset the measurement retry counter
+                self.measurementIterCnt = 0 # reset iteration counter
+                self.doSetFLParameters = False # only set Flux liear parameters once
+                
+            
+            elif self.state == "SETTLTE_AFTER_FFC":
+                if smEntryTimeMs > (self.lastFFCTime + (self.settleAfterFFCInterval * 1000)):
+                    self.state = "GET_TEMPERATURE"
+                else:
+                    self.state = "SETTLTE_AFTER_FFC"
+
+
+            elif self.state == "GET_TEMPERATURE":
+                if self.autoTrigger:
+                    self.temperatureSamples.append(self.measureTemp())
+                else:
+                # todo implement retries
+                    if self.roiFinder.getTcContours(image, settings.showFoundFace.value):  
+                        thRoiContours = self.roiFinder.getThContours() # LT, RT, LB, RB
+
+                        #thRect_x, thRect_y, thRect_w, thRect_h = cv.boundingRect(thRoi)
+                        # x and y should not be negativeor lager then the FPA. Clip the values.
+                        #thRect_x = max(0, min(thRect_x, self.thSensorWidth-2))
+                        #thRect_y = max(0, min(thRect_y, self.thSensorHeight-2))
+                        #thRect_w = max(0, min(thRect_x + thRect_w, self.thSensorWidth-1))
+                        #thRect_h = max(0, min(thRect_y + thRect_w, self.thSensorHeight-1))
+                        #thCorrected = (thRect_x, thRect_y, thRect_w, thRect_h)
+
+                        #print("TH ROI Contours")
+                        #print(str(thRoiContours))
+
+                        thRoi = self.getRoiFromContours(thRoiContours)
+
+                        # Flip thRoi vertically
+                        #start, end = thRoi
+                        #w = end[0] - start[0]
+                        #thRoi = (80 - start[0] - w, start[1]), (80 - start[0], end[1])
+
+                        # Translate a bit to the right
+                        start, end = thRoi
+                        xTrans = 10
+                        thRoi = (start[0] + xTrans, start[1]), (end[0] + xTrans, end[1])
+
+                        self.setThRoiOnLepton(thRoi)
+                        #self.writeLog()
+                        values = l.GetROIValues()
+                        self.temperatureSamples.append(values[1])
+                    else:
+                        self.state = "IDLE"
+                        self.temperatureSamples = []
+                        self.displayMixer.hide()
+                #print("Get temp took: " + str(int(round(time.time() * 1000)) - startTime) + "ms")
+                
+                # register time
+                self.lastGetTemperatureEntry = smEntryTimeMs
+                # increment iteration counter
+                self.measurementIterCnt = self.measurementIterCnt + 1
+                # did we have all iterations?
+                if self.measurementIterCnt > self.measurementIterations:
+                    self.state = "EVALUATE_RESULT"
+                else:
+                    self.state = "WAIT_TO_TAKE_NEXT_SAMPLE"
+                    print("[INFO] Waiting to get next sample ... Current sample was:  " + str(self.measurementIterCnt))
+                    
+            
+            
+            elif self.state == "WAIT_TO_TAKE_NEXT_SAMPLE":
+                if smEntryTimeMs > (self.lastGetTemperatureEntry + (self.measurementInterval * 1000)):
+                    self.state = "GET_TEMPERATURE"
+                else:
+                    self.state = "WAIT_TO_TAKE_NEXT_SAMPLE"
+
+                
+            elif self.state == "EVALUATE_RESULT":
+                self.temperature = calculateTemperature(self.temperatureSamples)
+                if self.printTemperatureOnScreen:
+                    self.addText(image, str(self.temperature), (0,255,255))
+                if self.temperature > settings.threshold.value:
+                    if self.NOKRetryCnt < self.retriesOnResultNOK:
+                        # OK, bad measurement: retry measuring
+                        print("[INFO] Temperature was over threshold (" + str(self.temperature) + "DegC), retrying.")
+                        self.measurementIterCnt = 0 # reset iteration counter
+                        self.state = "GET_TEMPERATURE"
+                        self.NOKRetryCnt = self.NOKRetryCnt + 1
+                    else:
+                        color = settings.alarmColor
+                        self.displayMixer.showTemperatureNok(image)
+                        self.state = "WAIT_FOR_NO_FACE"                  
+                elif self.temperature < self.minTempForValidMeasurement:
+                    if self.NOKRetryCnt < self.retriesOnResultNOK:
+                        # OK, bad measurement: retry measuring
+                        print("[INFO] Measured temperature (" + str(self.temperature) + "DegC) was not valid, retrying.")
+                        self.measurementIterCnt = 0 # reset iteration counter
+                        self.state = "GET_TEMPERATURE"
+                        self.NOKRetryCnt = self.NOKRetryCnt + 1
+                    else:
+                        color = settings.alarmColor
+                        self.displayMixer.showTemperatureNok(image)
                         self.state = "WAIT_FOR_NO_FACE"
                 else:
-                    self.state = "IDLE"
-                    self.temperatureSamples = []
-                    self.displayMixer.hide()
-            #print("Get temp took: " + str(int(round(time.time() * 1000)) - startTime) + "ms")
-            
-            # register time
-            self.lastGetTemperatureEntry = smEntryTimeMs
-            # increment iteration counter
-            self.measurementIterCnt = self.measurementIterCnt + 1
-            # did we have all iterations?
-            if self.measurementIterCnt > self.measurementIterations:
-                self.state = "EVALUATE_RESULT"
-            else:
-                self.state = "WAIT_TO_TAKE_NEXT_SAMPLE"
-                print("[INFO] Waiting to get next sampele ... Current sample was:  " + str(self.measurementIterCnt))
+                    color = settings.okColor
+                    self.displayMixer.showTemperatureOk(image)
+                    self.state = "WAIT_FOR_NO_FACE"
                 
-        
-        
-        elif self.state == "WAIT_TO_TAKE_NEXT_SAMPLE":
-            if smEntryTimeMs > (self.lastGetTemperatureEntry + (self.measurementInterval * 1000)):
-                self.state = "GET_TEMPERATURE"
-            else:
-                self.state = "WAIT_TO_TAKE_NEXT_SAMPLE"
+                
 
-            
-        elif self.state == "EVALUATE_RESULT":
-            self.temperature = calculateTemperature(self.temperatureSamples)
-            if self.temperature > settings.threshold.value:
-                if self.NOKRetryCnt < self.retriesOnResultNOK:
-                    # OK, bad measurement: retry measuring
-                    print("[INFO] Temperature was over threshold (" + str(self.temperature) + "DegC), retrying.")
-                    self.measurementIterCnt = 0 # reset iteration counter
-                    self.state = "GET_TEMPERATURE"
-                    self.NOKRetryCnt = self.NOKRetryCnt + 1
-                else:
-                    color = settings.alarmColor
-                    self.displayMixer.showTemperatureNok(image)
-                    self.state = "WAIT_FOR_NO_FACE"
-                    
-            elif self.temperature < self.minTempForValidMeasurement:
-                if self.NOKRetryCnt < self.retriesOnResultNOK:
-                    # OK, bad measurement: retry measuring
-                    print("[INFO] Measured temperature (" + str(self.temperature) + "DegC) was not valid, retrying.")
-                    self.measurementIterCnt = 0 # reset iteration counter
-                    self.state = "GET_TEMPERATURE"
-                    self.NOKRetryCnt = self.NOKRetryCnt + 1
-                else:
-                    color = settings.alarmColor
-                    self.displayMixer.showTemperatureNok(image)
-                    self.state = "WAIT_FOR_NO_FACE"
-            else:
-                color = settings.okColor
-                self.displayMixer.showTemperatureOk(image)
-                self.state = "WAIT_FOR_NO_FACE"
-            
-            
-
-        elif self.state == "WAIT_FOR_NO_FACE":
-            if self.autoTrigger:
-                time.sleep(self.waitAfterAutotriggerMeas)
-                self.state = "IDLE"
-                self.temperatureSamples = []
-                self.displayMixer.hide()
-                if self.autoTriggerAtRandomIntervals:
-                    self.autoTriggerInterval = random.randint(self.autoTriggerRndIntervalMin, self.autoTriggerRndIntervalMax)
-                    print("[INFO] Random intervals set, next measurement in " + str(self.autoTriggerInterval) + " seconds.")
-            else:
-                self.roiFinder.getTcContours(image, False) # only looks for the head now
-                if self.roiFinder.faceFound:
-                    print("[INFO] Max temp of all measurements: " + str(self.temperature) + " DegC" + ". (" + ', '.join(str(e) for e in self.temperatureSamples) + ")")    
-
-                    if self.temperature > settings.threshold.value:
-                        self.displayMixer.showTemperatureNok(image)
-                    else:
-                        self.displayMixer.showTemperatureOk(image)                       
-                else:
+            elif self.state == "WAIT_FOR_NO_FACE":
+                self.publishMeasurements()
+                if self.autoTrigger:
+                    time.sleep(self.waitAfterAutotriggerMeas)
                     self.state = "IDLE"
                     self.temperatureSamples = []
                     self.displayMixer.hide()
+                    if self.autoTriggerAtRandomIntervals:
+                        self.autoTriggerInterval = random.randint(self.autoTriggerRndIntervalMin, self.autoTriggerRndIntervalMax)
+                        print("[INFO] Random intervals set, next measurement in " + str(self.autoTriggerInterval) + " seconds.")
+                else:
+                    self.roiFinder.getTcContours(image, False) # only looks for the head now
+                    if self.roiFinder.faceFound:
+                        print("[INFO] Max temp of all measurements: " + str(self.temperature) + " DegC" + ". (" + ', '.join(str(e) for e in self.temperatureSamples) + ")")    
+
+                        if self.temperature > settings.threshold.value:
+                            self.displayMixer.showTemperatureNok(image)
+                        else:
+                            self.displayMixer.showTemperatureOk(image)                       
+                    else:
+                        self.state = "IDLE"
+                        self.temperatureSamples = []
+                        self.displayMixer.hide()
+        except Exception as e:
+            print("[ERROR] " + e.message)
         
-        self.prevState = self.state
 
     def measureTemp(self):
-        # Get FPA and AUX temp an put it in a csv line like this:
-        # "Current time;AUX Temp;FPA Temp;Last FFC time;"
-        sMQTTMessage = str(int(round(time.time() * 1000))) + ';' + str(l.GetAuxTemp()) + ';' + str(l.GetFpaTemp()) + ';' + str(self.lastFFCTime) + ';'
-        sMQTTMessage = sMQTTMessage.replace('.',',')
-        self.mqttc.publish("TempCx100", sMQTTMessage)
-        time.sleep(0.02)
+        print("[INFO] Reading framebuffer...")
         thFrame = l.GetFrameBuffer("/dev/spidev0.0")
-        if 0:
-            print("[INFO] Framebuffer length is: " + str(len(thFrame)))
-        # publish the frame
-        self.mqttc.publish("FrameBuffer", struct.pack('%sH' %len(thFrame), *thFrame))
-        return (max(thFrame)/100) - 273.15
+        if type(thFrame) is str:
+            # GetFrameBuffer returns a string on error
+            print("[ERROR] " + thFrame)
+            return 0
+        else:
+            return (max(thFrame)/100) - 273.15
+        
+    def publishMeasurements(self):
+        if self.publishMQTT:
+            # Get FPA and AUX temp an put it in a csv line like this:
+            # "Current time;AUX Temp;FPA Temp;Last FFC time;"
+            sMQTTMessage = str(int(round(time.time() * 1000))) + ';' + str(l.GetAuxTemp()) + ';' + str(l.GetFpaTemp()) + ';' + str(self.lastFFCTime) + ';' + str(self.temperature) + ";"
+            sMQTTMessage = sMQTTMessage.replace('.',',')
+            self.mqttc.publish("TempCx100", sMQTTMessage)
+            thFrame = l.GetFrameBuffer("/dev/spidev0.0")
+            if 0:
+                print("[INFO] Framebuffer length is: " + str(len(thFrame)))
+            # publish the frame
+            self.mqttc.publish("FrameBuffer", struct.pack('%sH' %len(thFrame), *thFrame))
+        else:
+            pass
 
 
     def runFfc(self):
         #l.RunRadFfc()
         l.RunSysFFCNormalization()
-        self.lastFFCTime = self.currentTime
+        self.lastFFCTime = (int(round(time.time() * 1000)))
 
     def setFluxLinearParams(self):
         sensorTemp = l.GetAuxTemp()
@@ -443,6 +479,10 @@ class StateMachine(object):
     def setRadTLinearEnableState(self, tlState):
         l.SetRadTLinearEnableState(tlState)
         print("[INFO] Set TLinear state to: " + str(tlState))
+        
+    def setFfcShutterModeAuto(self, shutterAuto):
+        l.SetFfcShutterModeObj(shutterAuto, 0, 1, 0, 0, 180000, 0, 150, 52)
+        print("[INFO] Set Auto shutter state to: " + str(shutterAuto))
         
     def getFpaTemp(self):
         fpaTempG = l.GetFpaTemp()
