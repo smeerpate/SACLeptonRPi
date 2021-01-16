@@ -20,6 +20,13 @@ def calculateTemperature(samples):
         retTemp = sum(samples) / len(samples)
         print("[INFO] Calculated temperature = " + str(retTemp) + " DegC.")
         return retTemp
+        
+def onMQTTBrokerConnect(client, userdata, flags, rc):
+    if rc==0:
+        client.connected_flag = True #set flag
+        print("[INFO] MQTT connected OK Returned code = ",rc)
+    else:
+        print("[WARNING] MQTT Bad connection Returned code = ",rc)
 
 class StateMachine(object):
     """description of class"""
@@ -51,6 +58,7 @@ class StateMachine(object):
         self.minTempForValidMeasurement = 31 # minimum temperature for a valid measurement
         self.settleAfterFFCInterval = 0 # seconds to settle after FFC
         self.publishMQTT = True
+        self.connectionTimeoutMQTT = 5 # seconds
         self.printTemperatureOnScreen = True
         ##################################
         
@@ -87,11 +95,22 @@ class StateMachine(object):
         
         # mqtt
         if self.publishMQTT:
-            self.mqttBrokerAddress = "192.168.1.60" #"192.168.0.138"
+            mqtt.Client.connected_flag = False # create flag in class
+            self.mqttBrokerAddress = "192.168.0.138" #"192.168.0.138" # "192.168.1.60"
             self.mqttBrokerPort = 1883
             self.mqttc = mqtt.Client()
-            self.mqttc.connect(self.mqttBrokerAddress, self.mqttBrokerPort, 60)
-            print("[INFO] Connected to MQTT broker: " + self.mqttBrokerAddress)
+            self.mqttc.on_connect = onMQTTBrokerConnect # bind call back function
+            self.mqttc.loop_start()
+            self.mqttc.connect_async(self.mqttBrokerAddress, self.mqttBrokerPort, 60)
+            mqttConWaitCnt = 0
+            while not self.mqttc.connected_flag: #wait in loop
+                print("[INFO] Trying to connect to MQTT broker: " + self.mqttBrokerAddress)
+                if mqttConWaitCnt >= self.connectionTimeoutMQTT:
+                    print("[ERROR] Could not connect to MQTT broker: " + self.mqttBrokerAddress)
+                    break
+                mqttConWaitCnt = mqttConWaitCnt + 1
+                time.sleep(1)
+            #self.mqttc.loop_stop() # no need for continuously listening
 
 
     def addText(self, image, sMessage, color):
