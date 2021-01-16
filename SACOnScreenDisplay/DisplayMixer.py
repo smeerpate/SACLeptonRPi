@@ -45,7 +45,8 @@ class DisplayMixer(object):
 
     def show(self, image, slide):     
         # image = 480(h)*640(w)
-        image = cv.flip(image, -1) # flip vertically and mirror
+        #image = cv.flip(image, -1) # flip vertically and mirror
+        image = cv.flip(image, 0) # flip vertically
         origImageWidth = image.shape[1]
         origImageHeight = image.shape[0]
         # we're going portrait and keeping the aspect ratio of the image
