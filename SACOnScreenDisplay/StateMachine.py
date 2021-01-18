@@ -16,8 +16,10 @@ from SACFaceFinder import FaceFinder
 from SACForeheadFinder import ForeheadFinder
 from .DisplayMixer import DisplayMixer
 
-def calculateTemperature(samples):
-        retTemp = sum(samples) / len(samples)
+def calculateTemperature(SensorSamples, FPATempSamples, SkinOffsetTemp, Coeff_A, Coeff_m):
+        sensorTemp = sum(SensorSamples) / len(SensorSamples) # average SensorSamples
+        fpaTemp = sum(FPATempSamples) / len(FPATempSamples) # average FPATempSamples
+        retTemp = sensorTemp + (Coeff_A - fpaTemp * Coeff_m) + SkinOffsetTemp
         print("[INFO] Calculated temperature = " + str(retTemp) + " DegC.")
         return retTemp
         
@@ -74,6 +76,10 @@ class StateMachine(object):
         self.temperature = 0
         self.thSensorWidth = 80
         self.thSensorHeight = 60
+        self.FPATemperatureSamples = []
+        self.SkinOffset = 0 #2.2 # degrees difference between timpanic temperature and forehead temp
+        self.mTempCorrCoeff = 0 # 0.0242 # slope of the linear correction
+        self.ATempCorrCoeff = 0 # 1.725 # offset of linear correction
         
         self.lastThermalFrame = []
         self.thColormap = [[255, 255, 255], [253, 253, 253], [251, 251, 251], [249, 249, 249], [247, 247, 247], 
@@ -127,7 +133,7 @@ class StateMachine(object):
         # mqtt
         if self.publishMQTT:
             mqtt.Client.connected_flag = False # create flag in class
-            self.mqttBrokerAddress = "192.168.0.138" #"192.168.0.138" # "192.168.1.60"
+            self.mqttBrokerAddress = "192.168.1.60" #"192.168.0.138" # "192.168.1.60"
             self.mqttBrokerPort = 1883
             self.mqttc = mqtt.Client()
             self.mqttc.on_connect = onMQTTBrokerConnect # bind call back function
@@ -285,6 +291,7 @@ class StateMachine(object):
                 else:
                     self.state = "IDLE"
                     self.temperatureSamples = []
+                    self.FPATemperatureSamples = []
                     self.displayMixer.hide()
                 #print("Wait for size took: " + str(int(round(time.time() * 1000)) - smEntryTimeMs) + "ms")
 
@@ -303,6 +310,7 @@ class StateMachine(object):
                     else:
                         self.state = "IDLE"
                         self.temperatureSamples = []
+                        self.FPATemperatureSamples = []
                         self.displayMixer.hide()
                 print("[INFO] Run FFC took: " + str(int(round(time.time() * 1000)) - smEntryTimeMs) + "ms")
                 print("[INFO] Settling " + str(self.settleAfterFFCInterval) + " seconds before measuring.")
@@ -330,6 +338,7 @@ class StateMachine(object):
                     else:
                         self.state = "IDLE"
                         self.temperatureSamples = []
+                        self.FPATemperatureSamples = []
                         self.displayMixer.hide()
                 #print("Set flux linear params took: " + str(int(round(time.time() * 1000)) - smEntryTimeMs) + "ms")
                 self.NOKRetryCnt = 0 # reset the measurement retry counter
@@ -347,6 +356,7 @@ class StateMachine(object):
             elif self.state == "GET_TEMPERATURE":
                 if self.autoTrigger:
                     self.temperatureSamples.append(self.measureTemp())
+                    self.FPATemperatureSamples.append(self.getFpaTemp())
                 else:
                 # todo implement retries
                     if self.roiFinder.getTcContours(image, settings.showFoundFace.value):  
@@ -379,9 +389,11 @@ class StateMachine(object):
                         #self.writeLog()
                         values = l.GetROIValues()
                         self.temperatureSamples.append(values[1])
+                        self.FPATemperatureSamples.append(self.getFpaTemp())
                     else:
                         self.state = "IDLE"
                         self.temperatureSamples = []
+                        self.FPATemperatureSamples = []
                         self.displayMixer.hide()
                 #print("Get temp took: " + str(int(round(time.time() * 1000)) - startTime) + "ms")
                 
@@ -406,7 +418,7 @@ class StateMachine(object):
 
                 
             elif self.state == "EVALUATE_RESULT":
-                self.temperature = calculateTemperature(self.temperatureSamples)
+                self.temperature = calculateTemperature(self.temperatureSamples, self.FPATemperatureSamples, self.SkinOffset, self.ATempCorrCoeff, self.mTempCorrCoeff)
                 if self.showThermalImage:
                     image = self.addThermalImage(image)
                 if self.printTemperatureOnScreen:
