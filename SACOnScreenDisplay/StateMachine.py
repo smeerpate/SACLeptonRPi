@@ -17,10 +17,16 @@ from SACForeheadFinder import ForeheadFinder
 from .DisplayMixer import DisplayMixer
 
 def calculateTemperature(SensorSamples, FPATempSamples, SkinOffsetTemp, Coeff_A, Coeff_m):
-        sensorTemp = sum(SensorSamples) / len(SensorSamples) # average SensorSamples
-        fpaTemp = sum(FPATempSamples) / len(FPATempSamples) # average FPATempSamples
-        retTemp = sensorTemp + (Coeff_A - fpaTemp * Coeff_m) + SkinOffsetTemp
-        print("[INFO] Calculated temperature = " + str(retTemp) + " DegC.")
+        sensorTemp = 0
+        fpaTemp = 0
+        retTemp = 0
+        if len(SensorSamples) > 0 and len(FPATempSamples) > 0:
+            sensorTemp = sum(SensorSamples) / len(SensorSamples) # average SensorSamples
+            fpaTemp = sum(FPATempSamples) / len(FPATempSamples) # average FPATempSamples
+            retTemp = sensorTemp + (Coeff_A + fpaTemp * Coeff_m) + SkinOffsetTemp
+            print("[INFO] Calculated temperature = " + str(retTemp) + " DegC.")
+        else:
+            print("[ERROR] Missing samples. Number of sensor sample =" + str(len(SensorSamples) + ", number of FPA samples = " + str(len(FPATempSamples)))) 
         return retTemp
         
 def onMQTTBrokerConnect(client, userdata, flags, rc):
@@ -45,7 +51,7 @@ class StateMachine(object):
         ###### Settings, sort of... ######
         self.faceSizeUpperLimit = 280
         self.faceSizeLowerLimit = 220
-        self.autoTrigger = True # Automatically trigger a measurement every mlAutoTriggerInterval seconds (ignoring Face ROI)
+        self.autoTrigger = False # Automatically trigger a measurement every mlAutoTriggerInterval seconds (ignoring Face ROI)
         self.autoTriggerInterval = 20 # seconds 
         self.autoTriggerAtRandomIntervals = True # Requires autoTrigger to be true. Triggers at random intervals
         self.autoTriggerRndIntervalMin = 20 # seconds
@@ -53,15 +59,19 @@ class StateMachine(object):
         self.waitAfterAutotriggerMeas = 3 # seconds, the time to stay in the WAIT FOR NO FACE state in auto trigger mode
         self.measurementInterval = 1 # seconds
         self.measurementIterations = 4 # times, number of measuremnts per head. 
-        self.maxFFCInterval = 120 # seconds
+        self.maxFFCInterval = 0 # seconds
         self.maxFPATempInterval = 30 # seconds
         self.showThermalImage = True # Need to show thermal image?
-        self.retriesOnResultNOK = 1 #
+        self.retriesOnResultNOK = 0 # 1 #
         self.minTempForValidMeasurement = 31 # minimum temperature for a valid measurement
         self.settleAfterFFCInterval = 0 # seconds to settle after FFC
         self.publishMQTT = True
         self.connectionTimeoutMQTT = 5 # seconds
         self.printTemperatureOnScreen = True
+        self.addThermalRoiToThermalImage = True
+        self.SkinOffset = 2.2 # 2.2 # degrees difference between timpanic temperature and forehead temp
+        self.mTempCorrCoeff = -0.0055 # -0.0242 # slope of the linear correction
+        self.ATempCorrCoeff = 1.7196 # 1.725 # offset of linear correction
         ##################################
         
         self.lastAutotriggerEvent = 0
@@ -77,9 +87,9 @@ class StateMachine(object):
         self.thSensorWidth = 80
         self.thSensorHeight = 60
         self.FPATemperatureSamples = []
-        self.SkinOffset = 0 #2.2 # degrees difference between timpanic temperature and forehead temp
-        self.mTempCorrCoeff = 0 # 0.0242 # slope of the linear correction
-        self.ATempCorrCoeff = 0 # 1.725 # offset of linear correction
+        
+        self.lastMeasurementTime = 0 # in ms
+        self.minMeasurementInterval = 20 # seconds. Min number os seconds between two measurements
         
         self.lastThermalFrame = []
         self.thColormap = [[255, 255, 255], [253, 253, 253], [251, 251, 251], [249, 249, 249], [247, 247, 247], 
@@ -116,7 +126,7 @@ class StateMachine(object):
         print("[INFO] Loaded affine transform from settings file: " + str(self.transformMatrix))
         
         if self.autoTrigger:
-            self.thRoi = (0, 0), (79, 59)
+            self.thRoi = (5, 5), (74, 54) # (0, 0), (79, 59) # (xstart, ystart), (xend, yend)
             self.roiFinder = None
         else:
             self.thRoi = (0, 0), (0, 0)
@@ -127,7 +137,7 @@ class StateMachine(object):
         self.currentTime = int(round(time.time()))
 
         # Globals for FFC timing
-        self.lastFFCTime = 0
+        self.lastFFCTime = 0 # in ms
         self.lastFPATempTime = 0
         
         # mqtt
@@ -161,8 +171,9 @@ class StateMachine(object):
     ###########################################
     # Adds a capture from the lepton to the
     # image. The thermal image is normalized.
+    # 
     ###########################################
-    def addThermalImage(self, image):
+    def addThermalImage(self, image, roi, addRoi):
         # Capture image from Lepton.
         #thRaw,_ = self.lepton.capture()
         if len(self.lastThermalFrame) == self.thSensorHeight * self.thSensorWidth:
@@ -176,6 +187,8 @@ class StateMachine(object):
         # convert grayscale to BGR
         #thermal = cv.cvtColor(thermal, cv.COLOR_GRAY2BGR)
         thermal = cv.applyColorMap(thermal, cv.COLORMAP_HOT)
+        if addRoi:
+            self.addRectangle(thermal, roi, (255,255,255))
         #thermal = cv.LUT(thermal, self.thColormap)
         xOffset = yOffset = 10
         #print(image.shape)
@@ -198,13 +211,13 @@ class StateMachine(object):
         return True
         color = (255, 0, 0)
         if currWidth > maxWidth:
-            self.addText(image, 'Ga wat verder staan.', color)
+            #self.addText(image, 'Ga wat verder staan.', color)
             return False
         elif currWidth < minWidth:
-            self.addText(image, 'Ga wat dichter staan.', color)
+            #self.addText(image, 'Ga wat dichter staan.', color)
             return False
         else:
-            self.addText(image, 'Afstand OK.', color)
+            #self.addText(image, 'Afstand OK.', color)
             return True
 
     def run(self, image):
@@ -243,7 +256,7 @@ class StateMachine(object):
                             self.state = "SET_INITIAL_PARAMETERS"
                 else:
                     if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
-                        self.state = "WAIT_FOR_SIZE_OK"
+                        self.state = "SETTLE_AFTER_MEASURING"
                         self.displayMixer.showDontMove(image)
                         dateValue = datetime.datetime.fromtimestamp(time.time())
                         print("[INFO] Found a face. (Timestamp = " + dateValue.strftime('%Y-%m-%d %H:%M:%S') + ")")
@@ -275,6 +288,18 @@ class StateMachine(object):
                 self.state = "IDLE"
                 
                 
+            elif self.state == "SETTLE_AFTER_MEASURING":
+                if smEntryTimeMs > (self.lastFFCTime + (self.minMeasurementInterval * 1000)):
+                    self.state = "WAIT_FOR_SIZE_OK"                        
+                else:
+                    if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
+                        self.state = "SETTLE_AFTER_MEASURING"
+                        self.displayMixer.showSettling(image)
+                    else:
+                        self.state = "IDLE"
+                        self.displayMixer.hide()
+                
+                
             elif self.state == "WAIT_FOR_SIZE_OK":
                 #start = int(round(time.time() * 1000))
                 if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
@@ -283,7 +308,7 @@ class StateMachine(object):
                         self.displayMixer.showDontMove(image)
                     else:
                         self.currentTime = int(round(time.time()))
-                        if self.currentTime > (self.lastFFCTime + self.maxFFCInterval):
+                        if smEntryTimeMs > (self.lastFFCTime + (self.maxFFCInterval * 1000)):
                             self.state = "RUN_FFC"                        
                         else:
                             self.state = "SET_FLUX_LINEAR_PARAMS"
@@ -355,7 +380,7 @@ class StateMachine(object):
 
             elif self.state == "GET_TEMPERATURE":
                 if self.autoTrigger:
-                    self.temperatureSamples.append(self.measureTemp())
+                    self.temperatureSamples.append(self.measureTemp(self.thRoi))
                     self.FPATemperatureSamples.append(self.getFpaTemp())
                 else:
                 # todo implement retries
@@ -372,8 +397,9 @@ class StateMachine(object):
 
                         #print("TH ROI Contours")
                         #print(str(thRoiContours))
-
-                        thRoi = self.getRoiFromContours(thRoiContours)
+                        
+                        # update the thermal ROI
+                        self.thRoi = self.getRoiFromContours(thRoiContours)
 
                         # Flip thRoi vertically
                         #start, end = thRoi
@@ -381,14 +407,15 @@ class StateMachine(object):
                         #thRoi = (80 - start[0] - w, start[1]), (80 - start[0], end[1])
 
                         # Translate a bit to the right
-                        start, end = thRoi
+                        start, end = self.thRoi
                         xTrans = 10
-                        thRoi = (start[0] + xTrans, start[1]), (end[0] + xTrans, end[1])
+                        self.thRoi = (start[0] + xTrans, start[1]), (end[0] + xTrans, end[1])
 
-                        self.setThRoiOnLepton(thRoi)
+                        #self.setThRoiOnLepton(thRoi)
                         #self.writeLog()
-                        values = l.GetROIValues()
-                        self.temperatureSamples.append(values[1])
+                        #values = l.GetROIValues()
+                        #self.temperatureSamples.append(values[1])
+                        self.temperatureSamples.append(self.measureTemp(self.thRoi))
                         self.FPATemperatureSamples.append(self.getFpaTemp())
                     else:
                         self.state = "IDLE"
@@ -420,7 +447,7 @@ class StateMachine(object):
             elif self.state == "EVALUATE_RESULT":
                 self.temperature = calculateTemperature(self.temperatureSamples, self.FPATemperatureSamples, self.SkinOffset, self.ATempCorrCoeff, self.mTempCorrCoeff)
                 if self.showThermalImage:
-                    image = self.addThermalImage(image)
+                    image = self.addThermalImage(image, self.thRoi, self.addThermalRoiToThermalImage)
                 if self.printTemperatureOnScreen:
                     self.addText(image, str(self.temperature), (0,255,255))
                 if self.temperature > settings.threshold.value:
@@ -451,7 +478,6 @@ class StateMachine(object):
                     self.state = "WAIT_FOR_NO_FACE"
                 
                 
-
             elif self.state == "WAIT_FOR_NO_FACE":
                 self.publishMeasurements()
                 if self.autoTrigger:
@@ -465,21 +491,29 @@ class StateMachine(object):
                 else:
                     self.roiFinder.getTcContours(image, False) # only looks for the head now
                     if self.roiFinder.faceFound:
-                        print("[INFO] Max temp of all measurements: " + str(self.temperature) + " DegC" + ". (" + ', '.join(str(e) for e in self.temperatureSamples) + ")")    
-
-                        if self.temperature > settings.threshold.value:
-                            self.displayMixer.showTemperatureNok(image)
+                        #print("[INFO] Max temp of all measurements: " + str(self.temperature) + " DegC" + ". (" + ', '.join(str(e) for e in self.temperatureSamples) + ")")    
+                        if self.showThermalImage:
+                            thImage = self.addThermalImage(image, self.thRoi, self.addThermalRoiToThermalImage)
+                            if self.temperature > settings.threshold.value:
+                                self.displayMixer.showTemperatureNok(thImage)
+                            else:
+                                self.displayMixer.showTemperatureOk(thImage)
                         else:
-                            self.displayMixer.showTemperatureOk(image)                       
+                            if self.temperature > settings.threshold.value:
+                                self.displayMixer.showTemperatureNok(image)
+                            else:
+                                self.displayMixer.showTemperatureOk(image)                       
                     else:
                         self.state = "IDLE"
                         self.temperatureSamples = []
                         self.displayMixer.hide()
+       
+                        
         except Exception as e:
-            print("[ERROR] " + e.message)
+            print("[ERROR] Main state machine error. State = " + str(self.state) + ". -> " + str(e))
         
 
-    def measureTemp(self):
+    def measureTemp(self, roi):
         print("[INFO] Reading framebuffer...")
         thFrame = l.GetFrameBuffer("/dev/spidev0.0")
         if type(thFrame) is str:
@@ -487,8 +521,14 @@ class StateMachine(object):
             print("[ERROR] " + thFrame)
             return 0
         else:
-            self.lastThermalFrame = np.array(thFrame)
-            return (max(thFrame)/100) - 273.15
+            if len(thFrame) == self.thSensorHeight * self.thSensorWidth:
+                self.lastThermalFrame = np.array(thFrame)
+                thFrame = np.reshape(thFrame, (self.thSensorHeight, self.thSensorWidth))
+                self.lastMeasurementTime = (int(round(time.time() * 1000)))
+                return (np.max(thFrame)/100) - 273.15 # TODO measure only in ROI
+            else:
+                print("[ERROR] Not enough pixels from themal imaging sensor. Got" + len(self.thFrame))
+                return 0;
         
     def publishMeasurements(self):
         if self.publishMQTT:
@@ -498,10 +538,14 @@ class StateMachine(object):
             sMQTTMessage = sMQTTMessage.replace('.',',')
             self.mqttc.publish("TempCx100", sMQTTMessage)
             thFrame = l.GetFrameBuffer("/dev/spidev0.0")
-            if 0:
-                print("[INFO] Framebuffer length is: " + str(len(thFrame)))
-            # publish the frame
-            self.mqttc.publish("FrameBuffer", struct.pack('%sH' %len(thFrame), *thFrame))
+            if type(thFrame) is str:
+                # GetFrameBuffer returns a string on error
+                print("[ERROR] " + thFrame)
+            else:
+                if 0:
+                    print("[INFO] Framebuffer length is: " + str(len(thFrame)))
+                # publish the frame
+                self.mqttc.publish("FrameBuffer", struct.pack('%sH' %len(thFrame), *thFrame))
         else:
             pass
 

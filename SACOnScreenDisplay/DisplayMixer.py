@@ -38,6 +38,10 @@ class DisplayMixer(object):
         self.dontMove = cv.imread("/home/pi/windmaster/Slides/SAC_DONTMOVE.jpg")
         self.dontMove = cv.cvtColor(self.dontMove, cv.COLOR_BGR2RGBA)
         self.dontMove = cv.flip(self.dontMove, 0)
+        
+        self.settling = cv.imread("/home/pi/windmaster/Slides/SAC_SETTLING.jpg")
+        self.settling = cv.cvtColor(self.settling, cv.COLOR_BGR2RGBA)
+        self.settling = cv.flip(self.settling, 0)
         #Display is 1920 (width) x 1080 (height) -> np array is 1080 (rows) x 1920 (cols)
         #self.transparent = np.full([1080, 200, 4], 150, dtype=np.uint8)
         #self.transparent = np.hstack((self.transparent, np.full([1080, 1720, 4], 240, dtype=np.uint8)))
@@ -80,6 +84,9 @@ class DisplayMixer(object):
 
     def showDontMove(self, image):
         self.show(image, self.dontMove)
+        
+    def showSettling(self, image):
+        self.show(image, self.settling)
 
     def hide(self):
         start = int(round(time.time() * 1000))
