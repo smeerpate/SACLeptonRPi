@@ -22,7 +22,7 @@ class SettingsManager(object):
             return self.settings
         else:
             if os.path.isfile(self.settingsFile):
-                print("Reading settings from file: " + self.settingsFile)
+                print("[INFO] Reading settings from file: " + self.settingsFile)
                 f = open(self.settingsFile, "r")
                 self.settings = jsonpickle.decode(f.read())
                 f.close()
@@ -125,7 +125,8 @@ class SettingsManager(object):
         settings.idleColor = idleColor
 
         affineTransform = AffineTransformSetting("Affine transform")
-        affineTransform.value = np.array([[1.70100612e-1, 4.91086300e-4, -2.62737066e+1],[5.51191729e-3, 1.75597084e-1, -2.09686199e+1]]) #Default
+        #affineTransform.value = np.array([[1.70100612e-1, 4.91086300e-4, -2.62737066e+1],[5.51191729e-3, 1.75597084e-1, -2.09686199e+1]]) #Default
+        affineTransform.value = np.array([[1.72672854e-01, 9.37420481e-04, -1.81536566e+01],[3.05513992e-03, 1.69052218e-01, -7.17111297e+00]]) # V5 Proto
         settings.affineTransform = affineTransform
 
         return settings

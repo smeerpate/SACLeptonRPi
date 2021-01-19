@@ -28,7 +28,8 @@ try:
     camera.framerate = 30
     time.sleep(0.5)
 
-    for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=True):
+    #for data in camera.capture_continuous(rawCapture, format="rgb", use_video_port=True):
+    for data in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
         frame = data.array
         #frame = frame.copy()
         #if osd.isRunning() or inputManager.hasInput():

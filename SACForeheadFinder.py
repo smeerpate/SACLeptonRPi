@@ -57,7 +57,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
                 faceWidth = xmax - xmin
                 faceHeight = ymax - ymin                
 
-                if xmin > 220 and xmax < 420 and faceWidth < 200 and faceWidth > 50 and faceHeight < 200 and faceHeight > 50:
+                if xmin > 220 and xmax < 420 and faceWidth < 400 and faceWidth > 50 and faceHeight < 400 and faceHeight > 50:
                     detections.append((confidence, (xmin, ymin), (xmax, ymax)))
 
         # We only want 1 face

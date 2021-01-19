@@ -42,6 +42,14 @@ class DisplayMixer(object):
         self.settling = cv.imread("/home/pi/windmaster/Slides/SAC_SETTLING.jpg")
         self.settling = cv.cvtColor(self.settling, cv.COLOR_BGR2RGBA)
         self.settling = cv.flip(self.settling, 0)
+        
+        self.stepCloser = cv.imread("/home/pi/windmaster/Slides/SAC_STEPCLOSER.jpg")
+        self.stepCloser = cv.cvtColor(self.stepCloser, cv.COLOR_BGR2RGBA)
+        self.stepCloser = cv.flip(self.stepCloser, 0)
+        
+        self.stepBack = cv.imread("/home/pi/windmaster/Slides/SAC_STEPBACK.jpg")
+        self.stepBack = cv.cvtColor(self.stepBack, cv.COLOR_BGR2RGBA)
+        self.stepBack = cv.flip(self.stepBack, 0)
         #Display is 1920 (width) x 1080 (height) -> np array is 1080 (rows) x 1920 (cols)
         #self.transparent = np.full([1080, 200, 4], 150, dtype=np.uint8)
         #self.transparent = np.hstack((self.transparent, np.full([1080, 1720, 4], 240, dtype=np.uint8)))
@@ -62,7 +70,7 @@ class DisplayMixer(object):
         image = cv.rotate(image, cv.ROTATE_90_CLOCKWISE)
         #print("[INFO] New true color image size: " + str(image.shape))
         
-        r_channel, g_channel, b_channel = cv.split(image)
+        b_channel, g_channel, r_channel = cv.split(image)
         alpha_channel = np.ones(b_channel.shape, dtype=b_channel.dtype) * 255 #creating a dummy alpha channel image.
         img_RGBA = cv.merge((r_channel, g_channel, b_channel, alpha_channel))
 
@@ -87,6 +95,12 @@ class DisplayMixer(object):
         
     def showSettling(self, image):
         self.show(image, self.settling)
+        
+    def showStepBack(self, image):
+        self.show(image, self.stepBack)
+        
+    def showStepCloser(self, image):
+        self.show(image, self.stepCloser)
 
     def hide(self):
         start = int(round(time.time() * 1000))
