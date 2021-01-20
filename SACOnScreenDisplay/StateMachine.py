@@ -75,8 +75,8 @@ class StateMachine(object):
         self.printTemperatureOnScreen = True
         self.addThermalRoiToThermalImage = True
         self.SkinOffset = 2.1 # 2.1 # 2.2 # degrees difference between timpanic temperature and forehead temp
-        self.mTempCorrCoeff = 0 # -0.0055 # -0.0242 # slope of the linear correction
-        self.ATempCorrCoeff = 2.26 # 1.7196 # 1.725 # offset of linear correction
+        self.mTempCorrCoeff = 0.0178 # -0.0242 # slope of the linear correction
+        self.ATempCorrCoeff = 1.4871 # 1.7196 # 1.725 # offset of linear correction
         self.minMeasurementInterval = 10 # seconds. Min number of seconds between two measurements (optimaal = 20)
         self.OSDTextColor = (255,120,70)
         ##################################
