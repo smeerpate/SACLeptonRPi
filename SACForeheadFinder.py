@@ -13,8 +13,8 @@ class ForeheadFinder(RectangleOfInterestFinder):
     def __init__(self, imageSize = (640,480), minFaceSize = (180,180), minEyesSize = (250,40)):
         self.minFaceSize = minFaceSize
         self.minEyesSize = minEyesSize
-        #self.net = cv2.dnn.readNet('/home/pi/SACLeptonRPi/face-detection-adas-0001.xml', '/home/pi/SACLeptonRPi/face-detection-adas-0001.bin')
-        self.net = cv2.dnn.readNet('/home/pi/SACLeptonRPi/face-detection-retail-0004.xml', '/home/pi/SACLeptonRPi/face-detection-retail-0004.bin')
+        self.net = cv2.dnn.readNet('/home/pi/SACLeptonRPi/face-detection-adas-0001.xml', '/home/pi/SACLeptonRPi/face-detection-adas-0001.bin')
+        #self.net = cv2.dnn.readNet('/home/pi/SACLeptonRPi/face-detection-retail-0004.xml', '/home/pi/SACLeptonRPi/face-detection-retail-0004.bin')
         print("[INFO] DNN: Read net completed")
         self.net.setPreferableTarget(cv2.dnn.DNN_TARGET_MYRIAD)
         print("[INFO] DNN: Target set")
@@ -41,8 +41,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
         start = time.time()
         #blob = cv2.dnn.blobFromImage(image, size=(640,480), ddepth=cv2.CV_8U)
         
-        blobScaling = 1
-        blobSize = (300,300)
+        blobSize = (640,480)
         scaled = cv2.resize(image, blobSize)
         blob = cv2.dnn.blobFromImage(scaled, size=blobSize, ddepth=cv2.CV_8U)
         
