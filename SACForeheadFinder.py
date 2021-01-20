@@ -13,7 +13,8 @@ class ForeheadFinder(RectangleOfInterestFinder):
     def __init__(self, imageSize = (640,480), minFaceSize = (180,180), minEyesSize = (250,40)):
         self.minFaceSize = minFaceSize
         self.minEyesSize = minEyesSize
-        self.net = cv2.dnn.readNet('/home/pi/SACLeptonRPi/face-detection-adas-0001.xml', '/home/pi/SACLeptonRPi/face-detection-adas-0001.bin')
+        #self.net = cv2.dnn.readNet('/home/pi/SACLeptonRPi/face-detection-adas-0001.xml', '/home/pi/SACLeptonRPi/face-detection-adas-0001.bin')
+        self.net = cv2.dnn.readNet('/home/pi/SACLeptonRPi/face-detection-retail-0004.xml', '/home/pi/SACLeptonRPi/face-detection-retail-0004.bin')
         print("[INFO] DNN: Read net completed")
         self.net.setPreferableTarget(cv2.dnn.DNN_TARGET_MYRIAD)
         print("[INFO] DNN: Target set")
@@ -41,7 +42,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
         #blob = cv2.dnn.blobFromImage(image, size=(640,480), ddepth=cv2.CV_8U)
         
         blobScaling = 1
-        blobSize = (int(640*blobScaling),int(480*blobScaling))
+        blobSize = (300,300)
         scaled = cv2.resize(image, blobSize)
         blob = cv2.dnn.blobFromImage(scaled, size=blobSize, ddepth=cv2.CV_8U)
         
@@ -63,7 +64,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
                 faceWidth = xmax - xmin
                 faceHeight = ymax - ymin                
 
-                if xmin > int(220*blobScaling) and xmax < int(420*blobScaling) and faceWidth < int(400*blobScaling) and faceWidth > int(50*blobScaling) and faceHeight < int(400*blobScaling) and faceHeight > int(50*blobScaling):
+                if xmin > 220 and xmax < 420 and faceWidth < 400 and faceWidth > 50 and faceHeight < 400 and faceHeight > 50:
                     detections.append((confidence, (xmin, ymin), (xmax, ymax)))
 
         # We only want 1 face
