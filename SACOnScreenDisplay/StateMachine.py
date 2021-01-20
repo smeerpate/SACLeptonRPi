@@ -8,6 +8,7 @@ import paho.mqtt.client as mqtt
 import struct
 import random
 import datetime
+import pdb
 
 from Lepton import Lepton
 from .LedDriver import LedDriver
@@ -209,6 +210,7 @@ class StateMachine(object):
             # 7) Else -> inform the user that we are going to measure again
 
             if self.state == "IDLE":
+                #pdb.set_trace()
                 color = settings.idleColor
                 self.ledDriver.output(color.red, color.green, color.blue, 100)
                 if self.autoTrigger:
