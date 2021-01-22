@@ -62,7 +62,7 @@ class StateMachine(object):
         self.waitAfterAutotriggerMeas = 3 # seconds, the time to stay in the WAIT FOR NO FACE state in auto trigger mode
         self.measurementInterval = 0.5 # seconds (optimal = 1)
         self.measurementIterations = 3 # times, number of measuremnts per head. (optimal = 4)
-        self.maxFFCInterval = 0 # seconds
+        self.maxFFCInterval = 60 # seconds. After more than maxFFCInterval, unit will do a dummy FFC
         self.maxFPATempInterval = 30 # seconds
         self.showThermalImage = True # Need to show thermal image?
         self.retriesOnResultNOK = 2 # 1 #
@@ -228,8 +228,12 @@ class StateMachine(object):
                             self.state = "SET_INITIAL_PARAMETERS"
                 else:
                     if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
-                        self.state = "SETTLE_AFTER_MEASURING"
-                        self.displayMixer.showDontMove(image)
+                        if smEntryTimeMs > (self.lastFFCTime + (self.maxFFCInterval * 1000)):
+                            # it's been too long a time since we've done an FFC
+                            self.state = "DO_DUMMY_FFC"
+                        else:
+                            self.state = "SETTLE_AFTER_MEASURING"
+                            self.displayMixer.showDontMove(image)
                         dateValue = datetime.datetime.fromtimestamp(time.time())
                         print("[INFO] Found a face. (Timestamp = " + dateValue.strftime('%Y-%m-%d %H:%M:%S') + ")")
                     else:
@@ -271,6 +275,10 @@ class StateMachine(object):
                         self.state = "IDLE"
                         self.displayMixer.hide()
                 
+            elif self.state == "DO_DUMMY_FFC":
+                print("[INFO] Doing dummy FFC ...")
+                self.runFfc()
+                self.state = "IDLE"
                 
             elif self.state == "WAIT_FOR_SIZE_OK":
                 if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
@@ -286,10 +294,7 @@ class StateMachine(object):
                         self.displayMixer.showStepBack(image)
                     else:
                         self.currentTime = int(round(time.time()))
-                        if smEntryTimeMs > (self.lastFFCTime + (self.maxFFCInterval * 1000)):
-                            self.state = "RUN_FFC"                        
-                        else:
-                            self.state = "SET_FLUX_LINEAR_PARAMS"
+                        self.state = "SET_FLUX_LINEAR_PARAMS"
                         dateValue = datetime.datetime.fromtimestamp(time.time())
                         print("[INFO] Starting measurement. (Timestamp = " + dateValue.strftime('%Y-%m-%d %H:%M:%S') + ")")
                         self.displayMixer.showDontMove(image)
@@ -346,8 +351,8 @@ class StateMachine(object):
                         self.FPATemperatureSamples = []
                         self.displayMixer.hide()
                 #print("Set flux linear params took: " + str(int(round(time.time() * 1000)) - smEntryTimeMs) + "ms")
-                self.NOKRetryCnt = 0 # reset the measurement retry counter
-                self.measurementIterCnt = 0 # reset iteration counter
+                #self.NOKRetryCnt = 0 # reset the measurement retry counter
+                #self.measurementIterCnt = 0 # reset iteration counter
                 self.doSetFLParameters = False # only set Flux liear parameters once
                 
             
@@ -421,8 +426,6 @@ class StateMachine(object):
                             print("[INFO] Waiting to get next sample ... Current sample was:  " + str(self.measurementIterCnt))
                     else:
                         print("[WARNING] Face dissapeared while measuring. ")
-                        self.measurementIterCnt = 0 # reset iteration counter
-                        self.NOKRetryCnt = 0 # reset the measurement retry counter
                         self.resetStateMachine()
                         #self.state = "IDLE"
                         #self.temperatureSamples = []
@@ -459,7 +462,8 @@ class StateMachine(object):
                         self.measurementIterCnt = 0 # reset iteration counter
                         self.temperatureSamples = []
                         self.FPATemperatureSamples = []
-                        self.state = "GET_TEMPERATURE"
+                        #self.state = "GET_TEMPERATURE"
+                        self.state = "RUN_FFC"
                         self.NOKRetryCnt = self.NOKRetryCnt + 1
                     else:
                         if 1:
@@ -474,7 +478,8 @@ class StateMachine(object):
                         self.measurementIterCnt = 0 # reset iteration counter
                         self.temperatureSamples = []
                         self.FPATemperatureSamples = []
-                        self.state = "GET_TEMPERATURE"
+                        #self.state = "GET_TEMPERATURE"
+                        self.state = "RUN_FFC"
                         self.NOKRetryCnt = self.NOKRetryCnt + 1
                     else:
                         if 1:
@@ -642,5 +647,7 @@ class StateMachine(object):
         self.FPATemperatureSamples = []
         self.displayMixer.hide()
         self.lastMeasurementsArePublished = False
+        self.NOKRetryCnt = 0 # reset the measurement retry counter
+        self.measurementIterCnt = 0 # reset iteration counter
 
 
