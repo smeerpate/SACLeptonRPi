@@ -79,6 +79,8 @@ class StateMachine(object):
         self.ATempCorrCoeff = 1.4871 # 1.7196 # 1.725 # offset of linear correction
         self.minMeasurementInterval = 10 # seconds. Min number of seconds between two measurements (optimaal = 20)
         self.OSDTextColor = (255,120,70)
+        self.mqttBrokerAddress = "192.168.1.60" # "192.168.1.37" #"192.168.0.138" # "192.168.1.60"
+        self.mqttBrokerPort = 1883
         ##################################
         
         self.lastAutotriggerEvent = 0
@@ -123,8 +125,6 @@ class StateMachine(object):
         # mqtt
         if self.publishMQTT:
             mqtt.Client.connected_flag = False # create flag in class
-            self.mqttBrokerAddress = "192.168.1.37" #"192.168.0.138" # "192.168.1.60"
-            self.mqttBrokerPort = 1883
             self.mqttc = mqtt.Client()
             self.mqttc.on_connect = onMQTTBrokerConnect # bind call back function
             self.mqttc.loop_start()
@@ -392,19 +392,19 @@ class StateMachine(object):
                             xTrans = 10
                             self.thRoi = (start[0] + xTrans, start[1]), (end[0] + xTrans, end[1])
 
-                        self.setThRoiOnLepton(self.thRoi)
+                        #self.setThRoiOnLepton(self.thRoi)
                         #self.writeLog()
-                        values = l.GetROIValues()
-                        self.temperatureSamples.append(values[1])
+                        #values = l.GetROIValues()
+                        #self.temperatureSamples.append(values[1])
                         if self.showThermalImage:
-                            self.measureTemp(self.thRoi)
-                        #self.temperatureSamples.append(self.measureTemp(self.thRoi))
+                            self.temperatureSamples.append(self.measureTemp(self.thRoi))
                         self.FPATemperatureSamples.append(self.getFpaTemp())
                     else:
-                        self.state = "IDLE"
-                        self.temperatureSamples = []
-                        self.FPATemperatureSamples = []
-                        self.displayMixer.hide()
+                        self.resetStateMachine()
+                        #self.state = "IDLE"
+                        #self.temperatureSamples = []
+                        #self.FPATemperatureSamples = []
+                        #self.displayMixer.hide()
                 #print("Get temp took: " + str(int(round(time.time() * 1000)) - startTime) + "ms")
                 
                 # register time
@@ -443,6 +443,8 @@ class StateMachine(object):
                         # OK, bad measurement: retry measuring
                         print("[INFO] Temperature was over threshold (" + str(self.temperature) + "DegC), retrying.")
                         self.measurementIterCnt = 0 # reset iteration counter
+                        self.temperatureSamples = []
+                        self.FPATemperatureSamples = []
                         self.state = "GET_TEMPERATURE"
                         self.NOKRetryCnt = self.NOKRetryCnt + 1
                     else:
@@ -456,6 +458,8 @@ class StateMachine(object):
                         # OK, bad measurement: retry measuring
                         print("[INFO] Measured temperature (" + str(self.temperature) + "DegC) was not valid, retrying.")
                         self.measurementIterCnt = 0 # reset iteration counter
+                        self.temperatureSamples = []
+                        self.FPATemperatureSamples = []
                         self.state = "GET_TEMPERATURE"
                         self.NOKRetryCnt = self.NOKRetryCnt + 1
                     else:
@@ -479,10 +483,7 @@ class StateMachine(object):
                     
                 if self.autoTrigger:
                     time.sleep(self.waitAfterAutotriggerMeas)
-                    self.state = "IDLE"
-                    self.temperatureSamples = []
-                    self.FPATemperatureSamples = []
-                    self.displayMixer.hide()
+                    self.resetStateMachine()       
                     if self.autoTriggerAtRandomIntervals:
                         self.autoTriggerInterval = random.randint(self.autoTriggerRndIntervalMin, self.autoTriggerRndIntervalMax)
                         print("[INFO] Random intervals set, next measurement in " + str(self.autoTriggerInterval) + " seconds.")
@@ -509,11 +510,7 @@ class StateMachine(object):
                             else:
                                 self.displayMixer.showTemperatureOk(image)                       
                     else:
-                        self.state = "IDLE"
-                        self.temperatureSamples = []
-                        self.FPATemperatureSamples = []
-                        self.displayMixer.hide()
-                        self.lastMeasurementsArePublished = False
+                        self.resetStateMachine()
        
                         
         except Exception as e:
@@ -522,7 +519,7 @@ class StateMachine(object):
         
 
     def measureTemp(self, roi):
-        print("[INFO] Reading framebuffer...")
+        print("[INFO] ROI on thermal image is " + str(roi) + ". Reading framebuffer...")
         thFrame = l.GetFrameBuffer("/dev/spidev0.0")
         self.lastRawThermalFrame = thFrame
         if type(thFrame) is str:
@@ -534,9 +531,18 @@ class StateMachine(object):
                 self.lastThermalFrame = np.array(thFrame)
                 thFrame = np.reshape(thFrame, (self.thSensorHeight, self.thSensorWidth))
                 self.lastMeasurementTime = (int(round(time.time() * 1000)))
-                return (np.max(thFrame)/100) - 273.15 # TODO measure only in ROI
+                # roi is ((x_start, y_start), (x_end, y_end))
+                x_start = int(max(0, min(roi[0][0], self.thSensorWidth-1)))
+                x_end = int(max(0, min(roi[1][0], self.thSensorWidth-1)))
+                y_start = int(max(0, min(roi[0][1], self.thSensorHeight-1)))
+                y_end = int(max(0, min(roi[1][1], self.thSensorHeight-1)))
+                thFrameRoi = thFrame[y_start:y_end, x_start:x_end]
+                tRet = (np.max(thFrameRoi)/100) - 273.15
+                if 1:
+                    print("[INFO] Maximum temperature in ROI (x: " + str(x_start) + ", " + str(x_end) + ", y: " + str(y_start) + ", " + str(y_end) + ") on thermal image is " + str(tRet) + "°C")
+                return tRet
             else:
-                print("[ERROR] Not enough pixels from themal imaging sensor. Got" + len(self.thFrame))
+                print("[ERROR] Not enough pixels from thermal imaging sensor. Got" + len(self.thFrame))
                 return 0;
         
     def publishMeasurements(self):

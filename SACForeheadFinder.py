@@ -77,7 +77,8 @@ class ForeheadFinder(RectangleOfInterestFinder):
                 cv2.rectangle(image, (xmin, ymin), (xmax, ymax), color=(255,0,0))
                 #cv2.putText(image, "Confidence: " + str(detection[0]), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 1)
 
-            spacing = int((xmax - xmin) * 0.1)           
+            #spacing = int((xmax - xmin) * 0.1)
+            spacing = 0
 
             x = xmin + spacing
             y = ymin
