@@ -192,12 +192,12 @@ class StateMachine(object):
     def run(self, image):
         # save last state
         self.prevState = self.state
+        # Get current time
+        smEntryTimeMs = int(round(time.time() * 1000))
         try:
             # Update settings
             settings = self.settingsManager.getSettings()
-            # Get current time
-            smEntryTimeMs = int(round(time.time() * 1000))
-            
+
             # Steps:
             # 1) Find a face
             # 2) Check if face size is good
@@ -211,6 +211,8 @@ class StateMachine(object):
                 #pdb.set_trace()
                 color = settings.idleColor
                 self.ledDriver.output(color.red, color.green, color.blue, 100)
+                self.NOKRetryCnt = 0 # reset the measurement retry counter
+                self.measurementIterCnt = 0 # reset iteration counter
                 if self.autoTrigger:
                     if smEntryTimeMs > (self.lastAutotriggerEvent + (self.autoTriggerInterval * 1000)):
                         # Do Auto trigger trigger
@@ -235,10 +237,7 @@ class StateMachine(object):
                         dateValue = datetime.datetime.fromtimestamp(time.time())
                         print("[INFO] Found a face. (Timestamp = " + dateValue.strftime('%Y-%m-%d %H:%M:%S') + ")")
                     else:
-                       # if self.roiFinder.faceFound:
-                       #     self.displayMixer.showDontMove(image)
-                       # else:
-                       #     self.displayMixer.hide()
+                        # No face found.
                         self.displayMixer.hide()
                         # did we already set the initial parameters?
                         if self.initialParametersAreSet:
@@ -264,6 +263,7 @@ class StateMachine(object):
                 
             elif self.state == "SETTLE_AFTER_MEASURING":
                 if smEntryTimeMs > (self.lastFFCTime + (self.minMeasurementInterval * 1000)):
+                #if smEntryTimeMs > (self.lastGetTemperatureEntry + (self.minMeasurementInterval * 1000)): 
                     self.state = "WAIT_FOR_SIZE_OK"                        
                 else:
                     if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
@@ -278,6 +278,7 @@ class StateMachine(object):
                 self.runFfc()
                 self.state = "IDLE"
                 
+                
             elif self.state == "WAIT_FOR_SIZE_OK":
                 if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
                     #if self.checkFaceSize(image, self.roiFinder.getTcROIWidth(), self.faceSizeLowerLimit, self.faceSizeUpperLimit) == -1:
@@ -291,17 +292,17 @@ class StateMachine(object):
                         self.state = "WAIT_FOR_SIZE_OK"
                         self.displayMixer.showStepBack(image)
                     else:
+                        # size is OK
                         self.currentTime = int(round(time.time()))
-                        self.state = "SET_FLUX_LINEAR_PARAMS"
+                        self.state = "RUN_FFC"
                         dateValue = datetime.datetime.fromtimestamp(time.time())
                         print("[INFO] Starting measurement. (Timestamp = " + dateValue.strftime('%Y-%m-%d %H:%M:%S') + ")")
                         self.displayMixer.showDontMove(image)
                 else:
-                    self.state = "IDLE"
-                    self.temperatureSamples = []
-                    self.FPATemperatureSamples = []
-                    self.displayMixer.hide()
+                    print("[WARNING] Face dissapeared while waiting for size OK.")
+                    self.resetStateMachine()
                 #print("Wait for size took: " + str(int(round(time.time() * 1000)) - smEntryTimeMs) + "ms")
+
 
             elif self.state == "RUN_FFC":
                 #start = int(round(time.time() * 1000))
@@ -423,7 +424,7 @@ class StateMachine(object):
                             self.state = "WAIT_TO_TAKE_NEXT_SAMPLE"
                             print("[INFO] Waiting to get next sample ... Current sample was:  " + str(self.measurementIterCnt))
                     else:
-                        print("[WARNING] Face dissapeared while measuring. ")
+                        print("[WARNING] Face dissapeared while measuring.")
                         self.resetStateMachine()
                         #self.state = "IDLE"
                         #self.temperatureSamples = []
