@@ -74,7 +74,7 @@ class StateMachine(object):
         self.connectionTimeoutMQTT = 5 # seconds
         self.printTemperatureOnScreen = True
         self.addThermalRoiToThermalImage = True
-        self.SkinOffset = 2.1 # 2.1 # 2.2 # degrees difference between timpanic temperature and forehead temp
+        self.SkinOffset = 1.6 # 2.1 # 2.2 # degrees difference between timpanic temperature and forehead temp
         self.mTempCorrCoeff = 0.0178 # -0.0242 # slope of the linear correction
         self.ATempCorrCoeff = 1.4871 # 1.7196 # 1.725 # offset of linear correction
         self.minMeasurementInterval = 10 # seconds. Min number of seconds between two measurements (optimaal = 20)
@@ -400,6 +400,8 @@ class StateMachine(object):
                             self.temperatureSamples.append(self.measureTemp(self.thRoi))
                         self.FPATemperatureSamples.append(self.getFpaTemp())
                     else:
+                        self.measurementIterCnt = 0 # reset iteration counter
+                        self.NOKRetryCnt = 0 # reset the measurement retry counter
                         self.resetStateMachine()
                         #self.state = "IDLE"
                         #self.temperatureSamples = []
