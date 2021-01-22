@@ -68,7 +68,7 @@ class StateMachine(object):
         self.retriesOnResultNOK = 2 # 1 #
         self.minTempForValidMeasurement = 32 # minimum temperature for a valid measurement
         #self.alarmTempThreshold = settings.threshold.value
-        self.alarmTempThreshold = 37
+        self.alarmTempThreshold = 37.9
         self.settleAfterFFCInterval = 0 # seconds to settle after FFC
         self.publishMQTT = True
         self.connectionTimeoutMQTT = 5 # seconds

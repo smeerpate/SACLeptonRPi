@@ -83,7 +83,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
             x = xmin + spacing
             y = ymin
             w = xmax - xmin - 2 * spacing
-            h = int((ymax - ymin) / 3)
+            h = int((ymax - ymin) / 3.5)
             self.tcROI = (x, y, w, h)
 
             if showRois:
