@@ -362,6 +362,16 @@ class StateMachine(object):
                 if self.autoTrigger:
                     self.temperatureSamples.append(self.measureTemp(self.thRoi))
                     self.FPATemperatureSamples.append(self.getFpaTemp())
+                    # register time
+                    self.lastGetTemperatureEntry = smEntryTimeMs
+                    # increment iteration counter
+                    self.measurementIterCnt = self.measurementIterCnt + 1
+                    # did we have all iterations?
+                    if self.measurementIterCnt > self.measurementIterations:
+                        self.state = "EVALUATE_RESULT"
+                    else:
+                        self.state = "WAIT_TO_TAKE_NEXT_SAMPLE"
+                        print("[INFO] Waiting to get next sample ... Current sample was:  " + str(self.measurementIterCnt))
                 else:
                 # todo implement retries
                     if self.roiFinder.getTcContours(image, settings.showFoundFace.value):  
@@ -399,7 +409,18 @@ class StateMachine(object):
                         if self.showThermalImage:
                             self.temperatureSamples.append(self.measureTemp(self.thRoi))
                         self.FPATemperatureSamples.append(self.getFpaTemp())
+                        # register time
+                        self.lastGetTemperatureEntry = smEntryTimeMs
+                        # increment iteration counter
+                        self.measurementIterCnt = self.measurementIterCnt + 1
+                        # did we have all iterations?
+                        if self.measurementIterCnt > self.measurementIterations:
+                            self.state = "EVALUATE_RESULT"
+                        else:
+                            self.state = "WAIT_TO_TAKE_NEXT_SAMPLE"
+                            print("[INFO] Waiting to get next sample ... Current sample was:  " + str(self.measurementIterCnt))
                     else:
+                        print("[WARNING] Face dissapeared while measuring. ")
                         self.measurementIterCnt = 0 # reset iteration counter
                         self.NOKRetryCnt = 0 # reset the measurement retry counter
                         self.resetStateMachine()
@@ -409,16 +430,7 @@ class StateMachine(object):
                         #self.displayMixer.hide()
                 #print("Get temp took: " + str(int(round(time.time() * 1000)) - startTime) + "ms")
                 
-                # register time
-                self.lastGetTemperatureEntry = smEntryTimeMs
-                # increment iteration counter
-                self.measurementIterCnt = self.measurementIterCnt + 1
-                # did we have all iterations?
-                if self.measurementIterCnt > self.measurementIterations:
-                    self.state = "EVALUATE_RESULT"
-                else:
-                    self.state = "WAIT_TO_TAKE_NEXT_SAMPLE"
-                    print("[INFO] Waiting to get next sample ... Current sample was:  " + str(self.measurementIterCnt))
+                
                     
             
             
@@ -510,11 +522,10 @@ class StateMachine(object):
                             if self.temperature > self.alarmTempThreshold:
                                 self.displayMixer.showTemperatureNok(image)
                             else:
-                                self.displayMixer.showTemperatureOk(image)                       
+                                self.displayMixer.showTemperatureOk(image)
                     else:
                         self.resetStateMachine()
-       
-                        
+
         except Exception as e:
             print("[ERROR] Main state machine error. State = " + str(self.state) + ". -> " + str(e))
             self.resetStateMachine()
