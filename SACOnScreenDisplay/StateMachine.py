@@ -29,7 +29,7 @@ def calculateTemperature(SensorSamples, FPATempSamples, SkinOffsetTemp, Coeff_A,
             retTemp = sensorTemp + (Coeff_A + fpaTemp * Coeff_m) + SkinOffsetTemp
             print("[INFO] Calculated temperature = " + str(retTemp) + " DegC.")
         else:
-            print("[ERROR] Missing samples. Number of sensor sample =" + str(len(SensorSamples) + ", number of FPA samples = " + str(len(FPATempSamples)))) 
+            print("[ERROR] Missing samples. Number of sensor samples =" + str(len(SensorSamples) + ", number of FPA samples = " + str(len(FPATempSamples)))) 
         return retTemp
         
 def onMQTTBrokerConnect(client, userdata, flags, rc):
@@ -163,18 +163,16 @@ class StateMachine(object):
         else:
             print("[ERROR] addThermalImage: wrong number of pixels. Got " + str(len(self.lastThermalFrame)) + " expected " + str(self.thSensorHeight * self.thSensorWidth))
             thermal = np.full((self.thSensorHeight, self.thSensorWidth), 100, dtype=np.uint8)
-        # convert grayscale to BGR
-        #thermal = cv.cvtColor(thermal, cv.COLOR_GRAY2BGR)
-        thermal = cv.applyColorMap(thermal, cv.COLORMAP_HOT)
+        # convert grayscale to pseudo color BGR
+        if 1:
+            thermal = cv.applyColorMap(thermal, cv.COLORMAP_HOT)
+        else:
+            thermal = cv.applyColorMap(thermal, cv.COLORMAP_JET)
         if addRoi:
             self.addRectangle(thermal, roi, (255,0,0))
-        #thermal = cv.LUT(thermal, self.thColormap)
         xOffset = yOffset = 10
         scale = 0.3
         backgnd = image.copy()
-        #print(image.shape)
-        #print(thermal.shape)
-        #image[yOffset:yOffset+thermal.shape[0], xOffset:xOffset+thermal.shape[1],:] = thermal # TODO: make offset adjustable and use width and height from Lepton library
         thermal = cv.resize(thermal, (int(scale*640)-xOffset, int(scale*480)-yOffset))
         backgnd[yOffset:yOffset+thermal.shape[0], xOffset:xOffset+thermal.shape[1]] = thermal
         #return thermal
@@ -454,7 +452,7 @@ class StateMachine(object):
                 if self.printTemperatureOnScreen:
                     if 1:
                             print("[INFO] Printing text to screen...")
-                    self.addText(image, "{:.2f}".format(self.temperature), self.OSDTextColor)
+                    self.addText(image, "{:.1f}".format(self.temperature), self.OSDTextColor)
                 if self.temperature > self.alarmTempThreshold:
                     if self.NOKRetryCnt < self.retriesOnResultNOK:
                         # OK, bad measurement: retry measuring
@@ -514,7 +512,7 @@ class StateMachine(object):
                             if self.printTemperatureOnScreen:
                                 if 1:
                                         print("[INFO] Printing text to screen...")
-                                self.addText(thImage, "{:.2f}".format(self.temperature), self.OSDTextColor)
+                                self.addText(thImage, "{:.1f}".format(self.temperature), self.OSDTextColor)
                             if self.temperature > self.alarmTempThreshold:
                                 self.displayMixer.showTemperatureNok(thImage)
                             else:
@@ -523,7 +521,7 @@ class StateMachine(object):
                             if self.printTemperatureOnScreen:
                                 if 1:
                                         print("[INFO] Printing text to screen...")
-                                self.addText(image, "{:.2f}".format(self.temperature), self.OSDTextColor)
+                                self.addText(image, "{:.1f}".format(self.temperature), self.OSDTextColor)
                             if self.temperature > self.alarmTempThreshold:
                                 self.displayMixer.showTemperatureNok(image)
                             else:
