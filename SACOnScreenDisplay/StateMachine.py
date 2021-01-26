@@ -32,6 +32,22 @@ def calculateTemperature(SensorSamples, FPATempSamples, SkinOffsetTemp, Coeff_A,
             print("[ERROR] Missing samples. Number of sensor samples =" + str(len(SensorSamples) + ", number of FPA samples = " + str(len(FPATempSamples)))) 
         return retTemp
         
+def calculateTemperature3D(SensorSamples, FPATempSamples, SkinOffsetTemp, a, b, c):
+        sensorTemp = 0
+        fpaTemp = 0
+        retTemp = 0
+        if 1:
+            print("[INFO] Calculating temperature. Sensor samples: " + str(SensorSamples) + ", FPA samples: " + str(FPATempSamples))
+        if len(SensorSamples) > 0 and len(FPATempSamples) > 0:
+            sensorTemp = sum(SensorSamples) / len(SensorSamples) # average SensorSamples
+            fpaTemp = sum(FPATempSamples) / len(FPATempSamples) # average FPATempSamples
+            retTemp = a * (fpaTemp**b) * (sensorTemp**c)
+            retTemp = retTemp + SkinOffsetTemp
+            print("[INFO] Calculated temperature = " + str(retTemp) + " DegC.")
+        else:
+            print("[ERROR] Missing samples. Number of sensor samples =" + str(len(SensorSamples) + ", number of FPA samples = " + str(len(FPATempSamples)))) 
+        return retTemp
+        
 def onMQTTBrokerConnect(client, userdata, flags, rc):
     if rc==0:
         client.connected_flag = True #set flag
@@ -74,13 +90,18 @@ class StateMachine(object):
         self.connectionTimeoutMQTT = 5 # seconds
         self.printTemperatureOnScreen = True
         self.addThermalRoiToThermalImage = True
-        self.SkinOffset = 1.6 # 2.1 # 2.2 # degrees difference between timpanic temperature and forehead temp
-        self.mTempCorrCoeff = 0.0178 # -0.0242 # slope of the linear correction
-        self.ATempCorrCoeff = 1.4871 # 1.7196 # 1.725 # offset of linear correction
+        self.SkinOffset = 0 #1.6 # 2.1 # 2.2 # degrees difference between timpanic temperature and forehead temp
+        self.mTempCorrCoeff = 0 #0.0178 # -0.0242 # slope of the linear correction
+        self.ATempCorrCoeff = 0 #1.4871 # 1.7196 # 1.725 # offset of linear correction
+        # e.g. = Ref_Temp = 0.011421541195997535 * FPA_Temp^-0.08387332390433329 * Calculated_Temp^2.2833534290744972
+        self.tempCorrFactor = 0.011421541195997535
+        self.tempCorrFPAExp = -0.08387332390433329
+        self.tempCorrSensExp = 2.2833534290744972
         self.minMeasurementInterval = 10 # seconds. Min number of seconds between two measurements (optimaal = 20)
         self.OSDTextColor = (255,120,70)
         self.mqttBrokerAddress = "192.168.1.60" # "192.168.1.37" #"192.168.0.138" # "192.168.1.60"
         self.mqttBrokerPort = 1883
+        self.enableTlinear = False
         ##################################
         
         self.lastAutotriggerEvent = 0
@@ -254,7 +275,10 @@ class StateMachine(object):
      
             elif self.state == "SET_INITIAL_PARAMETERS":
                 self.setFluxLinearParams()
-                self.setRadTLinearEnableState(1)
+                if self.enableTlinear:
+                    self.setRadTLinearEnableState(1)
+                else:
+                    self.setRadTLinearEnableState(0)
                 self.setFfcShutterModeAuto(0)
                 self.initialParametersAreSet = True
                 print("[INFO] Initial parametars are set.")
@@ -444,7 +468,8 @@ class StateMachine(object):
 
                 
             elif self.state == "EVALUATE_RESULT":
-                self.temperature = calculateTemperature(self.temperatureSamples, self.FPATemperatureSamples, self.SkinOffset, self.ATempCorrCoeff, self.mTempCorrCoeff)
+                # self.temperature = calculateTemperature(self.temperatureSamples, self.FPATemperatureSamples, self.SkinOffset, self.ATempCorrCoeff, self.mTempCorrCoeff)
+                self.temperature = calculateTemperature3D(self.temperatureSamples, self.FPATemperatureSamples, self.SkinOffset, self.tempCorrFactor, self.tempCorrFPAExp, self.tempCorrSensExp)
                 self.lastMeasurementsArePublished = False
                 if self.showThermalImage:
                     if 1:
@@ -554,7 +579,10 @@ class StateMachine(object):
                 y_start = int(max(0, min(roi[0][1], self.thSensorHeight-1)))
                 y_end = int(max(0, min(roi[1][1], self.thSensorHeight-1)))
                 thFrameRoi = thFrame[y_start:y_end, x_start:x_end]
-                tRet = (np.max(thFrameRoi)/100) - 273.15
+                if self.enableTlinear:
+                    tRet = (np.max(thFrameRoi)/100) - 273.15
+                else:
+                    tRet = np.max(thFrameRoi)/100
                 if 1:
                     print("[INFO] Maximum temperature in ROI (x: " + str(x_start) + ", " + str(x_end) + ", y: " + str(y_start) + ", " + str(y_end) + ") on thermal image is " + str(tRet) + "°C")
                 return tRet
