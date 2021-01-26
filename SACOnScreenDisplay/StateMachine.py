@@ -270,6 +270,7 @@ class StateMachine(object):
                         if self.currentTime > (self.lastFPATempTime + (self.maxFPATempInterval * 1000)):
                             self.getFpaTemp()
                             self.lastFPATempTime = self.currentTime
+                            self.publishFPATemp()
                     #print("Idle took: " + str(int(round(time.time() * 1000)) - smEntryTimeMs) + "ms")
 
      
@@ -609,6 +610,14 @@ class StateMachine(object):
                 self.mqttc.publish("SAC_V5_LeberKaese0001/FrameBuffer", struct.pack('%sH' %len(thFrame), *thFrame))
         else:
             pass
+            
+    def publishFPATemp(self):
+        if self.publishMQTT:
+            # Get FPA and AUX temp an put it in a csv line like this:
+            # "Current time;AUX Temp;FPA Temp;Last FFC time;"
+            sMQTTMessage = str(l.GetFpaTemp())
+            sMQTTMessage = sMQTTMessage.replace('.',',')
+            self.mqttc.publish("SAC_V5_LeberKaese0001/FPATempCx100", sMQTTMessage)
 
 
     def runFfc(self):
