@@ -90,7 +90,7 @@ class StateMachine(object):
         self.connectionTimeoutMQTT = 5 # seconds
         self.printTemperatureOnScreen = True
         self.addThermalRoiToThermalImage = True
-        self.SkinOffset = 0 #1.6 # 2.1 # 2.2 # degrees difference between timpanic temperature and forehead temp
+        self.SkinOffset = 1.633917 #1.6 # 2.1 # 2.2 # degrees difference between timpanic temperature and forehead temp
         self.mTempCorrCoeff = 0 #0.0178 # -0.0242 # slope of the linear correction
         self.ATempCorrCoeff = 0 #1.4871 # 1.7196 # 1.725 # offset of linear correction
         # e.g. = Ref_Temp = 0.011421541195997535 * FPA_Temp^-0.08387332390433329 * Calculated_Temp^2.2833534290744972
