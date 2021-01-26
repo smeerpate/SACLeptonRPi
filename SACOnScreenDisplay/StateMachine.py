@@ -99,7 +99,7 @@ class StateMachine(object):
         self.tempCorrSensExp = 2.2833534290744972
         self.minMeasurementInterval = 10 # seconds. Min number of seconds between two measurements (optimaal = 20)
         self.OSDTextColor = (255,120,70)
-        self.mqttBrokerAddress = "192.168.1.60" # "192.168.1.37" #"192.168.0.138" # "192.168.1.60"
+        self.mqttBrokerAddress = "broker.hivemq.com" # "192.168.1.37" #"192.168.0.138" # "192.168.1.60"
         self.mqttBrokerPort = 1883
         self.enableTlinear = False
         ##################################
@@ -596,7 +596,7 @@ class StateMachine(object):
             # "Current time;AUX Temp;FPA Temp;Last FFC time;"
             sMQTTMessage = str(int(round(time.time() * 1000))) + ';' + str(l.GetAuxTemp()) + ';' + str(l.GetFpaTemp()) + ';' + str(self.lastFFCTime) + ';' + str(self.temperature) + ";"
             sMQTTMessage = sMQTTMessage.replace('.',',')
-            self.mqttc.publish("TempCx100", sMQTTMessage)
+            self.mqttc.publish("SAC_V5_LeberKaese0001/TempCx100", sMQTTMessage)
             #thFrame = l.GetFrameBuffer("/dev/spidev0.0")
             thFrame = self.lastRawThermalFrame
             if type(thFrame) is str:
@@ -606,7 +606,7 @@ class StateMachine(object):
                 if 0:
                     print("[INFO] Framebuffer length is: " + str(len(thFrame)))
                 # publish the frame
-                self.mqttc.publish("FrameBuffer", struct.pack('%sH' %len(thFrame), *thFrame))
+                self.mqttc.publish("SAC_V5_LeberKaese0001/FrameBuffer", struct.pack('%sH' %len(thFrame), *thFrame))
         else:
             pass
 
