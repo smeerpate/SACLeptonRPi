@@ -67,7 +67,6 @@ with:
   * c = 2.283353429
 
 Ref_Temp = 0.011421541 * (FPA_temp^-0.083873324) * (sensor_output^2.283353429)
-![eq1](https://latex.codecogs.com/gif.latex?%5Cbg_black%20Ref_%7BTemp%7D%20%3D%200.011421541%20%5Ccdot%20%28FPA_%7Btemp%7D%5E%7B-0.083873324%7D%29%20%5Ccdot%20%28sensor_%7Bou%7B%5Ccolor%7BOrchid%7D%20%7Dtput%7D%5E%7B2.283353429%7D%29)
 
 In figure below, the axis "Calculated Temp" is the average maximum sensor_output value over N (e.g. 4) samples in the ROI.
 
