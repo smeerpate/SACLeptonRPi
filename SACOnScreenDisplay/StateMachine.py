@@ -70,7 +70,7 @@ def calculateTemperature3DPoly(SensorSamples, FPATempSamples, SkinOffsetTemp, co
             g = coeffs[6]
             h = coeffs[7]
             i = coeffs[8]
-            retTemp = a + b*x + c*y + d*x**2 + e*x*y + f*y**2 + g*x**2 *y + h*x*y**2 + i*y**3
+            retTemp = a + b*x + c*y + d*x**2 + e*x*y + f*y**2 + g*x**2*y + h*x*y**2 + i*y**3
             retTemp = retTemp + SkinOffsetTemp
             print("[INFO] Calculated temperature = " + str(retTemp) + " DegC.")
         else:
@@ -501,7 +501,7 @@ class StateMachine(object):
             elif self.state == "EVALUATE_RESULT":
                 # self.temperature = calculateTemperature(self.temperatureSamples, self.FPATemperatureSamples, self.SkinOffset, self.ATempCorrCoeff, self.mTempCorrCoeff)
                 # self.temperature = calculateTemperature3D(self.temperatureSamples, self.FPATemperatureSamples, self.SkinOffset, self.tempCorrFactor, self.tempCorrFPAExp, self.tempCorrSensExp)
-                self.temperature = calculateTemperature3Poly(self.temperatureSamples, self.FPATemperatureSamples, self.SkinOffset, self.tempCorrPolyCoeffs)
+                self.temperature = calculateTemperature3DPoly(self.temperatureSamples, self.FPATemperatureSamples, self.SkinOffset, self.tempCorrPolyCoeffs)
                 self.lastMeasurementsArePublished = False
                 if self.showThermalImage:
                     if 1:
