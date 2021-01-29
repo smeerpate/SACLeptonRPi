@@ -23,11 +23,12 @@ sudo systemctl stop SACLeptonRPi.service
 
 sudo systemctl enable SACLeptonRPi.service
 
-## Mechanics
+## 'Mechanics'
 * `/home/pi/SACLeptonRPi/SACLeptonRPi.sh`
   1. runs openVINO setupvars script (under `~/openvino/bin/setupvars.sh`)
   1. starts `~/SACLeptonRPi/Main.py`
 * `~/SACLeptonRPi/Main.py` starts openGLes display thread `/home/pi/SACLeptonRPi/SACDisplayMixer/OGLESSimpleImageWithIPC`
+* `~/SACLeptonRPi/Main.py` periodically calls state machine `~/SACLeptonRPi/SACOnScreenDisplay/StateMachine.py´
 
 ## Measuring method
 An estimation of a test person's core temperature can be done by measuring the person's forehead temperature. Based to the article *Investigation of the Impact of Infrared Sensors on Core Body Temperature Monitoring by Comparing Measurement Sites* (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7284737/) by Hsuan-Yu Chen, Andrew Chen and Chiachung Chen.
