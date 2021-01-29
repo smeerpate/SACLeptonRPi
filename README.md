@@ -53,7 +53,23 @@ This application uses an 80 x 60 uncooled microbolometer array (Flir Lepton 2.5)
   * Read back temperatures from the Thermal imaging sensor via the SPI (4 times, every 0.5s, depends on settings)
   * Wait to go back to idle state until detected face is gone
   * The average of maximum temperatures in the ROI, including a correcion accounting for FPA temperature and scene temperature fluctuations, is taken as the temperature of the forehead
-  
+
+## Calibration
+Each unit shall be calibrated before usage. Calibration consists of
+* measuring various scene temperatures in various ambient temperatures
+* fitting the measurements to a plane Ref_Temp = f(FPA_temp, sensor_output).
+
+### Example calibration on prototype
+Surface function = a * (x^b) * (y^c)
+with:
+  * a = 0.011421541
+  * b = -0.083873324
+  * c = 2.283353429
+
+In figure below, calculated temp is the average maximum sensor value over N samples in the ROI.
+![figure1](Documentation/MeasurementsCalibV5_proto.png)
+
+
   ### Results
   115 Measurements on different healthy persons resulted in:
   
