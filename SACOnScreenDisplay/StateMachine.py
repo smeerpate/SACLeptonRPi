@@ -119,6 +119,7 @@ class StateMachine(object):
         self.connectionTimeoutMQTT = 5 # seconds
         self.printTemperatureOnScreen = True
         self.addThermalRoiToThermalImage = True
+        self.applyTempCorrection = 3 # select correctiion method 1,2,3 or 0 for no correction
         self.SkinOffset = 1.633917 #1.6 # 2.1 # 2.2 # degrees difference between timpanic temperature and forehead temp
         self.mTempCorrCoeff = 0 #0.0178 # -0.0242 # slope of the linear correction
         self.ATempCorrCoeff = 0 #1.4871 # 1.7196 # 1.725 # offset of linear correction
@@ -499,9 +500,19 @@ class StateMachine(object):
 
                 
             elif self.state == "EVALUATE_RESULT":
-                # self.temperature = calculateTemperature(self.temperatureSamples, self.FPATemperatureSamples, self.SkinOffset, self.ATempCorrCoeff, self.mTempCorrCoeff)
-                # self.temperature = calculateTemperature3D(self.temperatureSamples, self.FPATemperatureSamples, self.SkinOffset, self.tempCorrFactor, self.tempCorrFPAExp, self.tempCorrSensExp)
-                self.temperature = calculateTemperature3DPoly(self.temperatureSamples, self.FPATemperatureSamples, self.SkinOffset, self.tempCorrPolyCoeffs)
+                if self.applyTempCorrection == 1:
+                    # using correction method #1
+                    self.temperature = calculateTemperature(self.temperatureSamples, self.FPATemperatureSamples, self.SkinOffset, self.ATempCorrCoeff, self.mTempCorrCoeff)
+                elif self.applyTempCorrection == 2:
+                    # using correction method #2
+                    self.temperature = calculateTemperature3D(self.temperatureSamples, self.FPATemperatureSamples, self.SkinOffset, self.tempCorrFactor, self.tempCorrFPAExp, self.tempCorrSensExp)
+                elif self.applyTempCorrection == 3:
+                    # using correction method #3
+                    self.temperature = calculateTemperature3DPoly(self.temperatureSamples, self.FPATemperatureSamples, self.SkinOffset, self.tempCorrPolyCoeffs)
+                else:
+                    # No correction
+                    self.temperature = calculateTemperature(self.temperatureSamples, self.FPATemperatureSamples, 0, 0, 0)
+                    
                 self.lastMeasurementsArePublished = False
                 if self.showThermalImage:
                     if 1:
