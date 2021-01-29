@@ -48,6 +48,34 @@ def calculateTemperature3D(SensorSamples, FPATempSamples, SkinOffsetTemp, a, b, 
             print("[ERROR] Missing samples. Number of sensor samples =" + str(len(SensorSamples) + ", number of FPA samples = " + str(len(FPATempSamples)))) 
         return retTemp
         
+def calculateTemperature3DPoly(SensorSamples, FPATempSamples, SkinOffsetTemp, coeffs):
+        y = 0
+        x = 0
+        retTemp = 0
+        nCoeffs = 9
+        if len(coeffs) != nCoeffs
+            print("[ERROR] Missing polynomial coefficients. Number of coefficients =" + str(len(coeffs)) + ", expected " + str(nCoeffs))
+        if 1:
+            print("[INFO] Calculating temperature. Sensor samples: " + str(SensorSamples) + ", FPA samples: " + str(FPATempSamples))
+        if len(SensorSamples) > 0 and len(FPATempSamples) > 0:
+            y = sum(SensorSamples) / len(SensorSamples) # average SensorSamples
+            x = sum(FPATempSamples) / len(FPATempSamples) # average FPATempSamples
+            a = coeffs[0]
+            b = coeffs[1]
+            c = coeffs[2]
+            d = coeffs[3]
+            e = coeffs[4]
+            f = coeffs[5]
+            g = coeffs[6]
+            h = coeffs[7]
+            i = coeffs[8]
+            retTemp = a + b*x + c*y + d*x**2 + e*x*y + f*y**2 + g*x**2 *y + h*x*y**2 + i*y**3
+            retTemp = retTemp + SkinOffsetTemp
+            print("[INFO] Calculated temperature = " + str(retTemp) + " DegC.")
+        else:
+            print("[ERROR] Missing samples. Number of sensor samples =" + str(len(SensorSamples) + ", number of FPA samples = " + str(len(FPATempSamples)))) 
+        return retTemp
+        
 def onMQTTBrokerConnect(client, userdata, flags, rc):
     if rc==0:
         client.connected_flag = True #set flag
@@ -97,6 +125,7 @@ class StateMachine(object):
         self.tempCorrFactor = 0.011421541195997535
         self.tempCorrFPAExp = -0.08387332390433329
         self.tempCorrSensExp = 2.2833534290744972
+        self.tempCorrPolyCoeffs = (2.21674006e+02, -4.39093812e+01,  9.14138294e+00, -4.36046473e-01, 2.91508334e+00, -1.12846147e+00,  1.18227195e-02, -4.68494336e-02, 2.01761856e-02)
         self.minMeasurementInterval = 10 # seconds. Min number of seconds between two measurements (optimaal = 20)
         self.OSDTextColor = (255,120,70)
         self.mqttBrokerAddress = "broker.hivemq.com" # "192.168.1.37" #"192.168.0.138" # "192.168.1.60"
@@ -470,7 +499,8 @@ class StateMachine(object):
                 
             elif self.state == "EVALUATE_RESULT":
                 # self.temperature = calculateTemperature(self.temperatureSamples, self.FPATemperatureSamples, self.SkinOffset, self.ATempCorrCoeff, self.mTempCorrCoeff)
-                self.temperature = calculateTemperature3D(self.temperatureSamples, self.FPATemperatureSamples, self.SkinOffset, self.tempCorrFactor, self.tempCorrFPAExp, self.tempCorrSensExp)
+                # self.temperature = calculateTemperature3D(self.temperatureSamples, self.FPATemperatureSamples, self.SkinOffset, self.tempCorrFactor, self.tempCorrFPAExp, self.tempCorrSensExp)
+                self.temperature = calculateTemperature3Poly(self.temperatureSamples, self.FPATemperatureSamples, self.SkinOffset, self.tempCorrPolyCoeffs)
                 self.lastMeasurementsArePublished = False
                 if self.showThermalImage:
                     if 1:

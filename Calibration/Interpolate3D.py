@@ -6,10 +6,12 @@ import csv
 
 
 # test function
-def function(data, a, b, c):
+def function(data, a, b, c, d, e, f, g, h, i):
     x = data[0]
     y = data[1]
-    return a * (x**b) * (y**c)
+    #return a * (x**b) * (y**c)
+    #return a + (x**b) + (y**c)
+    return a + b*x + c*y + d*x**2 + e*x*y + f*y**2 + g*x**2 *y + h*x*y**2 + i*y**3
     
 # setup test data
 #raw_data = [2.0, 2.0, 2.0], [1.5, 1.5, 1.5], [0.5, 0.5, 0.5],[3.0, 2.0, 1.0], [3.0, 2.0, 1.0],\
@@ -28,12 +30,12 @@ with open(filename, newline='') as csvfile:
         # print(row)
         if rowIdx != 0:
             # print(str(rowIdx))
-            s = row[2].replace(',', '.')
-            x_data.append(float(s))
-            s = row[4].replace(',', '.')
-            y_data.append(float(s))
-            s = row[7].replace(',', '.')
-            z_data.append(float(s))
+            s = row[2].replace(',', '.') 
+            x_data.append(float(s)) # FPA temp
+            s = row[4].replace(',', '.') 
+            y_data.append(float(s)) # Sensor value
+            s = row[7].replace(',', '.') 
+            z_data.append(float(s)) # Ref Temperature
         rowIdx = rowIdx + 1
 
 print("[INFO] Read " + str(rowIdx) + " rows.")
