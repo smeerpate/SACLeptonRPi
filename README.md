@@ -30,21 +30,27 @@ sudo systemctl enable SACLeptonRPi.service
 * `~/SACLeptonRPi/Main.py` starts openGLes display thread `/home/pi/SACLeptonRPi/SACDisplayMixer/OGLESSimpleImageWithIPC`
 
 ## Measuring method
-An estimation of the test person's core temperature is done by measuring the forehead temperature. This is done using an uncooled microbolometer. Based to the article *Investigation of the Impact of Infrared Sensors on Core Body Temperature Monitoring by Comparing Measurement Sites* (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7284737/) by Hsuan-Yu Chen, Andrew Chen and Chiachung Chen.
+An estimation of a test person's core temperature can be done by measuring the person's forehead temperature. Based to the article *Investigation of the Impact of Infrared Sensors on Core Body Temperature Monitoring by Comparing Measurement Sites* (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7284737/) by Hsuan-Yu Chen, Andrew Chen and Chiachung Chen.
 
+This application uses an uncooled microbolometer (Flir Lepton 2.5) no-contact temperature estimation.
+
+## Hardware limitations
+  * The hardware is to be used indoors and in an environment with limited temperature range (e.g. 10°C ... 30°C).
+  * The unit is very sensitive to ambient temperature fluctuations. When changing environments, leave the unit to settle for about 1 hour.
+
+## Software description
 ### Initialization
-  * Set the Flux Linear parameters in the Thermal imaging sensor. This code is currently using the Thermal imaging sensor housing temperature as ambient temperature (room for improvement)
+  * Upon startup: the software sets the Flux Linear parameters in the Thermal imaging sensor (for window, ambient and background compensation). The software is currently using the Thermal imaging sensor housing temperature as ambient temperature.
 
-### Loop
+### Detection and measurement Loop
   * Detect a face using a convolutional neural network implemented in openCV
   * Wait until the face is close enough by measuring its width
-  * Set the region of interest (ROI) to the forehead region. This is currently done by taking the top 1/3rd of the returned face bounding box (room for improvement)
+  * Set the region of interest (ROI) to the forehead region. This is currently done by taking the top 1/3rd of the returned face bounding box
   * Map the region of interest to the Thermal imaging sensor image using an affine transform
   * Perform a flat field calibration (FFC) on the Thermal imaging sensor on every measurement
-  * Write the ROI to the Thermal imaging sensor via the CCI
-  * Read back temperatures from the Thermal imaging sensor via the CCI (4 times, every 0.5s, depends on settings)
+  * Read back temperatures from the Thermal imaging sensor via the SPI (4 times, every 0.5s, depends on settings)
   * Wait to go back to idle state until detected face is gone
-  * The maximum temperature is taken as the temperature of the forehead
+  * The average of maximum temperatures in the ROI, including a correcion accounting for FPA temperature and scene temperature fluctuations, is taken as the temperature of the forehead
   
   ### Results
   115 Measurements on different healthy persons resulted in:
