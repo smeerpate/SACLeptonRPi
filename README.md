@@ -72,10 +72,7 @@ In figure below, the axis "Calculated Temp" is the average maximum sensor_output
 
 ![figure1](Documentation/MeasurementsCalibV5_proto.png)
 
+### Results
+The figure below shows the error on 500 measurements after calibration
 
-  ### Results
-  115 Measurements on different healthy persons resulted in:
-  
-  Average forehead temperature (degC) | Stddev | Coefficient of variation (CV%) 
-  ----------------------------------- | ------ | ------------------------------
-  33.324 | 0.560 |1.680
+![figure2](Documentation/ErrorAfterCalibration.png)
