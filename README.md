@@ -32,11 +32,12 @@ sudo systemctl enable SACLeptonRPi.service
 ## Measuring method
 An estimation of a test person's core temperature can be done by measuring the person's forehead temperature. Based to the article *Investigation of the Impact of Infrared Sensors on Core Body Temperature Monitoring by Comparing Measurement Sites* (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7284737/) by Hsuan-Yu Chen, Andrew Chen and Chiachung Chen.
 
-This application uses an 80 x 60 uncooled microbolometer array (Flir Lepton 2.5) for no-contact temperature estimation.
+This application uses an 80 x 60 uncooled microbolometer array (Flir Lepton 2.5) for no-contact core temperature estimation.
 
 ## Hardware limitations
   * The hardware is to be used indoors and in an environment with limited temperature range (e.g. 10°C ... 30°C).
   * The unit is very sensitive to ambient temperature fluctuations. When changing environments, leave the unit to settle for about 1 hour.
+  * The unit measures the forehead __skin__ temperature, which is only an indication of a person's core temperature. This temperature largely dependent on external factors.
 
 ## Software description
 ### Initialization
@@ -58,4 +59,3 @@ This application uses an 80 x 60 uncooled microbolometer array (Flir Lepton 2.5)
   Average forehead temperature (degC) | Stddev | Coefficient of variation (CV%) 
   ----------------------------------- | ------ | ------------------------------
   33.324 | 0.560 |1.680
-  
