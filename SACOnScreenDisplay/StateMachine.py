@@ -53,8 +53,9 @@ def calculateTemperature3DPoly(SensorSamples, FPATempSamples, SkinOffsetTemp, co
         x = 0
         retTemp = 0
         nCoeffs = 9
-        if len(coeffs) != nCoeffs
+        if len(coeffs) != nCoeffs:
             print("[ERROR] Missing polynomial coefficients. Number of coefficients =" + str(len(coeffs)) + ", expected " + str(nCoeffs))
+            return retTemp
         if 1:
             print("[INFO] Calculating temperature. Sensor samples: " + str(SensorSamples) + ", FPA samples: " + str(FPATempSamples))
         if len(SensorSamples) > 0 and len(FPATempSamples) > 0:
