@@ -278,6 +278,12 @@ class StateMachine(object):
                             self.state = "IDLE"
                         else:
                             self.state = "SET_INITIAL_PARAMETERS"
+                        
+                        self.currentTime = int(round(time.time() * 1000))
+                        if self.currentTime > (self.lastFPATempTime + (self.maxFPATempInterval * 1000)):
+                            self.getFpaTemp()
+                            self.lastFPATempTime = self.currentTime
+                            self.publishFPATemp()
                 else:
                     if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
                         if smEntryTimeMs > (self.lastFFCTime + (self.maxFFCInterval * 1000)):
