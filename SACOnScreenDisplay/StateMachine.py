@@ -127,7 +127,7 @@ class StateMachine(object):
         self.tempCorrFactor = 0.011421541195997535
         self.tempCorrFPAExp = -0.08387332390433329
         self.tempCorrSensExp = 2.2833534290744972
-        self.tempCorrPolyCoeffs = (2.21674006e+02, -4.39093812e+01,  9.14138294e+00, -4.36046473e-01, 2.91508334e+00, -1.12846147e+00,  1.18227195e-02, -4.68494336e-02, 2.01761856e-02)
+        self.tempCorrPolyCoeffs = (-2680.2643267187245, -0.14073571479380054, 213.7267184806687, 0.5524770689852628, -0.7610970264670899, -5.379862969877885, -0.01705213893779612, 0.02346792405094088, 0.041930692291342525)
         self.minMeasurementInterval = 10 # seconds. Min number of seconds between two measurements (optimaal = 20)
         self.OSDTextColor = (255,120,70)
         self.mqttBrokerAddress = "broker.hivemq.com" # "192.168.1.37" #"192.168.0.138" # "192.168.1.60"
