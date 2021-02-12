@@ -4,7 +4,7 @@ After=multi-user.target
 
 [Service]
 Type=idle
-ExecStart=/bin/bash  /home/pi/SACLeptonRPi/SACLeptonRPi.sh
+ExecStart=/bin/bash  /home/pi/SACLeptonRPi/Deploy/SACLeptonRPi.sh
 User=pi
 StandardOutput=inherit
 StandardError=inherit
