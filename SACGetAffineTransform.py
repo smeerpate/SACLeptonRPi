@@ -9,9 +9,9 @@ from Lepton import Lepton
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 
-screenWidth = 768
-screenHeight = 1024
-aspectRatio = 4.0/3.0
+screenWidth = 1920
+screenHeight = 1080
+aspectRatio = 16.0/9.0
 
 camera = PiCamera()
 camera.resolution = (640,480)
@@ -54,8 +54,13 @@ def combine_two_color_images(image1, image2, shm):
     x_offset=y_offset=0
     foreground[y_offset:y_offset+background.shape[0], x_offset:x_offset+background.shape[1]] = background
     img = cv2.flip(foreground, 0);
-    cv2.imwrite('/home/pi/SACLeptonRPi/Calibration.jpg', img)
-    shm.write(img)
+    #cv2.imwrite('/home/pi/SACLeptonRPi/Calibration.jpg', img)
+    dim = (screenWidth, screenHeight)
+    img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
+    r_channel, g_channel, b_channel = cv2.split(img)
+    alpha_channel = np.ones(b_channel.shape, dtype=b_channel.dtype) * 255 #creating a dummy alpha channel image.
+    img_RGBA = cv2.merge((r_channel, g_channel, b_channel, alpha_channel))
+    shm.write(img_RGBA)
 
 def getAffineTransformation():
     print(tcCircles)
@@ -76,7 +81,7 @@ th1 = Thread(target=startDisplay)
 th1.start()
 time.sleep(1)
 
-key = ipc.ftok("/home/pi/SACLeptonRPi", ord('i'))
+key = ipc.ftok("/home/pi/SACLeptonRPi", ord('p'))
 shm = ipc.SharedMemory(key, 0, 0)
 shm.attach()
 
@@ -97,7 +102,8 @@ try:
         del tcCircles[:]
         del thCircles[:]
         # true color:
-        thresh = cv2.threshold(tcImage, 40, 255, cv2.THRESH_BINARY_INV)[1]
+        thresh = cv2.threshold(tcImage, 20, 255, cv2.THRESH_BINARY_INV)[1]
+        threshTcImage = cv2.cvtColor(thresh, cv2.COLOR_GRAY2BGR)
         cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         if len(cnts)==2:
             cnts = cnts[0]
@@ -112,6 +118,7 @@ try:
 
         # thermal:
         thresh = cv2.threshold(thImage, 100, 255, cv2.THRESH_BINARY)[1]
+        threshThImage = cv2.cvtColor(thresh, cv2.COLOR_GRAY2BGR)
         cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         if len(cnts)==2:
             cnts = cnts[0]
@@ -127,7 +134,8 @@ try:
         getAffineTransformation()
         tcImage = cv2.cvtColor(tcImage, cv2.COLOR_GRAY2BGR)
         thImage = cv2.cvtColor(thImage, cv2.COLOR_GRAY2BGR)
-        combine_two_color_images(tcImage, thImage, shm)
+        #combine_two_color_images(tcImage, thImage, shm)
+        combine_two_color_images(threshTcImage, threshThImage, shm)
 
         #print(tcImage.shape)
         #print(thImage.shape)

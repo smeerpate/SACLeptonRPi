@@ -14,9 +14,10 @@ class ForeheadFinder(RectangleOfInterestFinder):
         self.minFaceSize = minFaceSize
         self.minEyesSize = minEyesSize
         self.net = cv2.dnn.readNet('/home/pi/SACLeptonRPi/face-detection-adas-0001.xml', '/home/pi/SACLeptonRPi/face-detection-adas-0001.bin')
-        print("Read net completed")
+        #self.net = cv2.dnn.readNet('/home/pi/SACLeptonRPi/face-detection-retail-0004.xml', '/home/pi/SACLeptonRPi/face-detection-retail-0004.bin')
+        print("[INFO] DNN: Read net completed")
         self.net.setPreferableTarget(cv2.dnn.DNN_TARGET_MYRIAD)
-        print("Target set")
+        print("[INFO] DNN: Target set")
         self.name = "Forehead"
         self.faceFound = False
 
@@ -38,7 +39,12 @@ class ForeheadFinder(RectangleOfInterestFinder):
     ####################################################
     def getTcContours(self, image, showRois):
         start = time.time()
-        blob = cv2.dnn.blobFromImage(image, size=(640,480), ddepth=cv2.CV_8U)
+        #blob = cv2.dnn.blobFromImage(image, size=(640,480), ddepth=cv2.CV_8U)
+        
+        blobSize = (640,480)
+        scaled = cv2.resize(image, blobSize)
+        blob = cv2.dnn.blobFromImage(scaled, size=blobSize, ddepth=cv2.CV_8U)
+        
         self.net.setInput(blob)
         out = self.net.forward()
         self.faceFound = False
@@ -57,7 +63,7 @@ class ForeheadFinder(RectangleOfInterestFinder):
                 faceWidth = xmax - xmin
                 faceHeight = ymax - ymin                
 
-                if xmin > 220 and xmax < 420 and faceWidth < 200 and faceWidth > 50 and faceHeight < 200 and faceHeight > 50:
+                if xmin > 220 and xmax < 420 and faceWidth < 400 and faceWidth > 50 and faceHeight < 400 and faceHeight > 50:
                     detections.append((confidence, (xmin, ymin), (xmax, ymax)))
 
         # We only want 1 face
@@ -71,12 +77,13 @@ class ForeheadFinder(RectangleOfInterestFinder):
                 cv2.rectangle(image, (xmin, ymin), (xmax, ymax), color=(255,0,0))
                 #cv2.putText(image, "Confidence: " + str(detection[0]), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 1)
 
-            spacing = int((xmax - xmin) * 0.1)           
+            #spacing = int((xmax - xmin) * 0.1)
+            spacing = 0
 
             x = xmin + spacing
             y = ymin
             w = xmax - xmin - 2 * spacing
-            h = int((ymax - ymin) / 3)
+            h = int((ymax - ymin) / 3.5)
             self.tcROI = (x, y, w, h)
 
             if showRois:

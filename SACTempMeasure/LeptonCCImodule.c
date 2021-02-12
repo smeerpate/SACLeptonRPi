@@ -10,6 +10,18 @@
 #include <LEPTON_Types.h>
 #include <LEPTON_RAD.h>
 
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <linux/types.h>
+#include <linux/spi/spidev.h>
+
+#define SPI_PACKET_SIZE 164
+#define SPI_PACKET_SIZE_UINT16 (SPI_PACKET_SIZE/2)
+#define SPI_PACKETS_PER_FRAME 60
+#define SPI_FRAME_SIZE_UINT16 (SPI_PACKET_SIZE_UINT16 * SPI_PACKETS_PER_FRAME)
+
+#define LEPTON_WIDTH 80
+#define LEPTON_HEIGHT 60
 
 // Value clamping macro
 #define CLAMP(x, low, high) ({\
@@ -19,11 +31,19 @@
   __x > __high ? __high : (__x < __low ? __low : __x);\
   })
 
-
-
 PyObject* LeptonCCIError;
 LEP_CAMERA_PORT_DESC_T i2cPort;
 char sError[128];
+
+int miSpiFd = 0;
+uint8_t result[SPI_PACKET_SIZE*SPI_PACKETS_PER_FRAME];
+uint16_t *frameBuffer;
+long mlFbMaxValue;
+long mlFbMinValue;
+
+static int SpiOpenPort (char *sPort);
+static int SpiClosePort(void);
+
 
 // Functions
 ///////////////////////////////////////////////////
@@ -242,7 +262,7 @@ static PyObject* LeptonCCI_SetFluxLinearParams(PyObject* self, PyObject* args) {
     sResult = LEP_SetRadFluxLinearParams(&i2cPort, sFLParams);
     if(LEP_OK != sResult)
     {
-        sprintf(sError, "LeptonCCI_SetFluxLinearParams: Unable to set spotmeter ROI. SDK error code %i.", (int)sResult);
+        sprintf(sError, "LeptonCCI_SetFluxLinearParams: Unable to set flux linear parameters. SDK error code %i.", (int)sResult);
         PyErr_SetString(LeptonCCIError, sError);
         return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
     }
@@ -299,6 +319,62 @@ static PyObject* LeptonCCI_GetFluxLinearParams(PyObject* self) {
                                       (sFLParams.TAtmK/100.0)-273.15,
                                       sFLParams.reflWindow/8192.0,
                                       (sFLParams.TReflK/100.0)-273.15);
+}
+
+
+///////////////////////////////////////////////////
+// LeptonCCI_SetFfcShutterModeObj is a Function with
+// arguments. Takes in a tuple of ints:
+// (shutterMode, tempLockoutState, videoFreezeDuringFFC, ffcDesired,
+// elapsedTimeSinceLastFfc, desiredFfcPeriod, explicitCmdToOpen, desiredFfcTempDelta, imminentDelay)
+///////////////////////////////////////////////////
+static PyObject* LeptonCCI_SetFfcShutterModeObj(PyObject* self, PyObject* args) {
+    LEP_RESULT sResult;
+    LEP_SYS_FFC_SHUTTER_MODE_OBJ_T sShutterObj;
+    unsigned int shutterMode, tempLockoutState, videoFreezeDuringFFC, ffcDesired,
+            elapsedTimeSinceLastFfc, desiredFfcPeriod, explicitCmdToOpen,
+            desiredFfcTempDelta, imminentDelay;
+
+    if (!PyArg_ParseTuple(args, "(IIIIIIIII)", &shutterMode, &tempLockoutState, &videoFreezeDuringFFC, &ffcDesired,
+            &elapsedTimeSinceLastFfc, &desiredFfcPeriod, &explicitCmdToOpen, &desiredFfcTempDelta, &imminentDelay))
+    {
+        sprintf(sError, "LeptonCCI_SetFfcShutterModeObj: Args parsing error. SDK error code %i.", (int)sResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return Py_BuildValue("s", sError);
+    }
+    
+    sShutterObj.shutterMode = (LEP_SYS_FFC_SHUTTER_MODE_E)(CLAMP(shutterMode, 0, 2));
+    sShutterObj.tempLockoutState = (LEP_SYS_SHUTTER_TEMP_LOCKOUT_STATE_E)(CLAMP(tempLockoutState, 0, 2));
+    sShutterObj.videoFreezeDuringFFC = (LEP_SYS_ENABLE_E)(CLAMP(videoFreezeDuringFFC, 0, 1));
+    sShutterObj.ffcDesired = (LEP_SYS_ENABLE_E)(CLAMP(ffcDesired, 0, 1));
+    sShutterObj.elapsedTimeSinceLastFfc = (LEP_UINT32)elapsedTimeSinceLastFfc;
+    sShutterObj.desiredFfcPeriod = (LEP_UINT32)desiredFfcPeriod;
+    sShutterObj.explicitCmdToOpen = (LEP_BOOL)(CLAMP(explicitCmdToOpen, 0, 1));
+    sShutterObj.desiredFfcTempDelta = (LEP_UINT16)(CLAMP(desiredFfcTempDelta, 0, 65535));
+    sShutterObj.imminentDelay = (LEP_UINT16)(CLAMP(imminentDelay, 0, 65535));
+    
+    sResult = LEP_OpenPort(1, LEP_CCI_TWI, 400, &i2cPort);
+    if(LEP_COMM_OK != sResult)
+    {
+        sprintf(sError, "LeptonCCI_SetFfcShutterModeObj: Unable to open i2c port. SDK error code %i.", (int)sResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
+    }   
+    sResult = LEP_SetSysFfcShutterModeObj(&i2cPort, sShutterObj);
+    if(LEP_OK != sResult)
+    {
+        sprintf(sError, "LeptonCCI_SetFfcShutterModeObj: Unable to set shutter mode. SDK error code %i.", (int)sResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
+    }
+    sResult = LEP_ClosePort(&i2cPort);
+    if(LEP_OK != sResult)
+    {
+        sprintf(sError, "LeptonCCI_SetFfcShutterModeObj: Unable to close i2c port. SDK error code %i.", (int)sResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpretor.
+    }
+    Py_RETURN_NONE;
 }
 
 
@@ -441,6 +517,234 @@ static PyObject* LeptonCCI_GetRadTLinearEnableState(PyObject* self) {
     return Py_BuildValue("i", enableState);
 }
 
+
+///////////////////////////////////////////////////
+// LeptonCCI_GetFrameBuffer
+// Not really a CCI function but rather uses SPI.
+// SPI port is e.g. "/dev/spidev0.0"
+///////////////////////////////////////////////////
+static PyObject* LeptonCCI_GetFrameBuffer(PyObject* self, PyObject* args) {
+    char sSpiPort[16] = "/dev/spidev0.0";
+    char sDummy[16];
+    PyObject *pyFbList, *item;
+    int k = 0;
+    int resets = 0;
+    int iResult = 0;
+    
+    if (!PyArg_ParseTuple(args, "s", sDummy))
+    {
+        sprintf(sError, "LeptonCCI_GetFrameBuffer: Unable to parse arguments.");
+        PyErr_SetString(LeptonCCIError, sError);
+        return Py_BuildValue("s", sError);
+    }
+    
+    iResult = SpiOpenPort(sSpiPort);
+    if (iResult < 0)
+    {
+        // failed to open SPI port, terminate.
+        sprintf(sError, "LeptonCCI_GetFrameBuffer: Unable to open SPI port %s. Error code %i.", sSpiPort, iResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return Py_BuildValue("s", sError); // Propagate the error to the Python interpreter.
+    }
+    
+    for(int j=0;j<SPI_PACKETS_PER_FRAME;j++)
+    {
+        //if it's a drop packet, reset j to 0, set to -1 so he'll be at 0 again loop
+        iResult = read(miSpiFd, result+sizeof(uint8_t)*SPI_PACKET_SIZE*j, sizeof(uint8_t)*SPI_PACKET_SIZE);
+        if (iResult < 0)
+        {
+            // failed to open SPI port, terminate.
+            sprintf(sError, "LeptonCCI_GetFrameBuffer: Unable to read from SPI port. Error code %i.", iResult);
+            PyErr_SetString(LeptonCCIError, sError);
+            return Py_BuildValue("s", sError); // Propagate the error to the Python interpreter.
+        }
+        int packetNumber = result[j*SPI_PACKET_SIZE+1];
+        if(packetNumber != j)
+        {
+            j = -1;
+            resets += 1;
+            usleep(1000);
+            //Note: we've selected 750 resets as an arbitrary limit, since there should never be 750 "null" packets between two valid transmissions at the current poll rate
+            //By polling faster, developers may easily exceed this count, and the down period between frames may then be flagged as a loss of sync
+            if(resets == 750)
+            {
+                SpiClosePort();
+                usleep(750000);
+                SpiOpenPort(sSpiPort);
+            }
+        }
+    }
+    if(resets >= 30) {
+        //printf("[INFO] Got more than 30 resets, done reading.\n");
+    }
+    
+    iResult = SpiClosePort();
+    if (iResult < 0)
+    {
+        // failed to close SPI port
+        sprintf(sError, "LeptonCCI_GetFrameBuffer: Unable to close SPI port. Error code %i.", iResult);
+        PyErr_SetString(LeptonCCIError, sError);
+        return Py_BuildValue("s", sError);
+    }
+
+    // Parse the received data
+    frameBuffer = (uint16_t *)result;
+    //int row, column;
+    uint16_t value;
+    uint16_t minValue = 65535;
+    uint16_t maxValue = 0;
+
+    uint32_t totalCounts = 0;
+    
+    //pyFbList = PyList_New(SPI_PACKET_SIZE_UINT16 * SPI_PACKETS_PER_FRAME);
+    pyFbList = PyList_New(LEPTON_WIDTH * SPI_PACKETS_PER_FRAME);
+
+    for(int i=0;i<SPI_FRAME_SIZE_UINT16;i++) 
+    {
+        //skip the first 2 uint16_t's of every packet, they're 4 header bytes
+        if(i % SPI_PACKET_SIZE_UINT16 < 2)
+        {
+            continue;
+        }
+        //flip the MSB and LSB at the last second
+        int temp = result[i*2];
+        result[i*2] = result[i*2+1];
+        result[i*2+1] = temp;
+
+        value = frameBuffer[i];
+        totalCounts += value;
+        if(value > maxValue)
+        {
+            maxValue = value;
+        }
+        if(value < minValue)
+        {
+            minValue = value;
+        }
+        //column = i % SPI_PACKET_SIZE_UINT16 - 2;
+        //row = i / SPI_PACKET_SIZE_UINT16 ;
+        
+        item = PyLong_FromLong((long)frameBuffer[i]);
+        PyList_SetItem(pyFbList, k, item);
+        k += 1;
+    }
+    
+    mlFbMaxValue = maxValue;
+    mlFbMinValue = minValue;
+    
+    return pyFbList;
+}
+
+
+///////////////////////////////////////////////////
+// Helper function for SPI -- SpiOpenPort
+// Error return values:
+// -1: Error - Could not open SPI device
+// -2: Could not set SPIMode (WR)...ioctl fail
+// -3: Could not set SPIMode (RD)...ioctl fail
+// -4: Could not set SPI bitsPerWord (WR)...ioctl fail
+// -5: Could not set SPI bitsPerWord(RD)...ioctl fail
+// -6: Could not set SPI speed (WR)...ioctl fail
+// -7: Could not set SPI speed (RD)...ioctl fail
+///////////////////////////////////////////////////
+static int SpiOpenPort (char *sPort)
+{
+	int status_value = -1;
+
+	//----- SET SPI MODE -----
+	//SPI_MODE_0 (0,0)  CPOL=0 (Clock Idle low level), CPHA=0 (SDO transmit/change edge active to idle)
+	//SPI_MODE_1 (0,1)  CPOL=0 (Clock Idle low level), CPHA=1 (SDO transmit/change edge idle to active)
+	//SPI_MODE_2 (1,0)  CPOL=1 (Clock Idle high level), CPHA=0 (SDO transmit/change edge active to idle)
+	//SPI_MODE_3 (1,1)  CPOL=1 (Clock Idle high level), CPHA=1 (SDO transmit/change edge idle to active)
+	unsigned char spi_mode = SPI_MODE_3;
+
+	//----- SET BITS PER WORD -----
+	unsigned char spi_bitsPerWord = 8;
+
+	//----- SET SPI BUS SPEED -----
+	unsigned int spi_speed = 24000000;				//24000000 = 24MHz (1uS per bit)
+    
+	miSpiFd = open(sPort, O_RDWR | O_NONBLOCK);
+	if (miSpiFd < 0)
+	{
+		//printf("Error - Could not open SPI device %s", sPortName);
+		//exit(1);
+        return -1;
+	}
+
+	status_value = ioctl(miSpiFd, SPI_IOC_WR_MODE, &spi_mode);
+	if(status_value < 0)
+	{
+		//printf("Could not set SPIMode (WR)...ioctl fail");
+		//exit(1);
+        return -2;
+	}
+
+	status_value = ioctl(miSpiFd, SPI_IOC_RD_MODE, &spi_mode);
+	if(status_value < 0)
+	{
+		//printf("Could not set SPIMode (RD)...ioctl fail");
+		//exit(1);
+        return -3;
+	}
+
+	status_value = ioctl(miSpiFd, SPI_IOC_WR_BITS_PER_WORD, &spi_bitsPerWord);
+	if(status_value < 0)
+	{
+		//printf("Could not set SPI bitsPerWord (WR)...ioctl fail");
+		//exit(1);
+        return -4;
+	}
+
+	status_value = ioctl(miSpiFd, SPI_IOC_RD_BITS_PER_WORD, &spi_bitsPerWord);
+	if(status_value < 0)
+	{
+		//printf("Could not set SPI bitsPerWord(RD)...ioctl fail");
+		//exit(1);
+        return -5;
+	}
+
+	status_value = ioctl(miSpiFd, SPI_IOC_WR_MAX_SPEED_HZ, &spi_speed);
+	if(status_value < 0)
+	{
+		//printf("Could not set SPI speed (WR)...ioctl fail");
+		//exit(1);
+        return -6;
+	}
+
+	status_value = ioctl(miSpiFd, SPI_IOC_RD_MAX_SPEED_HZ, &spi_speed);
+	if(status_value < 0)
+	{
+		//printf("Could not set SPI speed (RD)...ioctl fail");
+		//exit(1);
+        return -7;
+	}
+	return(status_value);
+}
+
+///////////////////////////////////////////////////
+// Helper function for SPI -- SpiClosePort
+// Error return values:
+// -1: Error - Could not close SPI device
+///////////////////////////////////////////////////
+static int SpiClosePort(void)
+{
+	int status_value = -1;
+    
+    if (miSpiFd > 0)
+    {
+        status_value = close(miSpiFd);
+    }
+    else
+    {
+        status_value = 100;
+    }
+
+	return(status_value);
+}
+///////////////////////////////////////////////////
+
+
 // Method mapping table
 // Method definition object for this extension, these argumens mean:
 // ml_name: The name of the method
@@ -457,10 +761,12 @@ static PyMethodDef LeptonCCI_methods[] = {
     {"GetROIValues", (PyCFunction)LeptonCCI_GetROIValues, METH_NOARGS, NULL},
     {"SetFluxLinearParams", (PyCFunction)LeptonCCI_SetFluxLinearParams, METH_VARARGS, NULL},
     {"GetFluxLinearParams", (PyCFunction)LeptonCCI_GetFluxLinearParams, METH_NOARGS, NULL},
+    {"SetFfcShutterModeObj", (PyCFunction)LeptonCCI_SetFfcShutterModeObj, METH_VARARGS, NULL},
     {"GetAuxTemp", (PyCFunction)LeptonCCI_GetAuxTemp, METH_NOARGS, NULL},
     {"GetFpaTemp", (PyCFunction)LeptonCCI_GetFpaTemp, METH_NOARGS, NULL},
     {"SetRadTLinearEnableState", (PyCFunction)LeptonCCI_SetRadTLinearEnableState, METH_VARARGS, NULL},
     {"GetRadTLinearEnableState", (PyCFunction)LeptonCCI_GetRadTLinearEnableState, METH_NOARGS, NULL},
+    {"GetFrameBuffer", (PyCFunction)LeptonCCI_GetFrameBuffer, METH_VARARGS, NULL},
     {NULL, NULL, 0, NULL}
 };
 

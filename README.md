@@ -23,31 +23,56 @@ sudo systemctl stop SACLeptonRPi.service
 
 sudo systemctl enable SACLeptonRPi.service
 
-## Mechanics
+## 'Mechanics'
 * `/home/pi/SACLeptonRPi/SACLeptonRPi.sh`
   1. runs openVINO setupvars script (under `~/openvino/bin/setupvars.sh`)
   1. starts `~/SACLeptonRPi/Main.py`
 * `~/SACLeptonRPi/Main.py` starts openGLes display thread `/home/pi/SACLeptonRPi/SACDisplayMixer/OGLESSimpleImageWithIPC`
+* `~/SACLeptonRPi/Main.py` periodically calls state machine `~/SACLeptonRPi/SACOnScreenDisplay/StateMachine.py´
 
 ## Measuring method
-An estimation of the test person's core temperature is done by measuring the forehead temperature. This is done using an uncooled microbolometer. Based to the article *Investigation of the Impact of Infrared Sensors on Core Body Temperature Monitoring by Comparing Measurement Sites* (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7284737/) by Hsuan-Yu Chen, Andrew Chen and Chiachung Chen.
+An estimation of a test person's core temperature can be done by measuring the person's forehead temperature. Based to the article *Investigation of the Impact of Infrared Sensors on Core Body Temperature Monitoring by Comparing Measurement Sites* (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7284737/) by Hsuan-Yu Chen, Andrew Chen and Chiachung Chen.
 
+This application uses an 80 x 60 uncooled microbolometer array (Flir Lepton 2.5) for no-contact core temperature estimation.
 
+## Hardware limitations
+  * The hardware is to be used indoors and in an environment with limited temperature range (e.g. 10°C ... 30°C).
+  * The unit is very sensitive to ambient temperature fluctuations. When changing environments, leave the unit to settle for about 1 hour.
+  * The unit measures the forehead __skin__ temperature, which is only an indication of a person's core temperature. This temperature largely dependent on external factors.
+
+## Software description
+### Initialization
+  * Upon startup: the software sets the Flux Linear parameters in the Thermal imaging sensor (for window, ambient and background compensation). The software is currently using the Thermal imaging sensor housing temperature as ambient temperature.
+
+### Detection and measurement Loop
   * Detect a face using a convolutional neural network implemented in openCV
   * Wait until the face is close enough by measuring its width
-  * Set the region of interest (ROI) to the forehead region. This is currently done by taking the top 1/3rd of the returned face bounding box (room for improvement)
+  * Set the region of interest (ROI) to the forehead region. This is currently done by taking the top 1/3rd of the returned face bounding box
   * Map the region of interest to the Thermal imaging sensor image using an affine transform
-  * Perform a flat field calibration (FFC) on the Thermal imaging sensor if the last FFC happened more than 20" ago
-  * Set the Flux Linear parameters in the Thermal imaging sensor. This code is currently using the Thermal imaging sensor housing temperature as ambient temperature (also room for improvement)
-  * Write the ROI to the Thermal imaging sensor via the CCI
-  * Read back temperatures from the Thermal imaging sensor via the CCI
+  * Perform a flat field calibration (FFC) on the Thermal imaging sensor on every measurement
+  * Read back temperatures from the Thermal imaging sensor via the SPI (4 times, every 0.5s, depends on settings)
   * Wait to go back to idle state until detected face is gone
-  * The maximum temperature is taken as the temperature of the forehead
-  
-  ### Results
-  115 Measurements on different healthy persons resulted in:
-  
-  Average forehead temperature (degC) | Stddev | Coefficient of variation (CV%) 
-  ----------------------------------- | ------ | ------------------------------
-  33.324 | 0.560 |1.680
-  
+  * The average of maximum temperatures in the ROI, including a correcion accounting for FPA temperature and scene temperature fluctuations, is taken as the temperature of the forehead
+
+## Calibration
+Each unit shall be calibrated before usage. Calibration consists of
+* measuring various scene temperatures in various ambient temperatures
+* fitting the measurements to a plane Ref_Temp = f(FPA_temp, sensor_output).
+
+### Example calibration on prototype
+Surface function = a * (x^b) * (y^c)
+with:
+  * a = 0.011421541
+  * b = -0.083873324
+  * c = 2.283353429
+
+Ref_Temp = 0.011421541 * (FPA_temp^-0.083873324) * (sensor_output^2.283353429)
+
+In figure below, the axis "Calculated Temp" is the average maximum sensor_output value over N (e.g. 4) samples in the ROI.
+
+![figure1](Documentation/MeasurementsCalibV5_proto.png)
+
+### Results
+The figure below shows the error on 500 measurements after calibration
+
+![figure2](Documentation/ErrorAfterCalibration.png)
