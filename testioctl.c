@@ -48,7 +48,6 @@ int main(){
 	ret = close(req.fd);
 	if (ret == -1) {
 		perror("Failed to close GPIO LINEHANDLE device file");
-		ret = -errno;
 	}	
 
 	return 0;
