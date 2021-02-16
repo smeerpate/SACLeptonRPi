@@ -62,7 +62,7 @@ static PyObject* LeptonCCI_Reset(PyObject* self){
 		return ret;
 	}
 
-	req.lineoffsets[0] = 96;
+	req.lineoffsets[0] = 16;
 	req.flags = GPIOHANDLE_REQUEST_OUTPUT;
 	memcpy(req.default_values, &data, sizeof(req.default_values));
 	strcpy(req.consumer_label, "led_gpio");
