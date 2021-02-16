@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -10,22 +11,21 @@
 int main(){
 	struct gpiohandle_request req;
 	struct gpiohandle_data data;
-	char chrdev_name[20];
+	char chrdev_name[20] = "/dev/gpiochip0";
 	int fd, ret;
-
-	strcpy(chrdev_name, "/dev/gpiochip0");
 
 	fd = open(chrdev_name, 0);
 	if (fd == -1) {
 		fprintf(stderr, "Failed to open %s\n", chrdev_name);
 		return ret;
 	}
+	fprintf(stderr, "File descriptor %d", fd);
 
 	req.lineoffsets[0] = 16;
 	req.flags = GPIOHANDLE_REQUEST_OUTPUT;
 	memcpy(req.default_values, &data, sizeof(req.default_values));
 	strcpy(req.consumer_label, "led_gpio");
-	req.lines  = 1;
+	req.lines = 1;
 
 	ret = ioctl(fd, GPIO_GET_LINEHANDLE_IOCTL, &req);
 	if (ret == -1) {
@@ -34,7 +34,7 @@ int main(){
 	}
 	if (close(fd) == -1)
 		perror("Failed to close GPIO character device file");
-
+	fprintf(stderr, "Req file descriptor %d", req.fd);
 	usleep(1000000);
 
 	data.values[0] = 1;
@@ -44,6 +44,7 @@ int main(){
 				"GPIOHANDLE_SET_LINE_VALUES_IOCTL", ret);
 	}
 
+	usleep(1000000);
 	/*  release line */
 	ret = close(req.fd);
 	if (ret == -1) {
