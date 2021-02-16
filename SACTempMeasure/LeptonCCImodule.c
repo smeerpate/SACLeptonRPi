@@ -69,6 +69,15 @@ static PyObject* LeptonCCI_Reset(PyObject* self){
 	strcpy(req.consumer_label, "led_gpio");
 	req.lines  = 1;
 	
+	ret = ioctl(fd, GPIO_GET_LINEHANDLE_IOCTL, &req);
+	if (ret == -1) {
+		ret = -errno;
+		fprintf(stderr, "Failed to issue GET LINEHANDLE IOCTL (%d)\n",
+			ret);
+	}
+	if (close(fd) == -1)
+		perror("Failed to close GPIO character device file");
+	
 	usleep(1000000);
 
 	data.values[0] = !data.values[0];
