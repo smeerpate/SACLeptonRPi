@@ -80,7 +80,7 @@ static PyObject* LeptonCCI_Reset(PyObject* self){
 	
 	usleep(1000000);
 
-	data.values[0] = !data.values[0];
+	data.values[0] = 1;
 	ret = ioctl(req.fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data);
 	if (ret == -1) {
 		ret = -errno;
