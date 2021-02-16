@@ -14,6 +14,7 @@
 #include <sys/ioctl.h>
 #include <linux/types.h>
 #include <linux/spi/spidev.h>
+#include <linux/gpio.h>
 
 #define SPI_PACKET_SIZE 164
 #define SPI_PACKET_SIZE_UINT16 (SPI_PACKET_SIZE/2)
@@ -49,7 +50,7 @@ static PyObject* LeptonCCI_Reset(PyObject* self){
 
 	struct gpiohandle_request req;
 	struct gpiohandle_data data;
-	char gpiochip[20];
+	char chrdev_name[20];
 	int fd, ret;
 
 	strcpy(chrdev_name, "/dev/gpiochip0");
