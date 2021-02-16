@@ -46,15 +46,44 @@ static int SpiClosePort(void);
 
 static PyObject* LeptonCCI_Reset(PyObject* self){
 	LEP_RESULT sResult;
-	char gpiochip[16] = "/dev/gpiochip0";
 
-    int fd = open(gpiochip);
-	sprintf(sError, "LeptonCCI_Reset: SDK error code %i.", (int)fd);
-	
+	struct gpiohandle_request req;
+	struct gpiohandle_data data;
+	char gpiochip[20];
+	int fd, ret;
+
+	strcpy(chrdev_name, "/dev/gpiochip0");
+
+	fd = open(chrdev_name, 0);
+	if (fd == -1) {
+		ret = -errno;
+		fprintf(stderr, "Failed to open %s\n", chrdev_name);
+
+		return ret;
+	}
+
+	req.lineoffsets[0] = 96;
+	req.flags = GPIOHANDLE_REQUEST_OUTPUT;
+	memcpy(req.default_values, &data, sizeof(req.default_values));
+	strcpy(req.consumer_label, "led_gpio");
+	req.lines  = 1;
 	
 	usleep(1000000);
-	
-	close(fd);
+
+	data.values[0] = !data.values[0];
+	ret = ioctl(req.fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data);
+	if (ret == -1) {
+		ret = -errno;
+		fprintf(stderr, "Failed to issue %s (%d)\n",
+				"GPIOHANDLE_SET_LINE_VALUES_IOCTL", ret);
+	}
+
+	/*  release line */
+	ret = close(req.fd);
+	if (ret == -1) {
+		perror("Failed to close GPIO LINEHANDLE device file");
+		ret = -errno;
+	}	
 	
     Py_RETURN_NONE;
 }
