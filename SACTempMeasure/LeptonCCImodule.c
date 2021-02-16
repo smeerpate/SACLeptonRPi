@@ -48,7 +48,9 @@ static PyObject* LeptonCCI_Reset(PyObject* self){
 	LEP_RESULT sResult;
 	char gpiochip[16] = "/dev/gpiochip0";
 
-    fd = open(gpiochip);
+    int fd = open(gpiochip);
+	sprintf(sError, "LeptonCCI_Reset: SDK error code %i.", (int)fd);
+	
 	
 	usleep(1000000);
 	
