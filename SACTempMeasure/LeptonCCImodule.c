@@ -799,6 +799,7 @@ static int SpiClosePort(void)
 //          class method, or being a static method of a class.
 // ml_doc:  Contents of this method's docstring
 static PyMethodDef LeptonCCI_methods[] = {
+	{"Reset", (PyCFunction)LeptonCCI_Reset, METH_NOARGS, NULL},
     {"RunRadFfc", (PyCFunction)LeptonCCI_RunRadFfc, METH_NOARGS, NULL},
     {"RunSysFFCNormalization", (PyCFunction)LeptonCCI_RunSysFFCNormalization, METH_NOARGS, NULL},
     {"GetROI", (PyCFunction)LeptonCCI_GetROI, METH_NOARGS, NULL},
