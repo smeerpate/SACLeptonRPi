@@ -44,6 +44,19 @@ long mlFbMinValue;
 static int SpiOpenPort (char *sPort);
 static int SpiClosePort(void);
 
+static PyObject* LeptonCCI_Reset(PyObject* self){
+	LEP_RESULT sResult;
+	char gpiochip[16] = "/dev/gpiochip0";
+
+    fd = open(gpiochip);
+	
+	usleep(1000000);
+	
+	close(fd);
+	
+    Py_RETURN_NONE;
+}
+
 
 // Functions
 ///////////////////////////////////////////////////
