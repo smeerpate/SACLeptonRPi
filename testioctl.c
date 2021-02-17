@@ -21,8 +21,9 @@ int main(){
 			return ret;
 		}
 		fprintf(stderr, "File descriptor %d", fd);
+		usleep(10000000);
 
-		req.lineoffsets[0] = 16;
+		/*req.lineoffsets[0] = 16;
 		req.flags = GPIOHANDLE_REQUEST_OUTPUT;
 		memcpy(req.default_values, &data, sizeof(req.default_values));
 		strcpy(req.consumer_label, "led_gpio");
