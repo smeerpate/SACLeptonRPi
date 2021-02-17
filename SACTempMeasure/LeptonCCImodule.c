@@ -44,60 +44,7 @@ long mlFbMinValue;
 
 static int SpiOpenPort (char *sPort);
 static int SpiClosePort(void);
-
-static PyObject* LeptonCCI_Reset(PyObject* self){
-	LEP_RESULT sResult;
-
-	struct gpiohandle_request req;
-	struct gpiohandle_data data;
-	char chrdev_name[20];
-	int fd, ret;
-
-	strcpy(chrdev_name, "/dev/gpiochip0");
-
-	fd = open(chrdev_name, 0);
-	if (fd == -1) {
-		ret = -errno;
-		fprintf(stderr, "Failed to open %s\n", chrdev_name);
-
-		return ret;
-	}
-
-	req.lineoffsets[0] = 16;
-	req.flags = GPIOHANDLE_REQUEST_OUTPUT;
-	memcpy(req.default_values, &data, sizeof(req.default_values));
-	strcpy(req.consumer_label, "led_gpio");
-	req.lines  = 1;
-	
-	ret = ioctl(fd, GPIO_GET_LINEHANDLE_IOCTL, &req);
-	if (ret == -1) {
-		ret = -errno;
-		fprintf(stderr, "Failed to issue GET LINEHANDLE IOCTL (%d)\n",
-			ret);
-	}
-	if (close(fd) == -1)
-		perror("Failed to close GPIO character device file");
-	
-	usleep(1000000);
-
-	data.values[0] = 1;
-	ret = ioctl(req.fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data);
-	if (ret == -1) {
-		ret = -errno;
-		fprintf(stderr, "Failed to issue %s (%d)\n",
-				"GPIOHANDLE_SET_LINE_VALUES_IOCTL", ret);
-	}
-
-	/*  release line */
-	ret = close(req.fd);
-	if (ret == -1) {
-		perror("Failed to close GPIO LINEHANDLE device file");
-		ret = -errno;
-	}	
-	
-    Py_RETURN_NONE;
-}
-
+static int Reset(void);
 
 // Functions
 ///////////////////////////////////////////////////
@@ -623,6 +570,7 @@ static PyObject* LeptonCCI_GetFrameBuffer(PyObject* self, PyObject* args) {
             if(resets == 750)
             {
                 SpiClosePort();
+				Reset();
                 usleep(750000);
                 SpiOpenPort(sSpiPort);
             }
@@ -798,6 +746,58 @@ static int SpiClosePort(void)
 }
 ///////////////////////////////////////////////////
 
+///////////////////////////////////////////////////
+// Helper function to reset the Lepton camera (Reset_L -> active low)
+// Error return values:
+// -1: Error - Something went wrong
+///////////////////////////////////////////////////
+static int Reset(void){
+	struct gpiohandle_request req;
+	struct gpiohandle_data data;
+	char chrdev_name[20];
+	int fd, ret;
+
+	strcpy(chrdev_name, "/dev/gpiochip0");
+
+	fd = open(chrdev_name, 0);
+	if (fd == -1) {
+		fprintf(stderr, "Failed to open %s\n", chrdev_name);
+		return -1;
+	}
+
+	req.lineoffsets[0] = 16;
+	req.flags = GPIOHANDLE_REQUEST_OUTPUT;
+	memcpy(req.default_values, &data, sizeof(req.default_values));
+	strcpy(req.consumer_label, "led_gpio");
+	req.lines  = 1;
+	
+	ret = ioctl(fd, GPIO_GET_LINEHANDLE_IOCTL, &req);
+	if (ret == -1) {
+		fprintf(stderr, "Failed to issue GET LINEHANDLE IOCTL (%d)\n",
+			ret);
+	}
+	if (close(fd) == -1){
+		perror("Failed to close GPIO character device file");
+	}
+
+	data.values[0] = 0;
+	ret = ioctl(req.fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data);
+	if (ret == -1) {
+		fprintf(stderr, "Failed to issue %s (%d)\n",
+				"GPIOHANDLE_SET_LINE_VALUES_IOCTL", ret);
+	}
+
+	usleep(1000000);
+
+	/*  release line */
+	ret = close(req.fd);
+	if (ret == -1) {
+		perror("Failed to close GPIO LINEHANDLE device file");
+	}	
+
+	return ret;
+}
+
 
 // Method mapping table
 // Method definition object for this extension, these argumens mean:
@@ -808,7 +808,6 @@ static int SpiClosePort(void)
 //          class method, or being a static method of a class.
 // ml_doc:  Contents of this method's docstring
 static PyMethodDef LeptonCCI_methods[] = {
-	{"Reset", (PyCFunction)LeptonCCI_Reset, METH_NOARGS, NULL},
     {"RunRadFfc", (PyCFunction)LeptonCCI_RunRadFfc, METH_NOARGS, NULL},
     {"RunSysFFCNormalization", (PyCFunction)LeptonCCI_RunSysFFCNormalization, METH_NOARGS, NULL},
     {"GetROI", (PyCFunction)LeptonCCI_GetROI, METH_NOARGS, NULL},
