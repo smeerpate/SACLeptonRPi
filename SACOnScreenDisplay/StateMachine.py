@@ -166,7 +166,9 @@ class StateMachine(object):
             self.thRoi = (0, 0), (0, 0)
             self.roiFinder = ForeheadFinder()
             self.roiFinder.setTransformMatrix(self.transformMatrix)
-
+        
+        print("Reset")
+        l.Reset()
         # Globals for logging
         self.currentTime = int(round(time.time()))
 
