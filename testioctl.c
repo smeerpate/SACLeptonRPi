@@ -23,7 +23,7 @@ int main(){
 		fprintf(stderr, "File descriptor %d", fd);
 		usleep(10000000);
 
-		/*req.lineoffsets[0] = 16;
+		req.lineoffsets[0] = 16;
 		req.flags = GPIOHANDLE_REQUEST_OUTPUT;
 		memcpy(req.default_values, &data, sizeof(req.default_values));
 		strcpy(req.consumer_label, "led_gpio");
@@ -34,10 +34,9 @@ int main(){
 			fprintf(stderr, "Failed to issue GET LINEHANDLE IOCTL (%d)\n",
 				ret);
 		}
-		if (close(fd) == -1)
-			perror("Failed to close GPIO character device file");
+		
 		fprintf(stderr, "Req file descriptor %d", req.fd);
-
+		
 		data.values[0] = 1;
 		ret = ioctl(req.fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data);
 		if (ret == -1) {
@@ -52,6 +51,9 @@ int main(){
 		if (ret == -1) {
 			perror("Failed to close GPIO LINEHANDLE device file");
 		}	
+		
+		if (close(fd) == -1)
+			perror("Failed to close GPIO character device file");		
 		
 		// Sleep to simulate
 		usleep(3000000);
