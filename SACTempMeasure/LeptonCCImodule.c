@@ -46,6 +46,14 @@ static int SpiOpenPort (char *sPort);
 static int SpiClosePort(void);
 static int Reset(void);
 
+static PyObject* LeptonCCI_Reset(PyObject* self) {
+    LEP_RESULT sResult;
+	
+	Reset();
+
+    Py_RETURN_NONE;
+}
+
 // Functions
 ///////////////////////////////////////////////////
 // LeptonCCI_RunRadFfc is a Function without
@@ -571,6 +579,8 @@ static PyObject* LeptonCCI_GetFrameBuffer(PyObject* self, PyObject* args) {
             {
                 SpiClosePort();
 				Reset();
+				sprintf(sError, "LeptonCCI_GetFrameBuffer: Unable to read from SPI port. Error code %i.", iResult);
+				PyErr_SetString(LeptonCCIError, sError);
                 usleep(750000);
                 SpiOpenPort(sSpiPort);
             }
@@ -759,6 +769,7 @@ static int Reset(void){
 
 	strcpy(chrdev_name, "/dev/gpiochip0");
 
+	fprintf(stdout, "Resetting GPIO16");
 	fd = open(chrdev_name, 0);
 	if (fd == -1) {
 		fprintf(stderr, "Failed to open %s\n", chrdev_name);
@@ -794,6 +805,8 @@ static int Reset(void){
 	if (ret == -1) {
 		perror("Failed to close GPIO LINEHANDLE device file");
 	}	
+	
+	fprintf(stdout, "Reset completed");
 
 	return ret;
 }
@@ -808,6 +821,7 @@ static int Reset(void){
 //          class method, or being a static method of a class.
 // ml_doc:  Contents of this method's docstring
 static PyMethodDef LeptonCCI_methods[] = {
+	{"Reset", (PyCFunction)LeptonCCI_Reset, METH_NOARGS, NULL},
     {"RunRadFfc", (PyCFunction)LeptonCCI_RunRadFfc, METH_NOARGS, NULL},
     {"RunSysFFCNormalization", (PyCFunction)LeptonCCI_RunSysFFCNormalization, METH_NOARGS, NULL},
     {"GetROI", (PyCFunction)LeptonCCI_GetROI, METH_NOARGS, NULL},
