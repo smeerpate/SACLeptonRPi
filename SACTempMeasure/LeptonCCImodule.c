@@ -769,7 +769,8 @@ static int Reset(void){
 
 	strcpy(chrdev_name, "/dev/gpiochip0");
 
-	fprintf(stdout, "Resetting GPIO16");
+	fprintf(stdout, "Resetting Lepton");
+	
 	fd = open(chrdev_name, 0);
 	if (fd == -1) {
 		fprintf(stderr, "Failed to open %s\n", chrdev_name);
@@ -805,6 +806,8 @@ static int Reset(void){
 	if (ret == -1) {
 		perror("Failed to close GPIO LINEHANDLE device file");
 	}	
+	
+	usleep(6000000);
 	
 	fprintf(stdout, "Reset completed");
 
