@@ -12,5 +12,5 @@ VIRTUALENVWRAPPER_ENV_BIN_DIR=bin
 echo "Going to workon openvino"
 workon openvino
 
-echo "Starting SACLeptonRPi/Main.py"
+echo "Starting SACLeptonRPi/SACGetAffineTransform.py"
 python3 /home/pi/SACLeptonRPi/SACGetAffineTransform.py

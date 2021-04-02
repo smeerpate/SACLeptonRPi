@@ -134,8 +134,8 @@ try:
         getAffineTransformation()
         tcImage = cv2.cvtColor(tcImage, cv2.COLOR_GRAY2BGR)
         thImage = cv2.cvtColor(thImage, cv2.COLOR_GRAY2BGR)
-        #combine_two_color_images(tcImage, thImage, shm)
-        combine_two_color_images(threshTcImage, threshThImage, shm)
+        combine_two_color_images(tcImage, thImage, shm)
+        #combine_two_color_images(threshTcImage, threshThImage, shm)
 
         #print(tcImage.shape)
         #print(thImage.shape)
