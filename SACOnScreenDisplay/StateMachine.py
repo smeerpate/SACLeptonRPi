@@ -120,14 +120,15 @@ class StateMachine(object):
         self.printTemperatureOnScreen = True
         self.addThermalRoiToThermalImage = True
         self.applyTempCorrection = 3 # select correctiion method 1,2,3 or 0 for no correction
-        self.SkinOffset = 1.633917 #1.6 # 2.1 # 2.2 # degrees difference between timpanic temperature and forehead temp
+        self.SkinOffset = 2.1 #1.6 # 2.1 # 2.2 # degrees difference between timpanic temperature and forehead temp
         self.mTempCorrCoeff = 0 #0.0178 # -0.0242 # slope of the linear correction
         self.ATempCorrCoeff = 0 #1.4871 # 1.7196 # 1.725 # offset of linear correction
         # e.g. = Ref_Temp = 0.011421541195997535 * FPA_Temp^-0.08387332390433329 * Calculated_Temp^2.2833534290744972
         self.tempCorrFactor = 0.011421541195997535
         self.tempCorrFPAExp = -0.08387332390433329
         self.tempCorrSensExp = 2.2833534290744972
-        self.tempCorrPolyCoeffs = (-2680.2643267187245, -0.14073571479380054, 213.7267184806687, 0.5524770689852628, -0.7610970264670899, -5.379862969877885, -0.01705213893779612, 0.02346792405094088, 0.041930692291342525)
+        self.tempCorrPolyCoeffs = (152.1478948924902, 0.9713012947694135, -15.333588606433949, 0.003675598622598923, -0.06597897304400911, 0.5198175601547528, -6.113012963569158e-05, 0.0009586603223290678, -0.005137269573036217)
+        #self.tempCorrPolyCoeffs = (-2680.2643267187245, -0.14073571479380054, 213.7267184806687, 0.5524770689852628, -0.7610970264670899, -5.379862969877885, -0.01705213893779612, 0.02346792405094088, 0.041930692291342525)
         self.minMeasurementInterval = 10 # seconds. Min number of seconds between two measurements (optimaal = 20)
         self.OSDTextColor = (255,120,70)
         self.mqttBrokerAddress = "broker.hivemq.com" # "192.168.1.37" #"192.168.0.138" # "192.168.1.60"
@@ -467,7 +468,7 @@ class StateMachine(object):
                         # Translate a bit to the right
                         if 0:
                             start, end = self.thRoi
-                            xTrans = 10
+                            xTrans = 5
                             self.thRoi = (start[0] + xTrans, start[1]), (end[0] + xTrans, end[1])
 
                         #self.setThRoiOnLepton(self.thRoi)
