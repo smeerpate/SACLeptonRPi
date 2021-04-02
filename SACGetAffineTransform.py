@@ -109,14 +109,14 @@ try:
             cnts = cnts[0]
         else:
             cnts = cnts[1]
-        print("Found " + str(len(cnts)) + " circles on RPi Camera")
+        
         for (i, c) in enumerate(cnts):
             ((x, y), _) = cv2.minEnclosingCircle(c)
-            if int(y) > 100 and int(y) < 400:
+            if int(y) > 100 and int(y) < 400 and int(x) > 100 and int(x) < 550:
             #cv2.putText(tcImage, "x:{},y:{}".format(x,y), (int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 2)
                 cv2.putText(tcImage, "{}".format(i), (int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1)
                 tcCircles.append((x,y))
-
+        print("Found " + str(len(tcCircles)) + " circles on RPi Camera")
         # thermal:
         thresh = cv2.threshold(thImage, 150, 255, cv2.THRESH_BINARY)[1]
         threshThImage = cv2.cvtColor(thresh, cv2.COLOR_GRAY2BGR)
