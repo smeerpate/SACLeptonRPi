@@ -466,10 +466,9 @@ class StateMachine(object):
                         #thRoi = (80 - start[0] - w, start[1]), (80 - start[0], end[1])
 
                         # Translate a bit to the right
-                        if 0:
-                            start, end = self.thRoi
-                            xTrans = 5
-                            self.thRoi = (start[0] + xTrans, start[1]), (end[0] + xTrans, end[1])
+                        start, end = self.thRoi
+                        xTrans = 5
+                        self.thRoi = (start[0] + xTrans, start[1]), (end[0] + xTrans, end[1])
 
                         #self.setThRoiOnLepton(self.thRoi)
                         #self.writeLog()
