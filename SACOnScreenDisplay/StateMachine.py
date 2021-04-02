@@ -396,21 +396,19 @@ class StateMachine(object):
                     self.displayMixer.showMeasuring(image)
                     if self.doSetFLParameters:
                         self.setFluxLinearParams()
-                    self.state = "GET_TEMPERATURE"
-                    #if self.settleAfterFFCInterval != 0:
-                        #self.state = "SETTLTE_AFTER_FFC"
-                    #else:
-                        #self.state = "GET_TEMPERATURE"
+                    if self.settleAfterFFCInterval != 0:
+                        self.state = "SETTLTE_AFTER_FFC"
+                    else:
+                        self.state = "GET_TEMPERATURE"
                 else:
                     if self.roiFinder.getTcContours(image, settings.showFoundFace.value) or self.autoTrigger:
                         self.displayMixer.showMeasuring(image)
                         if self.doSetFLParameters:
                             self.setFluxLinearParams()
-                        self.state = "GET_TEMPERATURE"
-                        #if self.settleAfterFFCInterval != 0:
-                            #self.state = "SETTLTE_AFTER_FFC"
-                        #else:
-                            #self.state = "GET_TEMPERATURE"               
+                        if self.settleAfterFFCInterval != 0:
+                            self.state = "SETTLTE_AFTER_FFC"
+                        else:
+                            self.state = "GET_TEMPERATURE"               
                     else:
                         self.state = "IDLE"
                         self.temperatureSamples = []
