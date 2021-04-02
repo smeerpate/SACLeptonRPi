@@ -75,7 +75,7 @@ def getAffineTransformation():
         print(afTrans)
 
 def startDisplay():
-    call(["SACDisplayMixer/OGLESSimpleImageWithIPC"])
+    call(["/home/pi/SACLeptonRPi/SACDisplayMixer/OGLESSimpleImageWithIPC"])
 
 th1 = Thread(target=startDisplay)
 th1.start()
