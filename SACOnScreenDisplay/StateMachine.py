@@ -156,8 +156,8 @@ class StateMachine(object):
 
         #self.transformMatrix = self.settingsManager.getSettings().affineTransform.value
         #ORIGINALself.transformMatrix = np.array([[1.72672854e-01, 9.37420481e-04, -1.81536566e+01],[3.05513992e-03, 1.69052218e-01, -7.17111297e+00]])
-        #self.transformMatrix = np.array([[1.63900966e-01, -2.05767606e-03, -1.99485901e+01],[1.75007260e-03, 1.66221761e-01, -1.43907617e+01]])
-        self.transformMatrix = np.array([[6.10043897e+00, 7.55179536e-02, 1.22781917e+02],[-6.42287208e-02, 6.01526438e+00, 8.52829638e+01]])
+        self.transformMatrix = np.array([[1.63900966e-01, -2.05767606e-03, -1.99485901e+01],[1.75007260e-03, 1.66221761e-01, -1.43907617e+01]])
+        #WRONGself.transformMatrix = np.array([[6.10043897e+00, 7.55179536e-02, 1.22781917e+02],[-6.42287208e-02, 6.01526438e+00, 8.52829638e+01]])
         print("[INFO] Loaded affine transform from settings file: " + str(self.transformMatrix))
         
         
