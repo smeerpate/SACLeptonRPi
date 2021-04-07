@@ -159,9 +159,9 @@ class StateMachine(object):
         #ORIGINALself.transformMatrix = np.array([[1.72672854e-01, 9.37420481e-04, -1.81536566e+01],[3.05513992e-03, 1.69052218e-01, -7.17111297e+00]])
         #self.transformMatrix = np.array([[1.63900966e-01, -2.05767606e-03, -1.99485901e+01],[1.75007260e-03, 1.66221761e-01, -1.43907617e+01]])
         with open('/home/pi/SACLeptonRPi/Calibration/AffineTransform.txt') as file:
-            self.transformMatrix = [[float(digit) for digit in f.readline().split()], [float(digit) for digit in f.readline().split()]]
+            self.transformMatrix = [[float(digit) for digit in file.readline().split()], [float(digit) for digit in file.readline().split()]]
             #self.transformMatrix = [[float(digit) for digit in line.split()] for line in file]
-            self.xTrans = float(f.readline())
+            self.xTrans = float(file.readline())
         print("[INFO] Loaded affine transform from settings file: " + str(self.transformMatrix))
         print("[INFO] With X Translation: " + str(self.xTrans))
         
