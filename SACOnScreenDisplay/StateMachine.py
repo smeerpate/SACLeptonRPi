@@ -292,17 +292,16 @@ class StateMachine(object):
                             self.publishFPATemp()
                 else:
                     if self.roiFinder.getTcContours(image, settings.showFoundFace.value):
-                        if smEntryTimeMs > (self.lastFFCTime + (self.maxFFCInterval * 1000)):
-                            # it's been too long a time since we've done an FFC
-                            self.state = "DO_DUMMY_FFC"
-                        else:
-                            self.state = "SETTLE_AFTER_MEASURING"
-                            self.displayMixer.showDontMove(image)
+                        self.state = "SETTLE_AFTER_MEASURING"
+                        self.displayMixer.showDontMove(image)
                         dateValue = datetime.datetime.fromtimestamp(time.time())
                         print("[INFO] Found a face. (Timestamp = " + dateValue.strftime('%Y-%m-%d %H:%M:%S') + ")")
                     else:
                         # No face found.
                         self.displayMixer.hide()
+                        if smEntryTimeMs > (self.lastFFCTime + (self.maxFFCInterval * 1000)):
+                            # it's been too long a time since we've done an FFC
+                            self.state = "DO_DUMMY_FFC"
                         # did we already set the initial parameters?
                         if self.initialParametersAreSet:
                             self.state = "IDLE"
