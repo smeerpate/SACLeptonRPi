@@ -156,9 +156,11 @@ class StateMachine(object):
         self.lastRawThermalFrame = []
 
         #self.transformMatrix = self.settingsManager.getSettings().affineTransform.value
-        with open('/home/pi/SACLeptonRPi/Calibration/AffineTransform.txt') as file:
-            self.transformMatrix = [[float(digit) for digit in file.readline().split()], [float(digit) for digit in file.readline().split()]]
-            self.xTrans = float(file.readline())
+		self.transformMatrix = np.array([[1.63900966e-01, -2.05767606e-03, -1.99485901e+01],[1.75007260e-03, 1.66221761e-01, -1.43907617e+01]])
+		self.xTrans = 5
+        #with open('/home/pi/SACLeptonRPi/Calibration/AffineTransform.txt') as file:
+            #self.transformMatrix = [[float(digit) for digit in file.readline().split()], [float(digit) for digit in file.readline().split()]]
+            #self.xTrans = float(file.readline())
         print("[INFO] Loaded affine transform from settings file: " + str(self.transformMatrix))
         print("[INFO] With X Translation: " + str(self.xTrans))
         
