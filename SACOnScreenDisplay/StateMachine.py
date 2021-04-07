@@ -299,14 +299,15 @@ class StateMachine(object):
                     else:
                         # No face found.
                         self.displayMixer.hide()
-                        if smEntryTimeMs > (self.lastFFCTime + (self.maxFFCInterval * 1000)):
-                            # it's been too long a time since we've done an FFC
-                            self.state = "DO_DUMMY_FFC"
+                        
                         # did we already set the initial parameters?
                         if self.initialParametersAreSet:
                             self.state = "IDLE"
                         else:
                             self.state = "SET_INITIAL_PARAMETERS"
+                        if smEntryTimeMs > (self.lastFFCTime + (self.maxFFCInterval * 1000)):
+                            # it's been too long a time since we've done an FFC
+                            self.state = "DO_DUMMY_FFC"
                             
                         self.currentTime = int(round(time.time() * 1000))
                         if self.currentTime > (self.lastFPATempTime + (self.maxFPATempInterval * 1000)):
