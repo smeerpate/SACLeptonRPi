@@ -296,7 +296,7 @@ class StateMachine(object):
                             # it's been too long a time since we've done an FFC
                             self.state = "DO_DUMMY_FFC"
                         else:
-                            self.state = "SETTLE_AFTER_MEASURING"
+                            self.state = "WAIT_FOR_SIZE_OK"
                             self.displayMixer.showDontMove(image)
                         dateValue = datetime.datetime.fromtimestamp(time.time())
                         print("[INFO] Found a face. (Timestamp = " + dateValue.strftime('%Y-%m-%d %H:%M:%S') + ")")
