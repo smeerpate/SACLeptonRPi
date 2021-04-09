@@ -117,6 +117,7 @@ try:
             if int(y) > roi[0][1] and int(y) < roi[1][1] and int(x) > roi[0][0] and int(x) < roi[1][0]:
             #cv2.putText(tcImage, "x:{},y:{}".format(x,y), (int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 2)
                 cv2.putText(tcImage, "{}".format(i), (int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1)
+                cv2.putText(threshTcImage, "{}".format(i), (int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1)
                 tcCircles.append((x,y))
         print("Found " + str(len(tcCircles)) + " circles on RPi Camera")
         # thermal:
