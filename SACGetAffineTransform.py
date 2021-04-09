@@ -102,8 +102,10 @@ try:
         del tcCircles[:]
         del thCircles[:]
         # true color:
-        thresh = cv2.threshold(tcImage, 20, 255, cv2.THRESH_BINARY_INV)[1]
+        thresh = cv2.threshold(tcImage, 127, 255, cv2.THRESH_BINARY_INV)[1]
+        roi = ((100,100), (550,400)) #x,y start to x,y end
         threshTcImage = cv2.cvtColor(thresh, cv2.COLOR_GRAY2BGR)
+        cv.rectangle(threshTcImage,roi[0],roi[1],(0,255,0),1)
         cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         if len(cnts)==2:
             cnts = cnts[0]
@@ -112,7 +114,7 @@ try:
         
         for (i, c) in enumerate(cnts):
             ((x, y), _) = cv2.minEnclosingCircle(c)
-            if int(y) > 100 and int(y) < 400 and int(x) > 100 and int(x) < 550:
+            if int(y) > roi[0][1] and int(y) < [1][1] and int(x) > [0][0] and int(x) < [1][0]:
             #cv2.putText(tcImage, "x:{},y:{}".format(x,y), (int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 2)
                 cv2.putText(tcImage, "{}".format(i), (int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1)
                 tcCircles.append((x,y))
