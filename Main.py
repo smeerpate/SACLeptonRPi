@@ -17,6 +17,7 @@ try:
     settingsManager = SettingsManager()
     inputManager = InputManager(5, 6, 13)
     ledDriver = LedDriver(17, 27, 22)
+    ledDriver.output(0, 0, 255, 100)
     #f = open("/home/pi/SACLeptonRPi/Logging/SAC Temp Log.csv", "a")
     stateMachine = StateMachine(settingsManager, ledDriver, displayMixer)
     osd = OSD(inputManager, settingsManager, displayMixer)
