@@ -105,7 +105,7 @@ try:
         thresh = cv2.threshold(tcImage, 127, 255, cv2.THRESH_BINARY_INV)[1]
         roi = ((100,100), (550,400)) #x,y start to x,y end
         threshTcImage = cv2.cvtColor(thresh, cv2.COLOR_GRAY2BGR)
-        cv.rectangle(threshTcImage,roi[0],roi[1],(0,255,0),1)
+        cv2.rectangle(threshTcImage,roi[0],roi[1],(0,255,0),1)
         cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         if len(cnts)==2:
             cnts = cnts[0]
