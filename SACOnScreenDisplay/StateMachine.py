@@ -88,6 +88,7 @@ class StateMachine(object):
     """description of class"""
 
     def __init__(self, settingsManager, ledDriver, displayMixer):
+        self.ledDriver.output(0, 0, 255, 100)
         self.state = "SET_INITIAL_PARAMETERS"
         self.prevState = "SET_INITIAL_PARAMETERS"
         self.settingsManager = settingsManager
@@ -267,8 +268,8 @@ class StateMachine(object):
 
             if self.state == "IDLE":
                 #pdb.set_trace()
-                color = settings.idleColor
-                self.ledDriver.output(color.red, color.green, color.blue, 100)
+                #color = settings.idleColor
+                self.ledDriver.output(0, 0, 0, 100)
                 self.NOKRetryCnt = 0 # reset the measurement retry counter
                 self.measurementIterCnt = 0 # reset iteration counter
                 if self.autoTrigger:
@@ -546,6 +547,7 @@ class StateMachine(object):
                         if 1:
                             print("[WARNING] Temperature was over threshold after " + str(self.NOKRetryCnt) + " retries.")
                         color = settings.alarmColor
+						self.ledDriver.output(color.red, color.green, color.blue, 100)
                         self.displayMixer.showTemperatureNok(image)
                         self.state = "WAIT_FOR_NO_FACE"                  
                 elif self.temperature < self.minTempForValidMeasurement:
@@ -568,6 +570,7 @@ class StateMachine(object):
                     if 1:
                         print("[INFO] Temperature is within bounds.")
                     color = settings.okColor
+					self.ledDriver.output(color.red, color.green, color.blue, 100)
                     self.displayMixer.showTemperatureOk(image)
                     self.state = "WAIT_FOR_NO_FACE"
                 
