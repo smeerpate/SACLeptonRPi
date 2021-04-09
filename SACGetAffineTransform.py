@@ -102,7 +102,7 @@ try:
         del tcCircles[:]
         del thCircles[:]
         # true color:
-        thresh = cv2.threshold(tcImage, 127, 255, cv2.THRESH_BINARY_INV)[1]
+        thresh = cv2.threshold(tcImage, 127, 230, cv2.THRESH_BINARY_INV)[1]
         roi = ((150,50), (510,340)) #x,y start to x,y end
         threshTcImage = cv2.cvtColor(thresh, cv2.COLOR_GRAY2BGR)
         cv2.rectangle(threshTcImage,roi[0],roi[1],(0,255,0),1)
