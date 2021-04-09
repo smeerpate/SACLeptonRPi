@@ -21,7 +21,7 @@ class LedDriver(object):
         
 
     def output(self, red, green, blue, brightness):
-        print("R: " + str(red) + ", G: " + str(green) + ", B: " + str(blue) + " at " + str(brightness) + "%")
+        #print("R: " + str(red) + ", G: " + str(green) + ", B: " + str(blue) + " at " + str(brightness) + "%")
         self.r.ChangeDutyCycle(self._getDutyCycle(red))
         self.g.ChangeDutyCycle(self._getDutyCycle(green))
         self.b.ChangeDutyCycle(self._getDutyCycle(blue))
