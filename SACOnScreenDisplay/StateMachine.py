@@ -547,7 +547,7 @@ class StateMachine(object):
                         if 1:
                             print("[WARNING] Temperature was over threshold after " + str(self.NOKRetryCnt) + " retries.")
                         color = settings.alarmColor
-						self.ledDriver.output(color.red, color.green, color.blue, 100)
+                        self.ledDriver.output(color.red, color.green, color.blue, 100)
                         self.displayMixer.showTemperatureNok(image)
                         self.state = "WAIT_FOR_NO_FACE"                  
                 elif self.temperature < self.minTempForValidMeasurement:
@@ -570,7 +570,7 @@ class StateMachine(object):
                     if 1:
                         print("[INFO] Temperature is within bounds.")
                     color = settings.okColor
-					self.ledDriver.output(color.red, color.green, color.blue, 100)
+                    self.ledDriver.output(color.red, color.green, color.blue, 100)
                     self.displayMixer.showTemperatureOk(image)
                     self.state = "WAIT_FOR_NO_FACE"
                 
