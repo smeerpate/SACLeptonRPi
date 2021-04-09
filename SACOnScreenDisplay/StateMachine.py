@@ -88,11 +88,11 @@ class StateMachine(object):
     """description of class"""
 
     def __init__(self, settingsManager, ledDriver, displayMixer):
-        self.ledDriver.output(0, 0, 255, 100)
         self.state = "SET_INITIAL_PARAMETERS"
         self.prevState = "SET_INITIAL_PARAMETERS"
         self.settingsManager = settingsManager
         self.ledDriver = ledDriver
+        self.ledDriver.output(0, 0, 255, 100)
         self.lepton = Lepton()
         #self.logFile = file
         self.displayMixer = displayMixer
