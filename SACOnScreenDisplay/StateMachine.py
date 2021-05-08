@@ -531,7 +531,7 @@ class StateMachine(object):
                 if self.printTemperatureOnScreen:
                     if 1:
                             print("[INFO] Printing text to screen...")
-                    self.addText(image, "{:.1f}".format(self.temperature), self.OSDTextColor)
+                    self.addText(image, "{:.1f}".format(self.temperature + 1), self.OSDTextColor)
                 if self.temperature > self.alarmTempThreshold:
                     if self.NOKRetryCnt < self.retriesOnResultNOK:
                         # OK, bad measurement: retry measuring
