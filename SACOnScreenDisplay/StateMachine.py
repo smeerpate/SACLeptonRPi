@@ -593,7 +593,10 @@ class StateMachine(object):
                             if self.printTemperatureOnScreen:
                                 if 1:
                                         print("[INFO] Printing text to screen...")
-                                self.addText(thImage, "{:.1f}".format(self.temperature + 1), self.OSDTextColor)
+                                print("Measured " + str(self.temperature))
+                                tempToShow = self.temperature + 1
+                                print("Showing " + str(tempToShow))
+                                self.addText(thImage, "{:.1f}".format(tempToShow), self.OSDTextColor)
                             if self.temperature > self.alarmTempThreshold:
                                 self.displayMixer.showTemperatureNok(thImage)
                             else:
