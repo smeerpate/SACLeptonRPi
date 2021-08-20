@@ -531,7 +531,7 @@ class StateMachine(object):
                 if self.printTemperatureOnScreen:
                     if 1:
                             print("[INFO] Printing text to screen...")
-                    self.addText(image, "{:.1f}".format(self.temperature + 2.5), self.OSDTextColor)
+                    self.addText(image, "{:.1f}".format(self.temperature), self.OSDTextColor)
                 if self.temperature > self.alarmTempThreshold:
                     if self.NOKRetryCnt < self.retriesOnResultNOK:
                         # OK, bad measurement: retry measuring
@@ -593,9 +593,9 @@ class StateMachine(object):
                             if self.printTemperatureOnScreen:
                                 if 1:
                                         print("[INFO] Printing text to screen...")
-                                print("Measured " + str(self.temperature))
-                                tempToShow = self.temperature + 2.5
-                                print("Showing " + str(tempToShow))
+                                print("[INFO] Measured temperature " + str(self.temperature))
+                                tempToShow = self.temperature
+                                print("[INFO] Shown temperature " + str(tempToShow))
                                 self.addText(thImage, "{:.1f}".format(tempToShow), self.OSDTextColor)
                             if self.temperature > self.alarmTempThreshold:
                                 self.displayMixer.showTemperatureNok(thImage)
@@ -605,7 +605,7 @@ class StateMachine(object):
                             if self.printTemperatureOnScreen:
                                 if 1:
                                         print("[INFO] Printing text to screen...")
-                                self.addText(image, "{:.1f}".format(self.temperature + 2.5), self.OSDTextColor)
+                                self.addText(image, "{:.1f}".format(self.temperature), self.OSDTextColor)
                             if self.temperature > self.alarmTempThreshold:
                                 self.displayMixer.showTemperatureNok(image)
                             else:
